@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deal margin — Concise view (example for reference)</title>
+  <link rel="stylesheet" href="./margin-analysis.css">
+</head>
+<body class="margin-analysis-page">
+  <div class="progress-strip">
+    <div class="progress-steps">
+      <a href="create-opportunity.html" class="step completed"><span class="step-icon">✓</span><span class="step-label">Create an opportunity</span></a>
+      <a href="sizing.html" class="step completed"><span class="step-icon">✓</span><span class="step-label">Create a quote</span></a>
+      <a href="deviations.html" class="step completed"><span class="step-icon">✓</span><span class="step-label">Apply feature request</span></a>
+      <a href="index.html" class="step active"><span class="step-icon">4</span><span class="step-label">Deal approval</span></a>
+      <a href="#" class="step"><span class="step-icon">5</span><span class="step-label">Site readiness</span></a>
+      <a href="#" class="step"><span class="step-icon">6</span><span class="step-label">Activate subscription</span></a>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <h1 class="page-title">Quote 123 <span style="font-size:14px;font-weight:500;color:var(--ma-text-muted);">— Concise view (example)</span></h1>
+
+    <!-- Compact metadata -->
+    <div class="metadata-card metadata-card-compact card">
+      <div class="meta-col status-col">
+        <div class="status-block">
+          <span class="status-dot pending"></span>
+          <div>
+            <span class="meta-label">Status</span>
+            <strong class="meta-value">Pending review</strong>
+            <div class="status-meta">Sent for review Dec 17, 2025</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Opportunity ID</span>
+        <span class="meta-value" id="meta-opportunity-id">OPP-001</span>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Customer</span>
+        <span class="meta-value"><a href="#">Customer name</a></span>
+        <a href="#" class="meta-link">View contact details</a>
+      </div>
+      <div class="meta-col meta-more-col">
+        <button type="button" class="meta-more-btn" id="meta-more-btn" aria-expanded="false" aria-controls="meta-more-details">More</button>
+      </div>
+      <div class="meta-more-details" id="meta-more-details" hidden>
+        <div class="meta-col"><span class="meta-label">Partner</span><span class="meta-value"><a href="#">Partner name</a></span></div>
+        <div class="meta-col"><span class="meta-label">Distributor</span><span class="meta-value"><a href="#">Distributor name</a></span></div>
+        <div class="meta-col"><span class="meta-label">Keystone</span><span class="meta-value">3.0</span></div>
+      </div>
+    </div>
+
+    <div class="tabs-row">
+      <button type="button" class="tab active" data-tab="overview" aria-selected="true">Overview</button>
+      <button type="button" class="tab" data-tab="details" aria-selected="false">Details</button>
+    </div>
+
+    <div class="tab-panel active" id="panel-quote" role="tabpanel">
+      <div class="summary-cards">
+        <div class="card summary-card quote-details-card">
+          <h3 class="summary-card-title">Quote details</h3>
+          <div class="quote-metrics">
+            <div class="metric-block"><span class="metric-value" id="summary-deal-margin">20%</span><span class="metric-label">Deal margin</span></div>
+            <div class="metric-block"><span class="metric-value" id="summary-contract-length">5Years</span><span class="metric-label">Contract length</span></div>
+            <div class="metric-block"><span class="metric-value">Annual</span><span class="metric-label">Billing frequency</span></div>
+            <div class="metric-block"><span class="metric-value" id="summary-discount">40%</span><span class="metric-label">Discount</span></div>
+          </div>
+        </div>
+        <div class="card summary-card proposed-value-card">
+          <h3 class="summary-card-title">Proposed quote value (USD)</h3>
+          <div class="quote-value-equation">
+            <div class="eq-part"><span class="eq-amount" id="summary-total-bookings">$925498</span><span class="eq-label">Total bookings</span></div>
+            <span class="eq-op" aria-hidden="true">−</span>
+            <div class="eq-part"><span class="eq-amount" id="summary-costs">$349103</span><span class="eq-label">Costs</span></div>
+            <span class="eq-op" aria-hidden="true">=</span>
+            <div class="eq-part"><span class="eq-amount eq-amount-result" id="summary-deal-value">$576395</span><span class="eq-label">Deal value</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-context card" id="overview-context">
+        <div class="overview-context-score">
+          <span class="overview-context-label">Deal score</span>
+          <span class="rating-badge rating-red" id="overview-deal-score">1.08 (Red)</span>
+        </div>
+        <div class="overview-context-deviations">
+          <span class="overview-context-label">Feature requests</span>
+          <span id="overview-deviations-summary">Discount above standard; SLA credits</span>
+          <span class="overview-context-rec" id="overview-recommended">· Can be approved by Deal Manager</span>
+        </div>
+      </div>
+
+      <div class="main-two-col">
+        <aside class="controls-panel card controls-panel-collapsible" id="controls-panel">
+          <button type="button" class="controls-panel-toggle" id="controls-panel-toggle" aria-expanded="false" aria-controls="controls-panel-body">
+            <span class="controls-panel-toggle-label">Adjust deal</span>
+            <span class="controls-panel-toggle-icon" aria-hidden="true">▼</span>
+          </button>
+          <div class="controls-panel-body" id="controls-panel-body" hidden>
+            <h2 class="controls-panel-title">Deal simulator</h2>
+            <div class="control-group">
+              <label class="control-label"><span>Contract length</span><span class="control-value" id="display-contract-length">5 Years</span></label>
+              <input type="range" class="slider" id="slider-contract-length" min="0" max="84" value="60" data-unit="months">
+              <div class="slider-ticks"><span>0</span><span>7 Years</span></div>
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span>Service level agreement credits</span><span class="control-value" id="display-sla-credits">$26,000</span></label>
+              <input type="range" class="slider" id="slider-sla-credits" min="0" max="100000" value="26000" step="1000">
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span>Discount rate</span><span class="control-value" id="display-discount-rate">26%</span></label>
+              <input type="range" class="slider" id="slider-discount-rate" min="0" max="100" value="26">
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span>Discount amount</span><span class="control-value" id="display-discount-amount">$20,000</span></label>
+              <input type="range" class="slider" id="slider-discount-amount" min="0" max="1000000" value="20000" step="5000">
+              <div class="slider-ticks"><span>$0</span><span>$1M</span></div>
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span>Gross margin with SLA</span><span class="control-value" id="display-gross-margin-sla">20%</span></label>
+              <input type="range" class="slider" id="slider-gross-margin-sla" min="0" max="100" value="20">
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span>Gross margin without SLA</span><span class="control-value" id="display-gross-margin-no-sla">20%</span></label>
+              <input type="range" class="slider" id="slider-gross-margin-no-sla" min="0" max="100" value="20">
+            </div>
+            <div class="control-group">
+              <label class="control-label"><span>Break even point</span><span class="control-value" id="display-break-even">0 Years 8 Months</span></label>
+              <input type="range" class="slider" id="slider-break-even" min="0" max="84" value="8" data-unit="months">
+              <div class="slider-ticks"><span>0</span><span>7 Years</span></div>
+            </div>
+            <button type="button" class="btn btn-secondary reset-btn" id="reset-values">Reset values</button>
+          </div>
+        </aside>
+
+        <section class="deal-economics-panel card">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Deal economics</h2>
+              <p class="panel-subtitle">Opportunity <span id="deal-economics-opportunity-id" aria-label="Opportunity ID">OPP-001</span> · Values per year</p>
+            </div>
+            <div class="panel-toggles">
+              <div class="view-toggle">
+                <button type="button" class="toggle-pill active" data-view="annual">Annual</button>
+                <button type="button" class="toggle-pill" data-view="cumulative">Cumulative</button>
+              </div>
+              <div class="deal-view-toggle">
+                <button type="button" class="toggle-pill" data-deal-view="original">Original</button>
+                <button type="button" class="toggle-pill active" data-deal-view="simulated">Simulated</button>
+              </div>
+            </div>
+          </div>
+          <div class="deal-view-original economics-table-wrapper" id="deal-view-original" hidden>
+            <table class="economics-table" id="economics-table-original">
+              <thead><tr><th class="col-charges">Charges</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>Year 4</th><th>Year 5</th></tr></thead>
+              <tbody>
+                <tr><td class="col-charges">Bookings in local currency</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+                <tr><td class="col-charges">Bookings in USD</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+                <tr><td class="col-charges">Partner incentive</td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td></tr>
+                <tr><td class="col-charges">Net bookings</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+                <tr><td class="col-charges">Bill of materials</td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td></tr>
+                <tr><td class="col-charges">Keystone services</td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td></tr>
+                <tr><td class="col-charges">SLA credits</td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td></tr>
+                <tr class="row-total"><td class="col-charges">Total costs</td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td><td class="num neg"></td></tr>
+                <tr class="row-highlight"><td class="col-charges">Deal value</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+                <tr><td class="col-charges">Gross margin with SLA</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+                <tr><td class="col-charges">Gross margin without SLA</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="economics-table-wrapper" id="deal-view-simulated">
+            <table class="economics-table" id="economics-table">
+              <thead><tr><th class="col-charges">Charges</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>Year 4</th><th>Year 5</th></tr></thead>
+              <tbody>
+                <tr><td class="col-charges">Bookings in local currency</td><td class="num">$185,100</td><td class="num">$185,100</td><td class="num">$185,100</td><td class="num">$185,100</td><td class="num">$185,100</td></tr>
+                <tr><td class="col-charges">Bookings in USD</td><td class="num">$185,100</td><td class="num">$185,100</td><td class="num">$185,100</td><td class="num">$185,100</td><td class="num">$185,100</td></tr>
+                <tr><td class="col-charges">Partner incentive</td><td class="num neg">($12,957)</td><td class="num neg">($12,957)</td><td class="num neg">($12,957)</td><td class="num neg">($12,957)</td><td class="num neg">($12,957)</td></tr>
+                <tr><td class="col-charges">Net bookings</td><td class="num">$172,143</td><td class="num">$172,143</td><td class="num">$172,143</td><td class="num">$172,143</td><td class="num">$172,143</td></tr>
+                <tr><td class="col-charges">Bill of materials</td><td class="num neg">($56,685)</td><td class="num neg">($56,685)</td><td class="num neg">($56,685)</td><td class="num neg">($56,685)</td><td class="num neg">($56,685)</td></tr>
+                <tr><td class="col-charges">Keystone services</td><td class="num neg">($38,437)</td><td class="num neg">($18,957)</td><td class="num neg">($18,957)</td><td class="num neg">($18,957)</td><td class="num neg">($18,957)</td></tr>
+                <tr><td class="col-charges">SLA credits</td><td class="num neg">($29,693)</td><td class="num neg">($29,693)</td><td class="num neg">($29,693)</td><td class="num neg">($29,693)</td><td class="num neg">($29,693)</td></tr>
+                <tr class="row-total"><td class="col-charges">Total costs</td><td class="num neg" id="tc-y1">($125,815)</td><td class="num neg" id="tc-y2">($115,295)</td><td class="num neg" id="tc-y3">($115,295)</td><td class="num neg" id="tc-y4">($115,295)</td><td class="num neg" id="tc-y5">($115,295)</td></tr>
+                <tr class="row-highlight"><td class="col-charges">Deal value</td><td class="num" id="dv-y1">$77,021</td><td class="num" id="dv-y2">$96,501</td><td class="num" id="dv-y3">$96,501</td><td class="num" id="dv-y4">$153,986</td><td class="num" id="dv-y5">$153,986</td></tr>
+                <tr><td class="col-charges">Gross margin with SLA</td><td class="num" id="gm-sla-y1">40%</td><td class="num" id="gm-sla-y2">39%</td><td class="num" id="gm-sla-y3">39%</td><td class="num" id="gm-sla-y4">72%</td><td class="num" id="gm-sla-y5">72%</td></tr>
+                <tr><td class="col-charges">Gross margin without SLA</td><td class="num" id="gm-nosla-y1">45%</td><td class="num" id="gm-nosla-y2">56%</td><td class="num" id="gm-nosla-y3">56%</td><td class="num" id="gm-nosla-y4">89%</td><td class="num" id="gm-nosla-y5">89%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="card approval-authority-card" id="approval-authority-block">
+        <span class="approval-authority-label">Approval authority</span>
+        <div class="approval-matrix" id="approval-matrix">
+          <div class="approval-tier" id="tier-dm"><span class="tier-badge tier-dm">Deal Manager</span></div>
+          <div class="approval-tier" id="tier-geo"><span class="tier-badge tier-geo">Geo</span></div>
+          <div class="approval-tier" id="tier-ww"><span class="tier-badge tier-ww">Worldwide</span></div>
+        </div>
+        <span class="approval-current" id="approval-current">· Current deal can be approved by <strong id="approval-current-who">Deal Manager</strong>.</span>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-details" role="tabpanel" hidden>
+      <div class="card tab-content-card justification-tab">
+        <h2 class="tab-content-title">Quote Details</h2>
+        <p class="justification-disclaimer">Disclaimer: Do not forward this email with the links to approve, reject or request for information. The person you forward this email to will be able to action on your behalf as if you had actioned the Approval. If you must forward this email, please make sure to remove the links.</p>
+        <div class="justification-quote-form-box">
+          <dl class="justification-field-grid">
+            <dt>Opportunity Number</dt><dd>2422380</dd>
+            <dt>Opportunity Name</dt><dd>UMB Bank-Opp-2422380-Tech Refresh-NetApp Expansion-<span class="justification-strike">Pellera</span></dd>
+            <dt>Opportunity Close Date</dt><dd>04-24-2026</dd>
+            <dt>Distributor Name (If Indirect)</dt><dd><span class="justification-distributor-highlight">Arrow Enterprise Computing Solutions Inc.</span></dd>
+            <dt>Reseller Name</dt><dd>Mainline Information Systems</dd>
+            <dt>End Customer Name</dt><dd>UMB Bank</dd>
+            <dt>Quote Number</dt><dd>376223</dd>
+            <dt>Quote Name</dt><dd class="justification-quote-name">UMB Bank - Keystone v3 PREM Tier - TREVNAS - Unified 725 TiB logical metering - 20% burst - 5yr - Annual payments - 376223</dd>
+            <dt>Proposed Bookings</dt><dd>1,234,567.00 USD</dd>
+            <dt>Approval Initiated Date</dt><dd>03-11-2026</dd>
+            <dt>Approval Initiator</dt><dd>Tricia Kovach</dd>
+            <dt>NetApp Channel Rep</dt><dd>Distributor</dd>
+            <dt>Primary NetApp Sales Rep</dt><dd>Tricia Kovach</dd>
+            <dt>District</dt><dd>AM-MidAmerica District</dd>
+            <dt>DDS - Deal Score</dt><dd><span class="justification-dds-score">1.00</span></dd>
+          </dl>
+        </div>
+        <div class="justification-pricing-section">
+          <h3 class="justification-section-heading">1. Pricing Summary (Pricelist: NA-USD)</h3>
+          <table class="justification-quote-table justification-pricing-table">
+            <thead><tr><th>Order Type</th><th>List Price</th><th>Discount%</th><th>Total</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Standard</td>
+                <td>4,548,360.00 USD</td>
+                <td>1,623,667.50 USD <span class="justification-discount-pct">(65.00%)</span></td>
+                <td>1,591,926.00 USD</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="justification-overall-rating-block">
+          <p class="justification-overall-rating-title">Overall Rating: <span class="justification-rating-label-red">Red</span></p>
+          <table class="justification-rating-map-table">
+            <thead><tr><th scope="col">Quote amount</th><th scope="col">Discount threshold</th><th scope="col">Color</th></tr></thead>
+            <tbody>
+              <tr><td>(USD)3,411,270.00</td><td>&lt;25.00</td><td><span class="rating-map-green">Green</span></td></tr>
+              <tr><td>(USD)2,956,434.00</td><td>&lt;35.00</td><td><span class="rating-map-yellow">Yellow</span></td></tr>
+              <tr><td>(USD)2,501,598.00</td><td>&lt;45.00</td><td><span class="rating-map-orange">Orange</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 class="justification-section-heading justification-triggers-heading">PVR Triggers</h3>
+        <table class="pvr-triggers-table pvr-triggers-table-full">
+          <thead><tr><th>Triggers</th><th>Product Grouping</th><th>Trigger Threshold%</th><th>Requested Value%</th></tr></thead>
+          <tbody>
+            <tr><td>Discount Requested Above Eligible (Discount &gt; 100%)</td><td>H2 - Keystone</td><td>15.0</td><td>65.0</td></tr>
+            <tr><td>TG margin not within policy</td><td>H2 - Keystone</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <p class="pvr-submitter-line">PVR submitter: <strong id="justification-pvr-submitter-name">Tricia Kovach</strong></p>
+      </div>
+      <div class="card tab-content-card">
+        <h2 class="tab-content-title">Comments</h2>
+        <p class="tab-content-note">Comments and notes (placeholder).</p>
+      </div>
+    </div>
+
+    <footer class="actions-footer">
+      <div class="footer-actions-row">
+        <button type="button" class="btn btn-outline" id="btn-copy-deal-data">Copy deal information</button>
+        <button type="button" class="btn btn-primary" id="btn-approve-quote">Approve</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="./margin-analysis.js"></script>
+</body>
+</html>

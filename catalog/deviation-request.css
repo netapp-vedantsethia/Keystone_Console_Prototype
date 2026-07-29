@@ -1,0 +1,207 @@
+/* Deviation request — Select existing deviation (theme aligned with deviation-intake) */
+
+.deviation-request-page {
+  background: var(--ma-bg);
+  min-height: 100vh;
+}
+
+.deviation-request-page .layout-wrapper {
+  display: block;
+}
+
+.deviation-request-main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 32px 48px;
+}
+
+/* Flow breadcrumb */
+.deviation-request-main .flow-breadcrumb a {
+  color: var(--ma-primary);
+}
+.deviation-request-main .flow-breadcrumb-current {
+  color: var(--ma-text);
+}
+.deviation-request-main .flow-breadcrumb {
+  color: var(--ma-text-secondary);
+}
+
+.deviation-request-page-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviation-request-intro {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: var(--ma-text-secondary);
+  line-height: 1.5;
+}
+
+.deviation-request-form {
+  padding: var(--ma-space-lg);
+  margin-bottom: 24px;
+  border-radius: var(--ma-radius-md);
+  border: 1px solid var(--ma-border);
+  box-shadow: var(--ma-shadow-card);
+}
+
+.deviation-request-section {
+  margin-bottom: var(--ma-space-xl);
+}
+
+.deviation-request-section-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviation-request-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+}
+
+@media (max-width: 600px) {
+  .deviation-request-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.deviation-request-field {
+  min-width: 0;
+}
+
+.deviation-request-field-full {
+  grid-column: 1 / -1;
+}
+
+.deviation-request-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ma-text);
+  margin-bottom: 6px;
+}
+
+.deviation-request-input,
+.deviation-request-select,
+.deviation-request-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--ma-text);
+  background: var(--ma-card);
+  border: 1px solid var(--ma-border);
+  border-radius: var(--ma-radius-sm);
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.deviation-request-input:focus,
+.deviation-request-select:focus,
+.deviation-request-textarea:focus {
+  outline: none;
+  border-color: var(--ma-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ma-primary) 20%, transparent);
+}
+
+.deviation-request-input-readonly {
+  background: var(--ma-table-row-alt);
+  color: var(--ma-text-secondary);
+  cursor: default;
+}
+
+.deviation-request-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.deviation-request-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.deviation-request-hint {
+  display: block;
+  font-size: 12px;
+  color: var(--ma-text-muted);
+  margin-top: 4px;
+}
+
+.deviation-request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: var(--ma-space-xl);
+  padding-top: var(--ma-space-lg);
+  border-top: 1px solid var(--ma-border);
+}
+
+.deviation-request-btn-primary {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ma-card);
+  background: var(--ma-primary);
+  border: none;
+  border-radius: var(--ma-radius-sm);
+  cursor: pointer;
+  box-shadow: var(--ma-shadow-btn);
+}
+
+.deviation-request-btn-primary:hover {
+  background: var(--ma-primary-hover);
+}
+
+.deviation-request-btn-secondary {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ma-text-secondary);
+  background: var(--ma-card);
+  border: 1px solid var(--ma-border);
+  border-radius: var(--ma-radius-sm);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.deviation-request-btn-secondary:hover {
+  background: var(--ma-bg);
+  color: var(--ma-text);
+}
+
+/* Apply to (single / multi quote) — shown for config type */
+.deviation-request-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.deviation-request-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ma-text);
+  cursor: pointer;
+}
+
+.deviation-request-note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--ma-text-secondary);
+}
+
+.deviation-request-note-margin {
+  color: var(--ma-primary);
+  font-weight: 500;
+}

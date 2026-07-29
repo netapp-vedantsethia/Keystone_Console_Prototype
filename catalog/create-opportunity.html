@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create opportunity | New Opportunity</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="margin-analysis.css">
+</head>
+<body class="create-opportunity-page">
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <a href="index.html" class="logo"><span class="logo-icon">N</span><span class="logo-text">Subscription Engine</span></a>
+    </div>
+    <div class="header-center">
+      <div class="search-bar"><input type="search" placeholder="Search..." aria-label="Search"></div>
+    </div>
+    <div class="header-right">
+      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Chris Collins (Sales)</span></div>
+      <button class="icon-btn" aria-label="Notifications">N</button>
+      <button class="icon-btn" aria-label="Help">?</button>
+      <div class="user-avatar">JD</div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <ul class="nav-list">
+      <li><a href="create-opportunity.html" class="nav-link active">Opportunity</a></li>
+      <li><a href="sizing.html" class="nav-link">Sizing</a></li>
+      <li><a href="deviations.html" class="nav-link">Feature requests</a></li>
+      <li><a href="sales-dashboard.html" class="nav-link">Sales dashboard</a></li>
+      <li><a href="index.html" class="nav-link">Deal dashboard</a></li>
+      <li><a href="margin-analysis.html" class="nav-link">Deal margin</a></li>
+      <li><a href="#" class="nav-link">Analytics</a></li>
+      <li><a href="#" class="nav-link">Projects</a></li>
+      <li><a href="#" class="nav-link">Settings</a></li>
+      <li><a href="#" class="nav-link">Billing</a></li>
+    </ul>
+  </nav>
+
+  <div class="progress-strip">
+    <div class="progress-steps">
+      <a href="create-opportunity.html" class="step active">
+        <span class="step-icon">1</span>
+        <span class="step-label">Create an opportunity</span>
+      </a>
+      <a href="sizing.html" class="step">
+        <span class="step-icon">2</span>
+        <span class="step-label">Create a quote</span>
+      </a>
+      <a href="deviations.html" class="step">
+        <span class="step-icon">3</span>
+        <span class="step-label">Apply feature request</span>
+      </a>
+      <a href="index.html" class="step">
+        <span class="step-icon">4</span>
+        <span class="step-label">Deal approval</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">5</span>
+        <span class="step-label">Site readiness</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">6</span>
+        <span class="step-label">Activate subscription</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="layout-wrapper">
+    <main class="main-content create-opportunity-main">
+      <div class="card" style="max-width:1120px;margin:28px auto;padding:20px 22px;">
+        <h1 style="margin:0 0 8px;font-size:24px;color:#1f2937;">Create opportunity</h1>
+        <p style="margin:0 0 16px;color:#6b7280;font-size:13px;">This step is completed in <strong>Salesforce Spark</strong>. Enter details below, then create quote.</p>
+        <div style="display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start;">
+          <aside style="border:1px solid #dbe2ea;border-radius:8px;background:#f8fafc;padding:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:11px;font-weight:700;letter-spacing:.04em;color:#475569;">SALESFORCE SPARK</span>
+              <span style="font-size:11px;color:#64748b;">New Opportunity</span>
+            </div>
+            <div style="border:1px solid #cfd8e3;border-radius:6px;background:#fff;min-height:220px;overflow:hidden;">
+              <img src="images/new-opportunity-modal.png" alt="Salesforce Spark new opportunity modal" style="display:block;width:100%;height:auto;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+              <div style="display:none;padding:14px;">
+                <div style="height:10px;background:#e2e8f0;border-radius:4px;margin-bottom:10px;width:70%;"></div>
+                <div style="height:34px;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:10px;"></div>
+                <div style="height:34px;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:10px;"></div>
+                <div style="height:34px;border:1px solid #e2e8f0;border-radius:6px;"></div>
+              </div>
+            </div>
+            <p style="margin:8px 0 0;font-size:12px;color:#64748b;">Opportunity intake in Spark (visual reference)</p>
+          </aside>
+
+          <form id="create-opportunity-form" class="create-opportunity-form">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Opportunity name
+              <input type="text" id="opp-name" required value="Enterprise Multi-Area" placeholder="e.g. Q4 Keystone Expansion" style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Opportunity ID
+              <input type="text" id="opp-id" required value="3876523" style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Customer name
+              <select id="customer-name" required style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+                <option value="Mega Hostings Inc." selected>Mega Hostings Inc.</option>
+                <option value="Electronic Arts">Electronic Arts</option>
+                <option value="Ford">Ford</option>
+                <option value="All for one">All for one</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Partner name
+              <input type="text" id="partner-name" placeholder="Partner name" style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Site name
+              <select id="site-name" style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+                <option value="Site-Santa Clara">Site-Santa Clara</option>
+                <option value="Dallas_FW" selected>Dallas_FW</option>
+                <option value="BRL">BRL</option>
+                <option value="Vancouver_BC">Vancouver_BC</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Subscription start date
+              <input type="date" id="subscription-start-date" required style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Distributor name
+              <input type="text" id="distributor-name" placeholder="Distributor name" style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Sales motion
+              <select id="sales-motion" style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+                <option value="Direct" selected>Direct</option>
+                <option value="Indirect">Indirect</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
+              Keystone version
+              <select id="keystone-version" style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
+                <option value="3.0" selected>3.0</option>
+                <option value="2.0">2.0</option>
+              </select>
+            </label>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:18px;">
+              <button type="submit" class="quote-btn-primary" style="min-width:160px;">Create quote</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    (function () {
+      function getById(id) { return document.getElementById(id); }
+      function safeString(v) { return String(v == null ? '' : v).trim(); }
+      function normalizeCustomerName(v) {
+        var name = safeString(v);
+        if (!name || /iron\s*lea(f|d)/i.test(name)) return 'Mega Hostings Inc.';
+        return name;
+      }
+      var dateInput = getById('subscription-start-date');
+      var customerSelect = getById('customer-name');
+      if (customerSelect) customerSelect.value = 'Mega Hostings Inc.';
+      if (dateInput) {
+        var today = new Date();
+        var yyyy = today.getFullYear();
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var dd = String(today.getDate()).padStart(2, '0');
+        var minDate = yyyy + '-' + mm + '-' + dd;
+        dateInput.min = minDate;
+        if (!dateInput.value) dateInput.value = minDate;
+      }
+      var form = getById('create-opportunity-form');
+      if (!form) return;
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var oppId = safeString(getById('opp-id').value) || 'OPP-001';
+        var profile = {
+          opportunityName: safeString(getById('opp-name').value),
+          opportunityId: oppId,
+          customerName: normalizeCustomerName(getById('customer-name').value),
+          partnerName: safeString(getById('partner-name').value),
+          siteName: safeString(getById('site-name').value),
+          subscriptionStartDate: safeString(getById('subscription-start-date').value),
+          distributorName: safeString(getById('distributor-name').value),
+          salesMotion: safeString(getById('sales-motion').value) || 'Direct',
+          keystoneVersion: safeString(getById('keystone-version').value) || '3.0',
+          createdAt: new Date().toISOString()
+        };
+        if (!profile.partnerName) profile.partnerName = 'Not applicable';
+        if (!profile.distributorName) profile.distributorName = 'Not applicable';
+        var newQuoteId = String(Math.floor(10000 + Math.random() * 90000));
+        try {
+          sessionStorage.setItem('opportunityProfile_' + oppId, JSON.stringify(profile));
+          localStorage.setItem('opportunityProfile_' + oppId, JSON.stringify(profile));
+          sessionStorage.setItem('sizingForceFresh', '1');
+          var quotesKey = 'sizingQuotes_' + oppId;
+          var raw = sessionStorage.getItem(quotesKey);
+          var list = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(list)) list = [];
+          if (list.indexOf(newQuoteId) === -1) list.unshift(newQuoteId);
+          sessionStorage.setItem(quotesKey, JSON.stringify(list));
+        } catch (err) {}
+        window.location.href = 'sizing.html?quote=' + encodeURIComponent(newQuoteId) + '&opportunity=' + encodeURIComponent(oppId);
+      });
+    })();
+  </script>
+  <script src="persona-switcher.js"></script>
+</body>
+</html>
