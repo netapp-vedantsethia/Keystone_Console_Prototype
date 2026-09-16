@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>
+      (function () {
+        try {
+          var b = document.createElement("base");
+          b.href = new URL(".", location.href).href;
+          var m = document.getElementsByTagName("meta")[0];
+          if (m && m.parentNode) m.parentNode.insertBefore(b, m);
+          else document.head.appendChild(b);
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NetApp Console</title>
+    
+    <link rel="stylesheet" href="./assets/index-C1ope1MW.css">
+  </head>
+
+  <body>
+    <div id="sub-sizer-console-return-bar" aria-label="Return to Subscription Engine" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;box-sizing:border-box;background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 20px;font-family:system-ui,sans-serif;font-size:14px">
+      <a href="#" id="sub-sizer-console-return-link" style="color:#0067c5;font-weight:600;text-decoration:none">← Back to Subscription Engine</a>
+    </div>
+    <script>
+      (function () {
+        function fallbackReturnUrl() {
+          var p = window.location.pathname || "/";
+          var lower = p.toLowerCase();
+          var idx = lower.indexOf("/console/");
+          var basePath = idx >= 0 ? p.slice(0, idx + 1) : (p.replace(/[^/]*$/, "") || "/");
+          if (basePath.slice(-1) !== "/") basePath += "/";
+          return window.location.origin + basePath + "sales-dashboard.html";
+        }
+        try {
+          var raw = sessionStorage.getItem("subSizerConsoleContext");
+          if (!raw) return;
+          var ctx = JSON.parse(raw);
+          var returnUrl = (ctx && ctx.returnUrl) ? String(ctx.returnUrl) : fallbackReturnUrl();
+          var bar = document.getElementById("sub-sizer-console-return-bar");
+          var link = document.getElementById("sub-sizer-console-return-link");
+          if (!bar || !link) return;
+          link.setAttribute("href", returnUrl);
+          bar.style.display = "flex";
+          document.body.style.paddingTop = "48px";
+        } catch (e) {}
+      })();
+    </script>
+
+    <div id="root"></div>
+      <script type="module">
+      (function () {
+        var root = document.getElementById("root");
+        if (location.protocol === "file:") {
+          if (root) {
+            root.innerHTML = "<p style=\"padding:24px;font-family:system-ui;line-height:1.6\">This React Console must be opened over <strong>http://</strong> (not a <code>file://</code> path).<br/><br/>From the repo folder run: <code>npx http-server \".\" -p 3000 -c-1</code> then open <code>/console/index.html</code> under that server.</p>";
+          }
+          return;
+        }
+        var bundleUrl = new URL("assets/index-C7mOTlDT.js", location.href).href;
+        import(bundleUrl).catch(function (err) {
+          console.error("[NetApp Console] bundle import failed", err);
+          if (root) {
+            root.innerHTML = "<div style=\"padding:24px;font-family:system-ui;max-width:640px\"><h1 style=\"color:#b91c1c;font-size:1.125rem;margin:0 0 12px\">Console bundle did not run</h1><p style=\"color:#444;margin:0 0 12px\">Confirm Network shows <strong>200</strong> for the large <code>.js</code> file. You can also run <code>npm run console:preview</code> (Vite) on port <strong>4173</strong> and set <code>window.NETAPP_CONSOLE_URL = 'http://127.0.0.1:4173/'</code>.</p><pre style=\"background:#f5f5f5;padding:12px;font-size:11px;overflow:auto;border:1px solid #e5e5e5\">" + String(err && err.stack || err).replace(/</g, "&lt;") + "</pre></div>";
+          }
+        });
+      })();
+    </script>
+
+  </body>
+</html>

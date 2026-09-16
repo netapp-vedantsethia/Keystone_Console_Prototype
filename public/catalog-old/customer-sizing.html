@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription Request | NetApp Keystone</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="margin-analysis.css">
+  <link rel="stylesheet" href="sizing.css">
+  <style>
+    /* Customer-view overrides */
+    .customer-hero {
+      background: linear-gradient(135deg, #0069b1 0%, #004f8b 100%);
+      color: #fff;
+      padding: 28px 32px 22px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .customer-hero-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      letter-spacing: -0.3px;
+    }
+    .customer-hero-sub {
+      font-size: 13px;
+      opacity: 0.85;
+      margin: 0;
+    }
+    .customer-meta-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 24px;
+      background: #f0f7ff;
+      border: 1px solid #cce0f5;
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-bottom: 18px;
+      font-size: 12.5px;
+    }
+    .customer-meta-item { display: flex; gap: 6px; align-items: baseline; }
+    .customer-meta-label { color: #64748b; }
+    .customer-meta-value { font-weight: 600; color: #1e3a5f; }
+    .customer-sidebar-title-main {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0069b1;
+    }
+    /* Submit button state after submission */
+    .quote-btn-submitted {
+      background: #16a34a !important;
+      border-color: #16a34a !important;
+      color: #fff !important;
+    }
+    .customer-submit-notice {
+      font-size: 12px;
+      color: #15803d;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .customer-submit-notice.visible { display: block; }
+  </style>
+</head>
+<body class="sizing-page quote-prototype">
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <a href="customer-sizing.html" class="logo"><span class="logo-icon">N</span><span class="logo-text">NetApp Keystone</span></a>
+    </div>
+    <div class="header-center">
+      <div class="search-bar"><input type="search" placeholder="Search..." aria-label="Search"></div>
+    </div>
+    <div class="header-right">
+      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">AUMOVIO Germany GmbH (Customer)</span></div>
+      <button class="icon-btn" aria-label="Notifications">N</button>
+      <button class="icon-btn" aria-label="Help">?</button>
+      <div class="user-avatar">MH</div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <ul class="nav-list">
+      <li><a href="customer-sizing.html" class="nav-link active">Configure subscription</a></li>
+      <li><a href="#" class="nav-link">My subscriptions</a></li>
+      <li><a href="#" class="nav-link">Support</a></li>
+    </ul>
+  </nav>
+
+  <div class="layout-wrapper">
+    <main class="main-content quote-prototype-main">
+      <div class="sizing-top-section">
+        <!-- Hero banner -->
+        <div class="customer-hero">
+          <p class="customer-hero-title">Configure your Keystone STaaS subscription</p>
+          <p class="customer-hero-sub">Select your workloads, performance requirements, and contract terms. A NetApp representative will review your request and get back to you within 1 business day.</p>
+        </div>
+
+        <!-- Account strip -->
+        <div class="customer-meta-strip" role="region" aria-label="Account details">
+          <div class="customer-meta-item">
+            <span class="customer-meta-label">Account</span>
+            <span class="customer-meta-value" id="meta-customer-name">AUMOVIO Germany GmbH</span>
+          </div>
+          <div class="customer-meta-item">
+            <span class="customer-meta-label">Service</span>
+            <span class="customer-meta-value">NetApp Keystone STaaS</span>
+          </div>
+          <div class="customer-meta-item">
+            <span class="customer-meta-label">Keystone version</span>
+            <span class="customer-meta-value" id="meta-keystone-version">3.0</span>
+          </div>
+          <div class="customer-meta-item">
+            <span class="customer-meta-label">Location</span>
+            <span class="customer-meta-value">Vancouver_BC</span>
+          </div>
+          <div class="customer-meta-item">
+            <span class="customer-meta-label">Your NetApp contact</span>
+            <span class="customer-meta-value">Chris Collins — <a href="mailto:chris.collins@netapp.com" style="font-weight:400;color:#0069b1;">chris.collins@netapp.com</a></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="quote-prototype-columns">
+        <div class="quote-prototype-left">
+
+          <!-- 1) Contract terms -->
+          <section class="quote-card card contract-terms-panel">
+            <h2 class="contract-terms-title">Contract terms</h2>
+            <p class="contract-terms-subtitle">Choose your preferred contract length and billing frequency</p>
+            <div class="contract-terms-divider"></div>
+            <div class="contract-terms-group" role="radiogroup" aria-label="Contract length">
+              <span class="contract-terms-group-label">Contract length</span>
+              <div class="contract-terms-cards">
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="5" class="contract-terms-input">
+                  <span class="contract-terms-card-label">5 Years</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="4" class="contract-terms-input">
+                  <span class="contract-terms-card-label">4 Years</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card selected" tabindex="0" role="radio" aria-checked="true">
+                  <input type="radio" name="contract-length" value="3" checked class="contract-terms-input">
+                  <span class="contract-terms-card-label">3 Years</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="2" class="contract-terms-input">
+                  <span class="contract-terms-card-label">2 Years</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="1" class="contract-terms-input">
+                  <span class="contract-terms-card-label">1 Year</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="custom" class="contract-terms-input">
+                  <span class="contract-terms-card-label">Custom</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+            <div class="contract-terms-divider"></div>
+            <div class="contract-terms-group" role="radiogroup" aria-label="Billing frequency">
+              <span class="contract-terms-group-label">Billing frequency</span>
+              <div class="contract-terms-cards">
+                <label class="contract-terms-card contract-terms-card-with-helper selected" tabindex="0" role="radio" aria-checked="true">
+                  <input type="radio" name="billing-frequency" value="annually" checked class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Annually</span>
+                    <span class="contract-terms-card-helper">Billed annually</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card contract-terms-card-with-helper" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="billing-frequency" value="semi" class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Semi-annually</span>
+                    <span class="contract-terms-card-helper">Billed every 6 months</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card contract-terms-card-with-helper" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="billing-frequency" value="quarterly" class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Quarterly</span>
+                    <span class="contract-terms-card-helper">Billed every 3 months</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card contract-terms-card-with-helper" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="billing-frequency" value="monthly" class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Monthly</span>
+                    <span class="contract-terms-card-helper">Billed monthly</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card contract-terms-card-with-helper" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="billing-frequency" value="custom" class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Custom</span>
+                    <span class="contract-terms-card-helper">Define a billing cycle</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+            <div class="contract-terms-divider"></div>
+            <div class="contract-terms-group contract-terms-group-auto-renew" role="radiogroup" aria-label="Auto renew">
+              <div class="contract-terms-auto-row">
+                <span class="contract-terms-group-label">Auto renew</span>
+                <div class="config-toggle-group config-toggle-group--sm contract-terms-auto-toggle" role="radiogroup" aria-label="Auto renew">
+                  <label class="config-toggle-opt"><input type="radio" name="auto-renewal" value="yes" checked> Yes</label>
+                  <label class="config-toggle-opt"><input type="radio" name="auto-renewal" value="no"> No</label>
+                </div>
+                <div class="contract-terms-auto-duration-wrap" id="auto-renewal-duration-wrap">
+                  <label class="contract-terms-duration-label" for="auto-renewal-duration">Auto renewal duration</label>
+                  <select class="quote-select-sm contract-terms-duration-select" id="auto-renewal-duration" name="auto-renewal-duration" aria-label="Auto renewal duration">
+                    <option value="12" selected>12 months</option>
+                    <option value="contract">Same as term length</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                  <span id="auto-renewal-term-years-msg" class="auto-renewal-term-years" hidden aria-live="polite"></span>
+                  <div id="auto-renewal-custom-wrap" class="contract-terms-auto-custom-wrap" hidden>
+                    <input type="number" id="auto-renewal-custom-value" class="contract-terms-auto-custom-input" min="1" max="120" value="12" aria-label="Custom renewal value">
+                    <select id="auto-renewal-custom-unit" class="quote-select-sm contract-terms-auto-custom-unit" aria-label="Unit">
+                      <option value="months">months</option>
+                      <option value="years">years</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2) Add workloads -->
+          <section class="quote-card card add-workloads-card">
+            <h2 class="quote-card-title">Add workloads <span class="quote-card-count" id="workload-count">(0/5 selected)</span></h2>
+            <p class="quote-card-desc">Select up to 5 workloads. Choose the types of applications you plan to run on this subscription.</p>
+            <div class="quote-field-group">
+              <span class="quote-field-label">Workloads</span>
+              <div class="quote-workload-tiles-wrap" id="workload-tiles-wrap">
+                <div class="quote-workload-tiles" id="workload-specific">
+                  <label class="quote-workload-tile" data-workload="ai-ml"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">AI / ML</span></label>
+                  <label class="quote-workload-tile" data-workload="hpc"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">HPC</span></label>
+                  <label class="quote-workload-tile" data-workload="inmem-db"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">In-memory DB</span></label>
+                  <label class="quote-workload-tile" data-workload="analytics"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Analytics</span></label>
+                  <label class="quote-workload-tile" data-workload="eda"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">EDA</span></label>
+                  <label class="quote-workload-tile" data-workload="oltp"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">OLTP</span></label>
+                  <label class="quote-workload-tile" data-workload="sap-hana"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">SAP HANA</span></label>
+                  <label class="quote-workload-tile" data-workload="oracle"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Oracle</span></label>
+                  <label class="quote-workload-tile" data-workload="mssql"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">MS SQL Server</span></label>
+                  <label class="quote-workload-tile" data-workload="epic"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">EPIC</span></label>
+                  <label class="quote-workload-tile" data-workload="olap"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">OLAP</span></label>
+                  <label class="quote-workload-tile" data-workload="iot"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">IoT</span></label>
+                  <label class="quote-workload-tile workload-tile-more" data-workload="containers"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Containers</span></label>
+                  <label class="quote-workload-tile workload-tile-more" data-workload="backup"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Backup</span></label>
+                  <label class="quote-workload-tile workload-tile-more" data-workload="archive"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Archive</span></label>
+                </div>
+                <button type="button" class="workload-expand-btn" id="workload-expand-btn" aria-expanded="false">Show more (<span id="workload-more-count">7</span>)</button>
+              </div>
+            </div>
+            <div class="quote-field-group quote-field-group-general">
+              <span class="quote-field-label">General</span>
+              <div class="quote-workload-tiles quote-workload-tiles-general">
+                <label class="quote-workload-tile" data-workload="mission-critical"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Mission critical (&lt; 1 ms)</span></label>
+                <label class="quote-workload-tile" data-workload="general-purpose"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">General purpose (2-4 ms)</span></label>
+                <label class="quote-workload-tile" data-workload="secondary"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Secondary (&gt; 5 ms)</span></label>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3) Configure workload requirements -->
+          <section class="config-workload-section" id="configure-workload-section">
+            <h2 class="config-workload-page-title">Configure workload requirements</h2>
+            <div class="config-workload-links-row" aria-label="Workload reference links">
+              <a href="#" id="rate-card-open-link">Rate card</a>
+              <span aria-hidden="true">|</span>
+              <a href="#" id="keystone-performance-levels-open-link">Keystone performance levels</a>
+            </div>
+            <div id="configure-workload-cards" class="config-workload-cards-container"></div>
+            <div id="configure-workload-empty" class="config-workload-empty">
+              <p>Select one or more workloads above to configure them here.</p>
+            </div>
+          </section>
+
+          <!-- 4) Subscription add-ons -->
+          <section class="quote-card card subscription-addons-section">
+            <h2 class="quote-card-title">Subscription add-ons</h2>
+            <p class="quote-card-desc">Optional services for your Keystone subscription</p>
+            <div class="quote-addon-group">
+              <h4 class="quote-addon-category">Data resilience and optimization</h4>
+              <div class="quote-addon-cards">
+                <label class="addon-card">
+                  <input type="checkbox" class="addon-card-input" name="addon_subscription" value="advanced-protection" aria-label="Metro Cluster">
+                  <span class="addon-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.5-8 11-4.6-1.5-8-6-8-11V5l8-3zm0 4.2L8 7.7V11c0 3.5 2.2 6.8 4 7.8 1.8-1 4-4.3 4-7.8V7.7l-4-1.5z"/></svg>
+                  </span>
+                  <span class="addon-card-label">Metro Cluster</span>
+                  <span class="addon-card-desc">Blurb about product</span>
+                  <span class="addon-card-cost" id="adp-card-rate">$X.XX / TiB / month</span>
+                  <span class="addon-card-action">Add to quote</span>
+                </label>
+                <label class="addon-card">
+                  <input type="checkbox" class="addon-card-input" name="addon_subscription" value="tiering" aria-label="Data tiering">
+                  <span class="addon-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4v3l-9 4-9-4v-3z"/></svg>
+                  </span>
+                  <span class="addon-card-label">Data tiering</span>
+                  <span class="addon-card-desc">Blurb about product</span>
+                  <span class="addon-card-cost" id="tiering-card-rate">$XX.XX / TiB / month</span>
+                  <span class="addon-card-action">Add to quote</span>
+                </label>
+                <label class="addon-card">
+                  <input type="checkbox" class="addon-card-input" name="addon_subscription" value="dii" aria-label="Data infrastructure insights">
+                  <span class="addon-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M11 17h2v2h-2v-2zm0-12h2v10h-2V5zm-8 6a9 9 0 1118 0 9 9 0 01-18 0z"/></svg>
+                  </span>
+                  <span class="addon-card-label">Data infrastructure insights</span>
+                  <span class="addon-card-desc">Blurb about product</span>
+                  <span class="addon-card-cost" id="dii-card-rate">$0.36 – $4.00 / TiB / month</span>
+                  <span class="addon-card-action">Add to quote</span>
+                </label>
+              </div>
+            </div>
+            <div class="quote-addon-group">
+              <h4 class="quote-addon-category">Supplemental services</h4>
+              <div class="quote-addon-cards">
+                <label class="addon-card">
+                  <input type="checkbox" class="addon-card-input" name="addon_subscription" value="co-mingling" aria-label="Cluster Join">
+                  <span class="addon-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M7 7h6v6H7V7zm4 4h6v6h-6v-6z"/></svg>
+                  </span>
+                  <span class="addon-card-label">Cluster Join</span>
+                  <span class="addon-card-cost">$14,400 — one-time charge</span>
+                  <span class="addon-card-action">Add to quote</span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- 5) Additional configs -->
+          <section class="quote-card card quote-level-options-section">
+            <h2 class="quote-card-title">Deployment details</h2>
+            <div class="quote-level-options">
+              <div class="quote-field-group">
+                <span class="quote-field-label">Site location</span>
+                <select class="quote-select-sm" name="deployment_location" aria-label="Deployment location">
+                  <option value="">— Select —</option>
+                  <option value="Site-Santa Clara">Site-Santa Clara</option>
+                  <option value="Dallas_FW">Dallas_FW</option>
+                  <option value="BRL">BRL</option>
+                  <option value="Vancouver_BC" selected>Vancouver_BC</option>
+                </select>
+              </div>
+              <div class="quote-field-group">
+                <span class="quote-field-label">Subscription type</span>
+                <select class="quote-select-sm" id="subscription-type" aria-label="Subscription type">
+                  <option value="USPS" selected>USPS</option>
+                  <option value="Non USPS">Non USPS</option>
+                </select>
+              </div>
+              <div class="quote-field-group">
+                <label class="quote-field-label" for="bill-to-address">Bill-to address</label>
+                <textarea class="quote-select-sm" id="bill-to-address" rows="2" placeholder="Street, City, State/Province, Country"></textarea>
+              </div>
+              <div class="quote-field-group">
+                <label class="quote-field-label" for="ship-to-address">Ship-to address</label>
+                <textarea class="quote-select-sm" id="ship-to-address" rows="2" placeholder="Street, City, State/Province, Country"></textarea>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Right sidebar: Subscription summary (customer view — no discount, single submit) -->
+        <aside class="quote-prototype-sidebar">
+          <div class="quote-sidebar-card card" id="quote-sidebar-flip-card">
+            <h2 class="quote-sidebar-title">
+              <span class="quote-sidebar-title-main"><span class="quote-sidebar-icon" aria-hidden="true">S</span> Subscription summary</span>
+            </h2>
+
+            <div class="quote-sidebar-section quote-sidebar-itemization">
+              <h3 class="quote-sidebar-section-title">Selected workloads</h3>
+              <div class="quote-empty-state" id="quote-itemization">
+                <div class="quote-empty-icon">S</div>
+                <p class="quote-empty-title">Nothing added yet</p>
+                <p class="quote-empty-desc">Select workloads and a performance plan, then add to your request.</p>
+              </div>
+              <div class="quote-itemization-list" id="quote-items-list" hidden></div>
+            </div>
+
+            <div class="quote-sidebar-section quote-sidebar-summary-compact" id="quote-sidebar-summary" hidden>
+              <h3 class="quote-sidebar-section-title">Summary</h3>
+              <div class="quote-selections-list" id="sidebar-selections"></div>
+            </div>
+
+            <div class="quote-sidebar-section">
+              <h3 class="quote-sidebar-section-title">Estimated cost</h3>
+              <div class="quote-input-row quote-currency-row">
+                <label class="quote-field-label">Currency</label>
+                <select class="quote-select-sm" id="sidebar-currency" aria-label="Currency"><option>USD</option><option>EUR</option></select>
+              </div>
+              <div class="quote-cost-breakdown">
+                <div class="quote-summary-row"><span class="quote-meta-label">Subtotal</span><span class="quote-summary-value" id="sidebar-subtotal">$0</span></div>
+                <div class="quote-summary-row" id="sidebar-row-adp" hidden><span class="quote-meta-label">Add-on: Adv. data protection</span><span class="quote-summary-value" id="sidebar-adp-value">$0</span></div>
+                <div class="quote-summary-row" id="sidebar-row-dt" hidden><span class="quote-meta-label">Add-on: Data tiering</span><span class="quote-summary-value" id="sidebar-dt-value">$0</span></div>
+                <div class="quote-summary-row" id="sidebar-row-dii" hidden><span class="quote-meta-label">Add-on: Data infra. insights</span><span class="quote-summary-value" id="sidebar-dii-value">$0</span></div>
+                <div class="quote-summary-row" id="sidebar-row-cj" hidden><span class="quote-meta-label">Add-on: Cluster Join (one-time)</span><span class="quote-summary-value" id="sidebar-cj-value">$14,400</span></div>
+                <div class="quote-summary-row"><span class="quote-meta-label">Monthly cost</span><span class="quote-summary-value" id="sidebar-monthly-cost">$0</span></div>
+                <div class="quote-summary-row"><span class="quote-meta-label">Per TiB / month</span><span class="quote-summary-value" id="sidebar-per-tib-month">$0</span></div>
+                <div class="quote-summary-row"><span class="quote-meta-label">Yearly cost</span><span class="quote-summary-value" id="sidebar-total-year">$0</span></div>
+                <div class="quote-summary-row quote-summary-total"><span class="quote-meta-label">Total per year</span><span class="quote-summary-value" id="sidebar-total-year-final">$0</span></div>
+                <div class="quote-summary-row quote-summary-total quote-summary-contract-total"><span class="quote-meta-label">Estimated total contract price</span><span class="quote-summary-value" id="sidebar-total">$0</span></div>
+              </div>
+            </div>
+
+            <div class="quote-sidebar-actions">
+              <p class="quote-send-notice quote-discount-warning-hidden" id="quote-send-notice" role="status"></p>
+              <button type="button" class="quote-btn-primary" id="btn-customer-submit" disabled>Submit subscription request</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals reused from sizing (sizing.js binds these by ID) -->
+  <div class="modal-overlay" id="delete-quote-modal" role="dialog" aria-labelledby="delete-quote-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="delete-quote-modal-title">Remove workload</h2>
+      <p class="modal-desc">Remove this workload from your request?</p>
+      <div class="modal-actions">
+        <button type="button" class="quote-btn-secondary modal-btn-cancel" id="delete-quote-cancel">Cancel</button>
+        <button type="button" class="quote-btn-primary" id="delete-quote-confirm">Yes, remove</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="add-deviation-modal" role="dialog" aria-labelledby="add-deviation-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="add-deviation-modal-title">Add feature request</h2>
+      <p class="modal-desc">Enter the details for your feature request.</p>
+      <form id="add-deviation-form" class="modal-form">
+        <div class="modal-field">
+          <label for="add-deviation-opportunity">Opportunity ID</label>
+          <input type="text" id="add-deviation-opportunity" class="deviation-modal-input" value="OPP-123" readonly aria-readonly="true">
+        </div>
+        <div class="modal-field">
+          <label for="add-deviation-quote">Quote ID</label>
+          <input type="text" id="add-deviation-quote" class="deviation-modal-input" value="123" readonly aria-readonly="true">
+        </div>
+        <div class="modal-field">
+          <label for="add-deviation-select">Requested feature request</label>
+          <select id="add-deviation-select" class="quote-select-sm" aria-label="Select feature request type">
+            <option value="">— Select —</option>
+            <optgroup label="Quote configuration">
+              <option value="burst-80">Burst capacity to 80%</option>
+              <option value="custom-term">Custom term length</option>
+              <option value="custom-billing">Custom billing frequency</option>
+              <option value="payment-terms">Flexible payment terms</option>
+            </optgroup>
+            <option value="custom">Other</option>
+          </select>
+        </div>
+        <div class="modal-field" id="add-deviation-desc-wrap">
+          <label for="add-deviation-description">Description</label>
+          <textarea id="add-deviation-description" class="deviation-modal-input" rows="3" placeholder="Describe your request..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="add-deviation-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary">Add request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="custom-contract-length-modal" role="dialog" aria-labelledby="custom-contract-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="custom-contract-modal-title">Custom contract length</h2>
+      <form id="custom-contract-length-form" class="modal-form">
+        <div class="modal-field">
+          <label for="custom-contract-years">Years</label>
+          <input type="number" id="custom-contract-years" class="deviation-modal-input" min="1" max="10" value="3" aria-label="Custom contract length in years">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="custom-contract-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary">Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="custom-burst-modal" role="dialog" aria-labelledby="custom-burst-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="custom-burst-modal-title">Custom burst capacity</h2>
+      <form id="custom-burst-form" class="modal-form">
+        <div class="modal-field">
+          <label for="custom-burst-pct">Burst %</label>
+          <input type="number" id="custom-burst-pct" class="deviation-modal-input" min="1" max="200" value="20" aria-label="Custom burst percentage">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="custom-burst-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary">Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="plan-details-modal" role="dialog" aria-labelledby="plan-details-title" aria-modal="true" hidden>
+    <div class="modal-dialog modal-dialog--wide">
+      <h2 class="modal-title" id="plan-details-title">Plan details</h2>
+      <div id="plan-details-body"></div>
+      <div class="modal-actions">
+        <button type="button" class="quote-btn-secondary modal-btn-cancel" id="plan-details-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="rate-card-modal" role="dialog" aria-labelledby="rate-card-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="rate-card-title">Rate card</h2>
+      <div id="rate-card-body"></div>
+      <div class="modal-actions">
+        <button type="button" class="quote-btn-secondary modal-btn-cancel" id="rate-card-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="keystone-performance-levels-modal" role="dialog" aria-labelledby="keystone-performance-levels-title" aria-modal="true" hidden>
+    <div class="modal-dialog modal-dialog--wide">
+      <h2 class="modal-title" id="keystone-performance-levels-title">Keystone performance levels</h2>
+      <div id="keystone-performance-levels-body"></div>
+      <div class="modal-actions">
+        <button type="button" class="quote-btn-secondary modal-btn-cancel" id="keystone-performance-levels-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="custom-billing-modal" role="dialog" aria-labelledby="custom-billing-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="custom-billing-modal-title">Custom billing frequency</h2>
+      <form id="custom-billing-form" class="modal-form">
+        <div class="modal-field">
+          <label for="custom-billing-value">Billing every</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="custom-billing-value" class="deviation-modal-input" min="1" max="120" value="3" style="width:80px;" aria-label="Custom billing interval value">
+            <select id="custom-billing-unit" class="quote-select-sm" aria-label="Unit">
+              <option value="months">months</option>
+              <option value="years">years</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="custom-billing-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary">Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="tiering-capacity-modal" role="dialog" aria-labelledby="tiering-capacity-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="tiering-capacity-modal-title">Data tiering capacity</h2>
+      <form id="tiering-capacity-form" class="modal-form">
+        <div class="modal-field">
+          <label for="tiering-capacity-input">Tiering capacity (TiB)</label>
+          <input type="number" id="tiering-capacity-input" class="deviation-modal-input" min="1" value="10" aria-label="Tiering capacity in TiB">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="tiering-capacity-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary modal-btn-submit" id="tiering-capacity-apply">Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>window.CUSTOMER_VIEW = true;</script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="persona-switcher.js"></script>
+  <script src="sizing.js"></script>
+</body>
+</html>

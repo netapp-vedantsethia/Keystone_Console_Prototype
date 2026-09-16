@@ -1,0 +1,2875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hardware Configurator</title>
+<style>
+/* Blueprint Design System — Light Theme */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:#F5F5F5;color:#1C1C1C;overflow:hidden}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 24px;background:#FFFFFF;border-bottom:1px solid #E0E0E0;flex-wrap:wrap}
+.hdr-main{display:flex;flex-direction:column;gap:2px;flex:1;min-width:200px}
+.hdr h1{font-size:17px;font-weight:600;color:#1C1C1C}
+.hdr .sub{font-size:13px;color:#6F6F6F}
+.hdr-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
+.btn-hw-draft{padding:10px 16px;border:1px solid #D0D0D0;border-radius:6px;background:#FFFFFF;color:#1C1C1C;font-weight:600;cursor:pointer;font-size:13px}
+.btn-hw-draft:hover{background:#F5F5F5;border-color:#B0B0B0}
+.btn-hw-draft:focus{outline:2px solid #0067C5;outline-offset:2px}
+.btn-approve-return{padding:10px 18px;border:none;border-radius:6px;background:#0E6027;color:#fff;font-weight:600;cursor:pointer;font-size:13px;line-height:1.25;text-align:center}
+.btn-approve-return:hover{background:#0a4d1f}
+.btn-approve-return:focus{outline:2px solid #0067C5;outline-offset:2px}
+.tabs{display:flex;gap:0;padding:0 24px;background:#FFFFFF;border-bottom:1px solid #E0E0E0}
+.tbtn{padding:10px 22px;border:none;background:transparent;color:#6F6F6F;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
+.tbtn:hover{color:#1C1C1C;background:#F5F5F5}
+.tbtn.on{color:#0067C5;border-bottom-color:#0067C5;background:transparent}
+.tpanel{display:none;height:calc(100vh - 90px);overflow:auto}
+.tpanel.on{display:flex;flex-direction:column}
+#t2{flex-direction:row!important;position:relative}
+#drawer{width:560px;min-width:400px;max-width:75vw;border-right:none;overflow-y:auto;padding:18px 20px;background:#FFFFFF;flex-shrink:0}
+#resize-handle{width:6px;cursor:col-resize;background:#E0E0E0;flex-shrink:0;transition:background .15s;position:relative;z-index:10}
+#resize-handle:hover,#resize-handle.dragging{background:#0067C5}
+#simpanel{flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column;min-width:250px}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:20px}
+.sc{background:#FFFFFF;border:1px solid #E0E0E0;border-radius:8px;padding:16px}
+.sc h3{font-size:13px;color:#6F6F6F;margin-bottom:10px}
+.sc select,.sc input[type=number]{width:100%;padding:8px 10px;border:1px solid #D0D0D0;border-radius:6px;background:#FFFFFF;color:#1C1C1C;font-size:14px}
+.sc.off{opacity:.35;pointer-events:none}
+.sc input[type=range]{width:100%;accent-color:#0067C5}
+.rv{text-align:center;font-size:18px;font-weight:700;color:#0067C5;margin-top:6px}
+.hs{margin-bottom:14px;border:1px solid #E0E0E0;border-radius:8px;padding:16px;background:#FFFFFF}
+.hs h3{font-size:14px;color:#1C1C1C;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.hs label{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#4A4A4A;margin-bottom:8px;gap:10px}
+.hs label span{flex:1}
+.hs input[type=number],.hs input[type=text]{width:110px;padding:5px 10px;border:1px solid #D0D0D0;border-radius:5px;background:#FFFFFF;color:#1C1C1C;text-align:right;font-size:13px}
+.hs input[readonly]{opacity:.5;cursor:default;background:#F5F5F5}
+.hs select{padding:5px 10px;border:1px solid #D0D0D0;border-radius:5px;background:#FFFFFF;color:#1C1C1C;font-size:13px}
+.hs input[type=checkbox]{width:18px;height:18px;accent-color:#0067C5}
+.hs.off{opacity:.35;pointer-events:none}
+.rg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.rb{border-radius:8px;padding:10px;text-align:center}
+.rb .rl{font-size:11px;opacity:.7;margin-bottom:2px}
+.rb .rv2{font-size:16px;font-weight:700}
+.rb.bl{background:#E8F1FC;color:#0053A5}.rb.cy{background:#E4F7FB;color:#00758F}
+.rb.gr{background:#E6F5EC;color:#0E6027}.rb.or{background:#FFF2E0;color:#A85D00}
+.rb.pu{background:#F0E8FC;color:#5B21B6}.rb.te{background:#E4F7F4;color:#047857}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th,table.t td{padding:8px 12px;text-align:left;border-bottom:1px solid #E0E0E0}
+table.t th{color:#6F6F6F;font-weight:600}
+table.t .tot td{border-top:2px solid #D0D0D0;font-weight:700;color:#0067C5}
+.bp{padding:6px 14px;border:none;border-radius:6px;background:#0067C5;color:#fff;font-weight:600;cursor:pointer;font-size:12px}
+.bp:hover{background:#0053A5}
+.bp.sm{padding:4px 10px;font-size:11px;background:#F5F5F5;color:#1C1C1C;border:1px solid #D0D0D0;border-radius:4px;cursor:pointer}.bp.sm:hover{background:#E0E0E0}
+.bp.sm.cab-preset.on{background:#0067C5;color:#fff;border-color:#0053A5}
+.bp.del{background:#C62828;padding:2px 8px;font-size:11px}.bp.del:hover{background:#B71C1C}
+.iinfo{cursor:help;color:#0067C5;font-size:14px;position:relative;display:inline-flex;align-items:center}
+.iinfo .tip{display:none;position:absolute;left:22px;top:-8px;background:#FFFFFF;border:1px solid #E0E0E0;padding:10px 14px;border-radius:8px;font-size:11px;color:#1C1C1C;white-space:normal;width:280px;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.1);line-height:1.5;font-weight:400}
+.iinfo:hover .tip{display:block}
+.adapt-wrap{overflow-x:auto;margin-top:8px}
+table.adapt{width:100%;border-collapse:collapse;font-size:12px;min-width:420px}
+table.adapt th,table.adapt td{padding:5px 6px;text-align:left;border-bottom:1px solid #E0E0E0;white-space:nowrap}
+table.adapt th{color:#6F6F6F;font-weight:600;font-size:11px}
+table.adapt select{padding:3px 5px;border:1px solid #D0D0D0;border-radius:4px;background:#FFFFFF;color:#1C1C1C;font-size:12px;max-width:100px}
+table.adapt input[type=number]{width:48px;padding:3px 5px;border:1px solid #D0D0D0;border-radius:4px;background:#FFFFFF;color:#1C1C1C;font-size:12px;text-align:center}
+table.adapt .at-desc{font-size:12px;color:#6F6F6F;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+/* ─── Simulator toolbar ─── */
+.stb{display:flex;align-items:center;gap:4px;padding:6px 12px;background:#FFFFFF;border-bottom:1px solid #E0E0E0;flex-wrap:wrap}
+.stb button{background:#F5F5F5;color:#1C1C1C;border:1px solid #D0D0D0;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px}
+.stb button:hover{background:#E0E0E0}
+.stb .vb{padding:5px 14px;font-size:12px;font-weight:600}
+.stb .vb.on{background:#0067C5;color:#fff;border-color:#0067C5}
+.stb .sep{width:1px;height:20px;background:#E0E0E0;margin:0 4px}
+.stb .st{margin-left:auto;font-size:12px;color:#6F6F6F}
+.cwrap{flex:1;overflow:auto;background:#FAFAFA;cursor:grab;position:relative}
+#simsvg{display:block;user-select:none}
+/* ─── Interactive port styles ─── */
+.port-rect{cursor:pointer;transition:fill .12s,stroke .12s}
+.port-rect:hover{stroke:#0067C5;stroke-width:2}
+.port-rect.sel{stroke:#0E6027;stroke-width:2.5;filter:drop-shadow(0 0 4px #0E6027)}
+.port-rect.compat{stroke:#0E6027;stroke-width:2;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.cable-path{fill:none;stroke-width:2.5;stroke-linecap:round;cursor:pointer}
+.cable-path:hover{stroke-width:4;filter:drop-shadow(0 0 4px rgba(0,0,0,.15))}
+/* ─── Port tooltip ─── */
+.ptip{position:absolute;background:#FFFFFF;border:1px solid #E0E0E0;border-radius:8px;padding:10px 14px;font-size:11px;color:#1C1C1C;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.1);pointer-events:auto;max-width:260px;line-height:1.6}
+.ptip strong{color:#0067C5}
+.ptip .ptip-title{font-weight:700;color:#1C1C1C;margin-bottom:4px;font-size:12px}
+.ptip .ptip-row{display:flex;justify-content:space-between;gap:8px}
+.ptip .ptip-close{position:absolute;top:4px;right:8px;cursor:pointer;color:#6F6F6F;font-size:14px}
+/* ─── BOM panel ─── */
+.bom-item{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #E0E0E0}
+.bom-item .bom-qty{color:#0E6027;font-weight:600;min-width:35px;text-align:right}
+.bom-item .bom-qty.zero{color:#C62828}
+.bom-cat{font-size:12px;color:#6F6F6F;font-weight:700;margin:10px 0 5px;text-transform:uppercase;letter-spacing:.5px}
+/* Site requirements */
+.srg{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:20px}
+.src{background:#FFFFFF;border:1px solid #E0E0E0;border-radius:8px;padding:16px}
+.src h3{font-size:16px;color:#1C1C1C;margin-bottom:10px}
+.src.full{grid-column:1/-1}
+.sn{font-size:12px;color:#858C95;margin-top:8px}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#F5F5F5}
+::-webkit-scrollbar-thumb{background:#D0D0D0;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#B0B0B0}
+@media(max-width:1100px){.sg{grid-template-columns:repeat(2,1fr)}.rg{grid-template-columns:repeat(2,1fr)}}
+.hs input[type=range]{width:100%;accent-color:#0067C5;margin-top:2px}
+.hs .rv{text-align:right;font-size:13px;font-weight:700;color:#0067C5;margin-top:2px}
+@media(max-width:900px){.sg,.rg,.srg{grid-template-columns:1fr}#drawer{width:100%!important;max-width:100%!important;border-bottom:1px solid #E0E0E0}#resize-handle{display:none}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-main">
+    <h1>Keystone Premium — Hardware Configuration</h1>
+    <span class="sub">AFF A-Series platform sizing, adapter selection, rack simulation, and site requirements</span>
+  </div>
+  <div class="hdr-actions">
+    <button type="button" id="btn-hw-save-draft" class="btn-hw-draft" aria-label="Save as draft and return to subscription sizing">Save as Draft</button>
+    <button type="button" id="btn-hw-approve-return" class="btn-approve-return" aria-label="Approve configuration and return to subscription sizing">Approve</button>
+  </div>
+</header>
+<nav class="tabs">
+  <button class="tbtn on" data-t="t2">HW Configurator</button>
+  <button class="tbtn" data-t="t3">Site Requirements</button>
+</nav>
+<section id="t1" class="tpanel" style="display:none!important"><div id="subCfg"></div></section>
+<section id="t2" class="tpanel on"><div id="drawer"><div id="hwCfg"></div></div><div id="resize-handle"></div><div id="simpanel"></div></section>
+<section id="t3" class="tpanel"><div id="sitePnl"></div></section>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   DATA CATALOGS — Keystone Premium HW Configurator v5 (Cisco 3636)
+   ═══════════════════════════════════════════════════════════════ */
+const PLATFORMS=[
+  {id:'A20',model:'AFF A20',ctrl_ru:2,int_drives:24,pcie:8,mem_gb:128,form:'2U',
+    max_raw_pb:4.0392,max_ha:{nas:3,san:3},host_ports_per_ha:8,
+    pwr:{base:900,drive:18,shelf:250},drives:[15.3,30.7],fe_speeds:'10/25/100GbE, 64G FC',note:'Entry Premium'},
+  {id:'A30',model:'AFF A30',ctrl_ru:2,int_drives:24,pcie:8,mem_gb:128,form:'2U',
+    max_raw_pb:4.0392,max_ha:{nas:4,san:4},host_ports_per_ha:12,
+    pwr:{base:950,drive:18,shelf:250},drives:[15.3,30.7],fe_speeds:'10/25/100GbE, 64G FC',note:'Mid Premium'},
+  {id:'A50',model:'AFF A50',ctrl_ru:2,int_drives:24,pcie:8,mem_gb:256,form:'2U',
+    max_raw_pb:4.0392,max_ha:{nas:12,san:6},host_ports_per_ha:16,
+    pwr:{base:1100,drive:18,shelf:250},drives:[15.3,30.7],fe_speeds:'10/25/100GbE, 64G FC',note:'Higher-end 2U Premium'},
+  {id:'A70',model:'AFF A70',ctrl_ru:4,int_drives:48,pcie:18,mem_gb:256,form:'4U',
+    max_raw_pb:6.6096,max_ha:{nas:12,san:6},host_ports_per_ha:24,
+    pwr:{base:1400,drive:18,shelf:250},drives:[15.3,30.7,61.4],fe_speeds:'10/25/100/200GbE, 64G FC',note:'Large Premium / 4U'}
+];
+const DRIVES=[
+  {pn:'X4032B',tb:15.3,tw:7,mw:11,btu:38},
+  {pn:'X4030A',tb:30.7,tw:8,mw:12,btu:42},
+  {pn:'X4154A',tb:61.4,tw:10,mw:15,btu:52}
+];
+const IP_REQ={sw_mgmt:1,sp_bmc:1,cluster_mgmt:1,node_mgmt:1};
+const VM_REQ={keystone_collector:1};
+
+const ADAPTER_CATALOG={
+  'Host 25GbE':{pn:'4-port 10/25GbE',desc:'4-port 10/25GbE host module',mode:'25GbE',media:'SFP28',defQty:2,ports:4},
+  'Host 100GbE':{pn:'2-port 100GbE',desc:'2-port 40/100GbE module',mode:'100GbE',media:'QSFP28',defQty:2,ports:2},
+  'Host 200GbE':{pn:'2-port 200GbE',desc:'2-port 200GbE module (A70 only)',mode:'200GbE',media:'QSFP56',defQty:2,ports:2},
+  'FC 64G':{pn:'4-port 64G FC',desc:'4-port 64G FC module',mode:'64G FC',media:'FC',defQty:2,ports:4},
+  'Cluster':{pn:'2-port 100GbE',desc:'2-port 40/100GbE cluster/HA',mode:'100GbE',media:'QSFP28',defQty:2,ports:2},
+  'Shelf SAS':{pn:'Shelf connectivity',desc:'NS224 shelf port (QSFP28 copper)',mode:'SAS',media:'QSFP28',defQty:4,ports:4}
+};
+
+const CABLE_RULES=[
+  {dist:'In-cabinet',speed:'10GbE',suggested:'1m',media:'DAC or optics',lengths:['0.5m','1m','2m','3m']},
+  {dist:'In-cabinet',speed:'25GbE',suggested:'1m',media:'DAC or optics',lengths:['0.5m','1m','2m','3m']},
+  {dist:'In-cabinet',speed:'100GbE',suggested:'1m',media:'QSFP28 DAC',lengths:['0.5m','1m','2m','3m']},
+  {dist:'In-cabinet',speed:'200GbE',suggested:'1m',media:'QSFP56 DAC',lengths:['0.5m','1m','2m','3m']},
+  {dist:'Adjacent rack',speed:'10GbE',suggested:'5m',media:'Optics',lengths:['5m','10m','15m','20m','30m']},
+  {dist:'Adjacent rack',speed:'25GbE',suggested:'5m',media:'Optics',lengths:['5m','10m','15m','20m','30m']},
+  {dist:'Adjacent rack',speed:'100GbE',suggested:'5m',media:'AOC or optics',lengths:['5m','7m','10m','15m','20m','30m']},
+  {dist:'Adjacent rack',speed:'200GbE',suggested:'5m',media:'AOC or optics',lengths:['5m','7m','10m','15m','20m','30m']},
+  {dist:'Same row',speed:'10GbE',suggested:'10m',media:'Optics',lengths:['10m','15m','20m','30m']},
+  {dist:'Same row',speed:'25GbE',suggested:'10m',media:'Optics',lengths:['10m','15m','20m','30m']},
+  {dist:'Same row',speed:'100GbE',suggested:'10m',media:'Optics',lengths:['10m','15m','20m','30m']},
+  {dist:'Same row',speed:'200GbE',suggested:'10m',media:'Optics',lengths:['10m','15m','20m','30m']}
+];
+
+const CABLE_COLORS={
+  cluster:'#805AD5',isl:'#D69E2E',network:'#0E6027','host 25gbe':'#0E6027','host 100gbe':'#0067C5',
+  'host 200gbe':'#5B21B6','fc 64g':'#C62828',storage:'#0097A7','shelf sas':'#0097A7',
+  management:'#6F6F6F',power:'#E53E3E',data:'#0E6027',target:'#C62828',
+  host:'#0E6027',shelf:'#0097A7',mgmt:'#6F6F6F'
+};
+const CABLE_LEGEND=[
+  {role:'cluster',label:'Cluster (100GbE)',dash:''},
+  {role:'isl',label:'ISL (customer-provided)',dash:'6,3'},
+  {role:'network',label:'Host / Data (25GbE)',dash:''},
+  {role:'host 100gbe',label:'Host / Data (100GbE)',dash:''},
+  {role:'storage',label:'Storage / Shelf (QSFP28)',dash:''},
+  {role:'management',label:'Management (RJ45)',dash:'4,2'},
+  {role:'power',label:'Power (C13-C14)',dash:'2,2'}
+];
+const ROLE_CLR={...CABLE_COLORS};
+
+const CABINET_OPTIONS={
+  height_u:[38,42,45,48,52],width_mm:[600,700,750,800],depth_mm:[800,900,1000,1070,1100,1200],
+  rail_standard:['19-inch EIA'],
+  door_type:['perforated_front_perforated_rear','perforated_front_solid_rear','glass_front_perforated_rear','no_front_no_rear'],
+  side_panels:[true,false],cable_entry:['top','bottom','both']
+};
+const CABINET_PRESETS={
+  storage_heavy:{label:'Storage Heavy',owner:'netapp',height_u:42,width_mm:750,depth_mm:1200,door:'perforated_front_perforated_rear',side_panels:true,cable_entry:'top'},
+  general_server_storage:{label:'General Server/Storage',owner:'netapp',height_u:42,width_mm:600,depth_mm:1070,door:'perforated_front_perforated_rear',side_panels:true,cable_entry:'top'},
+  network_heavy:{label:'Network Heavy',owner:'netapp',height_u:42,width_mm:800,depth_mm:1000,door:'perforated_front_solid_rear',side_panels:true,cable_entry:'top'},
+  customer_owned_standard:{label:'Customer-Owned Standard',owner:'customer',height_u:42,width_mm:600,depth_mm:1000,door:'perforated_front_perforated_rear',side_panels:true,cable_entry:'both'},
+  customer_owned_deep:{label:'Customer-Owned Deep',owner:'customer',height_u:45,width_mm:750,depth_mm:1200,door:'perforated_front_perforated_rear',side_panels:true,cable_entry:'both'}
+};
+const COMPONENT_DEPTHS={
+  A20:{depth_mm:880,note:'AFF A20 2U chassis'},A30:{depth_mm:880,note:'AFF A30 2U chassis'},
+  A50:{depth_mm:880,note:'AFF A50 2U chassis'},A70:{depth_mm:1016,note:'AFF A70 4U chassis'},
+  NS224:{depth_mm:596,note:'NS224 disk shelf'},'Cisco Nexus 3636C-R':{depth_mm:457,note:'Cluster switch'}
+};
+let cabConfig={height_u:42,width_mm:600,depth_mm:1070,door:'perforated_front_perforated_rear',
+  side_panels:true,cable_entry:'top',preset:'general_server_storage',owner:'netapp'};
+
+function checkCabinetCompatFor(cfg){
+  const issues=[];
+  const plat=hwCfg.platform;
+  const sw=hwCfg.sw||{};
+  const cdPlat=COMPONENT_DEPTHS[plat.id]||{depth_mm:880};
+  if(cdPlat.depth_mm>cfg.depth_mm-100)
+    issues.push({sev:'error',msg:`${plat.model} requires ~${cdPlat.depth_mm}mm depth + cable clearance. Cabinet depth ${cfg.depth_mm}mm may be too shallow.`});
+  const cdShelf=COMPONENT_DEPTHS.NS224;
+  if((hwCfg.totalShelves||0)>0&&cdShelf.depth_mm>cfg.depth_mm-100)
+    issues.push({sev:'warning',msg:`NS224 shelf needs ${cdShelf.depth_mm}mm depth.`});
+  if(sw.needSwitch){
+    const cdSw=COMPONENT_DEPTHS['Cisco Nexus 3636C-R'];
+    if(cdSw.depth_mm>cfg.depth_mm-100)
+      issues.push({sev:'warning',msg:`Cisco 3636 switch needs ${cdSw.depth_mm}mm depth.`});
+  }
+  const _shelfRU=hwCfg.shelvesPerHaPair?hwCfg.shelvesPerHaPair.reduce((s,x)=>s+x*2,0):(hwCfg.totalShelves||0)*2;
+  const usedRU=hwCfg.haPairs*plat.ctrl_ru*2+_shelfRU+2+(sw.switchRU||0)+1;
+  if(usedRU>cfg.height_u)
+    issues.push({sev:'error',msg:`${usedRU} RU needed but cabinet is ${cfg.height_u}U (${cfg.height_u-usedRU} short).`});
+  else if(usedRU>cfg.height_u*0.85)
+    issues.push({sev:'warning',msg:`${usedRU} of ${cfg.height_u}U used (${((usedRU/cfg.height_u)*100).toFixed(0)}%) — limited headroom for future expansion.`});
+  if(cfg.width_mm<600)
+    issues.push({sev:'error',msg:'Minimum 600mm width required for 19-inch EIA rail standard.'});
+  if(cfg.door==='no_front_no_rear')
+    issues.push({sev:'warning',msg:'Open-frame rack — airflow management limited. Ensure adequate cooling.'});
+  if(!cfg.side_panels)
+    issues.push({sev:'warning',msg:'No side panels — reduced EMI shielding and security.'});
+  return issues;
+}
+function checkCabinetCompat(){
+  return checkCabinetCompatFor(cabConfig);
+}
+
+const SWITCH_OPTIONS=[
+  {id:'cisco-3636',name:'Cisco Nexus 3636C-R',speed:'100GbE QSFP28',ports:36,watts:450,ru:1,
+    note:'36 QSFP28 ports; planning estimate for power, validate in HWU',
+    url:'https://www.cisco.com/c/en/us/products/collateral/switches/nexus-3000-series-switches/datasheet-c78-740345.html'},
+  {id:'review-larger',name:'Review larger Cisco design',speed:'100GbE QSFP28',ports:999,watts:0,ru:0,
+    note:'Guardrail — consumed ports exceed 36; review alternate supported switch design',url:''}
+];
+
+function switchSizing(haPairs,topo,islLinksPerPair,sparePorts,switchOverride,distProfile){
+  const totalNodes=haPairs*2;
+  const switchRequired=totalNodes>2?'Required':(topo==='switched'?'Optional':'Not needed');
+  const needSwitch=topo==='switched'||(totalNodes>2);
+  const pairCount=needSwitch?1:0;
+  const nodeToSwitchLinks=needSwitch?totalNodes*2:0;
+  const islLinks=needSwitch?islLinksPerPair:0;
+  const perSwNodePorts=needSwitch?Math.ceil(nodeToSwitchLinks/2):0;
+  const perSwIslPorts=needSwitch?Math.ceil(islLinks/2):0;
+  const perSwConsumed=perSwNodePorts+perSwIslPorts+sparePorts;
+  const sw=(switchOverride&&switchOverride!=='auto')?SWITCH_OPTIONS.find(s=>s.id===switchOverride):SWITCH_OPTIONS[0];
+  const usablePorts=sw.ports;
+  const freePorts=usablePorts-perSwConsumed;
+  const fitStatus=perSwConsumed<=usablePorts?'Fit':'Exceeds '+sw.name;
+  const switchWatts=pairCount*2*sw.watts;
+  const switchRU=pairCount*2*sw.ru;
+  let topoLabel;
+  if(totalNodes<=2&&!needSwitch) topoLabel='2-node switchless';
+  else if(totalNodes<=2&&needSwitch) topoLabel='2-node switchless allowed; switched optional';
+  else topoLabel='Switched cluster required ('+totalNodes+' nodes)';
+  distProfile=distProfile||'In-cabinet';
+  const cableRule=CABLE_RULES.find(r=>r.dist===distProfile&&r.speed==='100GbE');
+  const sugLen=cableRule?cableRule.suggested:'1m';
+  const sugMedia=cableRule?cableRule.media:'QSFP28 DAC';
+  const swTransceivers=distProfile==='In-cabinet'?0:nodeToSwitchLinks+islLinks;
+  const ctrlTransceivers=distProfile==='In-cabinet'?0:nodeToSwitchLinks;
+  return{switchRequired,needSwitch,pairCount,totalNodes,nodeToSwitchLinks,islLinks,
+    perSwNodePorts,perSwIslPorts,sparePorts,perSwConsumed,usablePorts,freePorts,fitStatus,
+    switchWatts,switchRU,topoLabel,sw,sugLen,sugMedia,swTransceivers,ctrlTransceivers,
+    totalSwitchCables:needSwitch?(nodeToSwitchLinks+islLinks):0};
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SIZING ENGINE — Keystone Premium
+   Formulas from JSON spec:
+     usable_after_se = effective_capacity / se_ratio
+     raw_required = usable_after_se / (1-overhead) * (1+growth)
+     drives_needed = ceil(raw_required / drive_size_tb)
+     HA pairs = max(ceil(raw_req / max_raw_per_ha_pair), ceil(host_ports / target_ports_per_ha))
+   ═══════════════════════════════════════════════════════════════ */
+function pickPlatform(rawTB, overridePlatId){
+  if(overridePlatId && overridePlatId!=='auto'){
+    const p=PLATFORMS.find(x=>x.id===overridePlatId);
+    if(p) return p;
+  }
+  const rawPB=rawTB/1000;
+  for(const p of PLATFORMS) if(rawPB<=p.max_raw_pb) return p;
+  return PLATFORMS[PLATFORMS.length-1];
+}
+function sizingEngine(protocol,capTiB,seRatio,overheadPct,growthPct,driveTB,hostPorts,overridePlat,minHaPairs){
+  const usableAfterSE=capTiB/seRatio;
+  const rawTiB=usableAfterSE/(1-overheadPct)*(1+growthPct);
+  const rawTB=rawTiB*1.09951;
+  const drv=DRIVES.find(d=>d.tb===driveTB)||DRIVES[1];
+  const rawDrives=Math.max(4,Math.ceil(rawTB/drv.tb));
+  const plat=pickPlatform(rawTB, overridePlat);
+  const maxRawTB=plat.max_raw_pb*1000;
+  const capPairs=Math.max(1,Math.ceil(rawTB/maxRawTB));
+  const portPairs=Math.max(1,Math.ceil(hostPorts/plat.host_ports_per_ha));
+  const instancePairs=minHaPairs||1;
+  const haPairs=Math.max(capPairs,portPairs,instancePairs);
+  const totalInternal=plat.int_drives*haPairs;
+  let int,ext,sh,tot;
+  if(rawDrives<=totalInternal){int=totalInternal;ext=0;sh=0;}
+  else{int=totalInternal;sh=Math.ceil((rawDrives-totalInternal)/24);ext=sh*24;}
+  tot=int+ext;
+  const isSan=protocol==='san';
+  const maxHA=isSan?plat.max_ha.san:plat.max_ha.nas;
+  const scaleOk=haPairs<=maxHA;
+  return{protocol,perfLevel:'Premium',committed_tib:capTiB,usable_after_se:usableAfterSE,
+    se_ratio:seRatio,overheadPct,growthPct,tib_to_tb_factor:1.09951,raw_tib:rawTiB,raw_tb:rawTB,
+    driveSize:driveTB,rawDrives,totalDrives:tot,internalDrives:int,externalDrives:ext,shelves:sh,
+    haPairs,capPairs,portPairs,instancePairs,hostPorts,platform:plat,scaleOk,maxHA,
+    measurementType:seRatio>1?'logical':'physical'};
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB SWITCHING
+   ═══════════════════════════════════════════════════════════════ */
+let resetSimPanZoom=()=>{};
+document.querySelectorAll('.tbtn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.tpanel').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');document.getElementById(b.dataset.t).classList.add('on');
+  if(b.dataset.t==='t2'){
+    resetSimPanZoom();
+    renderSim();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL STATE
+   ═══════════════════════════════════════════════════════════════ */
+let lastSizing=null;
+let quoteContext={psl:'Premium',capacityTiB:100,instances:1,protocol:'unified',instanceList:[]};
+let currentInstanceIdx=0;
+let instanceConfigs=[];
+let hwCfg={platform:PLATFORMS[0],haPairs:1,shelvesPerHA:0,drivesPerShelf:24,totalDrives:24,addSwitch:false,internalDrives:24,externalDrives:0};
+
+function initInstanceConfigs(){
+  const list=quoteContext.instanceList||[];
+  if(list.length<=1){
+    const cap=quoteContext.capacityTiB||100;
+    instanceConfigs=[{psl:quoteContext.psl,capacityTiB:cap,quoteCap:cap,
+      protocol:quoteContext.protocol,workloadLabel:'Instance 1',planName:quoteContext.psl,spec:''}];
+  }else{
+    instanceConfigs=list.map((inst,i)=>{
+      const cap=inst.capacityTiB||100;
+      return{psl:inst.psl||quoteContext.psl,
+      capacityTiB:cap,quoteCap:cap,protocol:inst.protocol||'unified',
+      workloadLabel:inst.workloadLabel||('Instance '+(i+1)),
+      workloadId:inst.workloadId||'',
+      planName:inst.planName||inst.psl||'Premium',spec:inst.spec||''};
+    });
+  }
+  currentInstanceIdx=0;
+  console.log('[HW-CFG] initInstanceConfigs result:', instanceConfigs.map((ic,i)=>({idx:i, cap:ic.capacityTiB, quoteCap:ic.quoteCap, label:ic.workloadLabel})));
+}
+function saveCurrentInstanceState(){
+  if(!instanceConfigs[currentInstanceIdx])return;
+  const ic=instanceConfigs[currentInstanceIdx];
+  ic.capacityTiB=+(q('s-cap')?q('s-cap').value:ic.capacityTiB);
+  ic.protocol=q('s-proto')?q('s-proto').value:ic.protocol;
+  if(lastSizing){
+    ic._lastSizing=lastSizing;
+    ic._hwCfg={...hwCfg};
+  }
+}
+function loadInstanceState(idx){
+  if(idx<0||idx>=instanceConfigs.length)return;
+  saveCurrentInstanceState();
+  currentInstanceIdx=idx;
+  const ic=instanceConfigs[idx];
+  if(q('s-proto'))q('s-proto').value=ic.protocol||'unified';
+  if(q('s-cap')){q('s-cap').value=ic.capacityTiB;if(q('s-cap-num'))q('s-cap-num').value=ic.capacityTiB;}
+  updateInstanceNav();
+  globalCalc();
+}
+function updateInstanceNav(){
+  const n=instanceConfigs.length;
+  const navEl=q('inst-nav'), tabsEl=q('inst-tabs'), detailEl=q('inst-detail');
+  const instHint=q('inst-hint');
+  if(n<=1){
+    if(navEl)navEl.style.display='none';
+    if(tabsEl)tabsEl.style.display='none';
+    if(detailEl)detailEl.textContent='';
+    if(instHint)instHint.style.display='none';
+    return;
+  }
+  if(navEl)navEl.style.display='flex';
+  if(q('inst-prev'))q('inst-prev').disabled=currentInstanceIdx<=0;
+  if(q('inst-next'))q('inst-next').disabled=currentInstanceIdx>=n-1;
+  if(q('inst-label'))q('inst-label').textContent=`Instance ${currentInstanceIdx+1} of ${n}`;
+  if(instHint)instHint.style.display='block';
+  if(tabsEl){
+    tabsEl.style.display='flex';
+    tabsEl.innerHTML=instanceConfigs.map((ic,i)=>{
+      const active=i===currentInstanceIdx;
+      const bg=active?'#0067C5':'#F5F5F5';
+      const clr=active?'#fff':'#4A4A4A';
+      const bdr=active?'#0053A5':'#D0D0D0';
+      const capDisplay=ic.quoteCap||ic.capacityTiB;
+      const arrow=active?' &#9654;':'';
+      return `<button class="bp sm inst-tab" data-idx="${i}" style="background:${bg};color:${clr};border-color:${bdr};font-size:11px;padding:5px 12px;border-radius:12px;cursor:pointer;transition:all .15s">${arrow} ${ic.workloadLabel||('Instance '+(i+1))}<br><span style="font-size:9px;opacity:0.85">${ic.psl} &middot; ${capDisplay} TiB</span></button>`;
+    }).join('');
+    tabsEl.querySelectorAll('.inst-tab').forEach(btn=>{
+      btn.onclick=()=>loadInstanceState(+btn.dataset.idx);
+    });
+  }
+  const ic=instanceConfigs[currentInstanceIdx];
+  if(detailEl){
+    detailEl.innerHTML=`<span style="background:#E0F0FF;padding:2px 8px;border-radius:8px;font-weight:600;color:#0053A5">&#9881; Configuring:</span> <strong>${ic.workloadLabel||('Instance '+(currentInstanceIdx+1))}</strong> &mdash; ${ic.psl} &middot; ${ic.capacityTiB} TiB &middot; ${ic.protocol}${ic.spec?' &middot; '+ic.spec:''}`;
+  }
+  if(q('qc-psl'))q('qc-psl').textContent=ic.psl;
+  if(q('qc-cap'))q('qc-cap').textContent=ic.capacityTiB+' TiB (this instance)';
+  if(q('qc-inst'))q('qc-inst').textContent=n+' instances';
+}
+let numCabs=1,cabSpacing=200;
+let simView='front'; // front | back | cabling | rack
+let selPort=null, dragLine=null, cableConns=[], portElMap={};
+let bomStock=[];
+let hwConfigComplete=false;
+let _lastHwSig='';
+let cableRoleFilter='all';
+let _rackLayoutVersion=0;
+let _cablingLastSyncVersion=0;
+
+/* ── Rack placement state: each item has cabIdx and startU ── */
+let rackItems=[];
+let rackDrag=null; // {idx, offsetX, offsetY, ghostEl}
+let rackCabs=[]; // geometry cache from last render
+let haPairLabels=[];
+
+function getHaLabel(haIdx){
+  return haPairLabels[haIdx]||`HA${haIdx+1}`;
+}
+
+function buildHaPairLabels(instanceRuns){
+  const labels=[];
+  (instanceRuns||[]).forEach((ir,idx)=>{
+    const ic=instanceConfigs[idx]||{};
+    const base=(ic.workloadLabel||`Instance ${idx+1}`).trim();
+    const pairCount=Math.max(1,ir&&ir.haPairs?ir.haPairs:1);
+    for(let i=0;i<pairCount;i++){
+      labels.push(pairCount>1?`${base} · Pair ${i+1}`:base);
+    }
+  });
+  return labels;
+}
+
+function buildDefaultRackItems(){
+  const c=hwCfg, sw=c.sw||{};
+  const items=[];
+  items.push({id:'cust-sw-a',label:'Customer Switch A (1U)',ru:1,type:'cust-switch',fill:'#E8F1FC',stroke:'#0067C5',cabIdx:0,startU:null});
+  items.push({id:'cust-sw-b',label:'Customer Switch B (1U)',ru:1,type:'cust-switch',fill:'#E8F1FC',stroke:'#0067C5',cabIdx:0,startU:null});
+  if(sw.needSwitch){
+    const swName=sw.sw?sw.sw.name:'Cisco 3636C-R';
+    const swRU=sw.sw?sw.sw.ru:1;
+    items.push({id:'cl-sw-a',label:`${swName} A (${swRU}U)`,ru:swRU,type:'cluster-switch',fill:'#F3E8FF',stroke:'#805AD5',cabIdx:0,startU:null});
+    items.push({id:'cl-sw-b',label:`${swName} B (${swRU}U)`,ru:swRU,type:'cluster-switch',fill:'#F3E8FF',stroke:'#805AD5',cabIdx:0,startU:null});
+  }
+  for(let ha=0;ha<c.haPairs;ha++){
+    const ru=c.platform.ctrl_ru;
+    const haLbl=getHaLabel(ha);
+    const grp=`ha-${ha}`;
+    items.push({id:`ctrl-${ha}-a`,label:`${c.platform.model} Ctrl A — ${haLbl} (${ru}U)`,ru,type:'controller',fill:'url(#gCh)',stroke:'#0067C5',cabIdx:0,startU:null,ha,group:grp,groupRole:'top'});
+    items.push({id:`ctrl-${ha}-b`,label:`${c.platform.model} Ctrl B — ${haLbl} (${ru}U)`,ru,type:'controller',fill:'url(#gCh)',stroke:'#0067C5',cabIdx:0,startU:null,ha,group:grp,groupRole:'bottom'});
+    const haShelfCount=(c.shelvesPerHaPair&&c.shelvesPerHaPair[ha]!==undefined)?c.shelvesPerHaPair[ha]:c.shelvesPerHA;
+    for(let s=0;s<haShelfCount;s++){
+      items.push({id:`shelf-${ha}-${s}`,label:`NS224 Shelf ${s+1} — ${haLbl} (2U)`,ru:2,type:'shelf',fill:'url(#gSh)',stroke:'#0E6027',cabIdx:0,startU:null,ha});
+    }
+  }
+  // auto-place top-down
+  const cabU=cabConfig.height_u||42;
+  let ci=0, topU=cabU;
+  for(const it of items){
+    if(topU-it.ru<0){ci++;topU=cabU;}
+    if(ci>=numCabs){it.cabIdx=numCabs-1;it.startU=0;}
+    else{topU-=it.ru;it.startU=topU;it.cabIdx=ci;}
+  }
+  return items;
+}
+
+function checkCableWarnings(){
+  const warnings=[];
+  const cableLen=q('h-cable')?q('h-cable').value:'1m';
+  const lenM=parseFloat(cableLen)||1;
+  const cabItems={};
+  for(const it of rackItems){
+    if(!cabItems[it.type])cabItems[it.type]=[];
+    cabItems[it.type].push(it);
+  }
+  // controllers in different cabinets from their shelves
+  for(const it of rackItems){
+    if(it.type!=='shelf')continue;
+    const ctrls=rackItems.filter(r=>r.type==='controller'&&r.ha===it.ha);
+    for(const ct of ctrls){
+      if(ct.cabIdx!==it.cabIdx){
+        const dist=Math.abs(ct.cabIdx-it.cabIdx);
+        const estLen=dist*1.5;
+        if(estLen>lenM){
+          warnings.push({sev:'error',msg:`${it.label} in Cabinet ${it.cabIdx+1} needs >${estLen.toFixed(1)}m cable to reach ${ct.label} in Cabinet ${ct.cabIdx+1}. Selected cable: ${cableLen}`});
+        }else{
+          warnings.push({sev:'warning',msg:`${it.label} and ${ct.label} in adjacent cabinets — verify ${cableLen} cable reaches.`});
+        }
+      }
+    }
+  }
+  // cluster switches should be in same cabinet or adjacent
+  const clSw=rackItems.filter(r=>r.type==='cluster-switch');
+  const controllers=rackItems.filter(r=>r.type==='controller');
+  for(const sw of clSw){
+    for(const ct of controllers){
+      if(Math.abs(sw.cabIdx-ct.cabIdx)>1){
+        warnings.push({sev:'error',msg:`${sw.label} (Cab ${sw.cabIdx+1}) is ${Math.abs(sw.cabIdx-ct.cabIdx)} cabinets away from ${ct.label} (Cab ${ct.cabIdx+1}). Cluster cables may not reach.`});
+      }
+    }
+  }
+  return warnings;
+}
+
+function updateConfigStatus(){
+  const issues=[];
+  if(!lastSizing) issues.push('No sizing calculated');
+  if(rackItems.length===0) issues.push('No rack items placed');
+  const cabU=cabConfig.height_u||42;
+  for(let ci=0;ci<numCabs;ci++){
+    const items=rackItems.filter(r=>r.cabIdx===ci);
+    const usedU=items.reduce((s,r)=>s+r.ru,0);
+    if(usedU>cabU) issues.push(`Cabinet ${ci+1}: ${usedU}U used exceeds ${cabU}U capacity`);
+  }
+  const cableWarns=checkCableWarnings().filter(w=>w.sev==='error');
+  if(cableWarns.length) issues.push(`${cableWarns.length} cable length error(s)`);
+  hwConfigComplete=issues.length===0&&rackItems.length>0;
+  const el=q('config-status');
+  if(el){
+    if(hwConfigComplete){
+      el.innerHTML='<span style="color:#0E6027;font-weight:600">✓ Configuration Complete</span>';
+      el.style.background='#ECFDF5';el.style.borderColor='#A7F3D0';
+    }else{
+      el.innerHTML='<span style="color:#C62828;font-weight:600">⚠ Incomplete</span><span style="font-size:10px;color:#6F6F6F;margin-left:6px">'+issues.join(' · ')+'</span>';
+      el.style.background='#FEF2F2';el.style.borderColor='#FECACA';
+    }
+  }
+  // notify parent
+  if(window.parent&&window.parent!==window){
+    window.parent.postMessage({type:'hwConfigStatus',complete:hwConfigComplete},'*');
+  }
+}
+const q=id=>document.getElementById(id);
+const NS='http://www.w3.org/2000/svg';
+
+/* ═══════════════════════════════════════════════════════════════
+   PHYSICAL MODEL BUILDER
+   ═══════════════════════════════════════════════════════════════ */
+function buildPhysicalModel(){
+  const p=hwCfg.platform, nSlots=p.pcie, drvTB=lastSizing?lastSizing.driveSize:15.3;
+  const pwrType=q('h-pwr')?q('h-pwr').value:'titanium';
+  const adRows=[...document.querySelectorAll('#adapt-body tr')];
+
+  // Slot arrays per controller
+  const sA=Array.from({length:nSlots},()=>null), sB=Array.from({length:nSlots},()=>null);
+  let nA=0,nB=0;
+  for(const row of adRows){
+    const tp=row.querySelector('.at-type')?.value; if(!tp)continue;
+    const qty=+(row.querySelector('.at-qty')?.value||0); if(!qty)continue;
+    const cat=ADAPTER_CATALOG[tp]; if(!cat)continue;
+    const role=tp.toLowerCase(), perC=Math.ceil(qty/2);
+    for(let i=0;i<perC&&nA<nSlots;i++){
+      sA[nA]={pn:cat.pn,desc:cat.desc,speed:cat.mode,media:cat.media,role,portCount:cat.ports};nA++;}
+    for(let i=0;i<perC&&nB<nSlots;i++){
+      sB[nB]={pn:cat.pn,desc:cat.desc,speed:cat.mode,media:cat.media,role,portCount:cat.ports};nB++;}
+  }
+  // Build drives
+  const int=hwCfg.internalDrives, drvs=[];
+  for(let i=0;i<p.int_drives;i++) drvs.push({bay:i+1,populated:i<int,capacityTB:drvTB});
+
+  // BOM inventory based on adapter selections
+  rebuildBomStock(adRows);
+
+  return{
+    platform:p.model, ru:p.ctrl_ru, pcie:nSlots,
+    controllers:[{id:'A',slots:sA},{id:'B',slots:sB}],
+    drives:drvs,
+    psus:[{id:'A',rating:pwrType==='dc'?'DC -48V':'1600W Titanium'},{id:'B',rating:pwrType==='dc'?'DC -48V':'1600W Titanium'}],
+    shelves:hwCfg.shelvesPerHA,
+    shelvesPerHaPair:hwCfg.shelvesPerHaPair||[]
+  };
+}
+
+function rebuildBomStock(adRows){
+  bomStock=[];
+  const ha=hwCfg.haPairs||1;
+  let totalQsfp=0,totalQsfp56=0,totalSfp=0,totalFc=0,totalFiber=0,totalCopper=0;
+  const distProfile=q('s-dist')?q('s-dist').value:'In-cabinet';
+  for(const row of (adRows||[...document.querySelectorAll('#adapt-body tr')])){
+    const tp=row.querySelector('.at-type')?.value;
+    const qty=+(row.querySelector('.at-qty')?.value||0);
+    const cableType=row.querySelector('.at-cable')?.value||'Copper';
+    const cat=ADAPTER_CATALOG[tp]; if(!cat||!qty)continue;
+    const portsTotal=qty*cat.ports;
+    if(cat.media==='QSFP28'){totalQsfp+=portsTotal;if(cableType==='Fiber')totalFiber+=portsTotal;else totalCopper+=portsTotal;}
+    else if(cat.media==='QSFP56'){totalQsfp56+=portsTotal;if(cableType==='Fiber')totalFiber+=portsTotal;else totalCopper+=portsTotal;}
+    else if(cat.media==='SFP28'){totalSfp+=portsTotal;if(cableType==='Fiber')totalFiber+=portsTotal;else totalCopper+=portsTotal;}
+    else if(cat.media==='FC'){totalFc+=portsTotal;}
+  }
+  const actualTotalShelves=hwCfg.totalShelves||0;
+  const shelfQsfp=actualTotalShelves*4;
+  const ctrlN=ha*2;
+  const swN=hwCfg.sw&&hwCfg.sw.needSwitch?hwCfg.sw.pairCount*2:0;
+  const custSw=2;
+  const deviceCount=ctrlN+actualTotalShelves+swN+custSw;
+  bomStock=[
+    {part:hwCfg.platform.model+' HA chassis',total:ha,used:0,type:'device',media:'',cat:'device'},
+    {part:'1600W Titanium PSU',total:ctrlN,used:0,type:'device',media:'',cat:'device'},
+    {part:'NVMe SSD '+(lastSizing?lastSizing.driveSize:15.3)+'TB',total:hwCfg.totalDrives,used:0,type:'pluggable',media:'',cat:'pluggable'},
+    {part:'NS224 Shelf',total:actualTotalShelves,used:0,type:'device',media:'',cat:'device'},
+    {part:'QSFP28 optic / DAC',total:totalQsfp*ha+shelfQsfp,used:0,type:'pluggable',media:'QSFP28',cat:'pluggable'},
+    {part:'QSFP56 optic / DAC',total:totalQsfp56*ha,used:0,type:'pluggable',media:'QSFP56',cat:'pluggable'},
+    {part:'SFP28 optic / DAC',total:totalSfp*ha,used:0,type:'pluggable',media:'SFP28',cat:'pluggable'},
+    {part:'FC optic',total:totalFc*ha,used:0,type:'pluggable',media:'FC',cat:'pluggable'},
+    {part:'Ethernet cable ('+distProfile+')',total:(totalCopper+totalFiber)*ha,used:0,type:'cable',media:'ETH',cat:'cable'},
+    {part:'Shelf QSFP28 cable',total:shelfQsfp,used:0,type:'cable',media:'QSFP28',cat:'cable'},
+    {part:'C13-C14 power cord (dual-feed)',total:deviceCount*2,used:0,type:'cable',media:'power',cat:'cable'},
+    {part:'Rail kit',total:ha,used:0,type:'accessory',media:'',cat:'cable'},
+    {part:'Cisco Nexus 3636C-R switch',total:swN,used:0,type:'device',media:'',cat:'device'},
+    {part:'Cluster switch cable (QSFP28 '+((hwCfg.sw&&hwCfg.sw.sugLen)||'1m')+')',total:hwCfg.sw?hwCfg.sw.totalSwitchCables:0,used:0,type:'cable',media:'QSFP28',cat:'cable'},
+    {part:'Switch-side QSFP28 transceiver',total:hwCfg.sw?hwCfg.sw.swTransceivers:0,used:0,type:'pluggable',media:'QSFP28',cat:'pluggable'},
+    {part:'Controller-side cluster transceiver',total:hwCfg.sw?hwCfg.sw.ctrlTransceivers:0,used:0,type:'pluggable',media:'QSFP28',cat:'pluggable'}
+  ].filter(b=>b.total>0);
+  renderBomPanel();
+}
+function renderBomPanel(){
+  const el=q('bom-panel'); if(!el)return;
+  const cats={device:'Devices',pluggable:'Pluggables',cable:'Cables & Accessories'};
+  let h='';
+  for(const[ck,clbl]of Object.entries(cats)){
+    const items=bomStock.filter(b=>b.cat===ck);
+    if(!items.length)continue;
+    h+=`<div class="bom-cat">${clbl}</div>`;
+    for(const it of items){
+      const avail=Math.max(0,it.total-it.used);
+      h+=`<div class="bom-item"><span>${it.part}</span><span class="bom-qty ${avail<=0?'zero':''}">${avail} / ${it.total}</span></div>`;
+    }
+  }
+  el.innerHTML=h||'<p style="font-size:11px;color:#6e7681">Add adapters to populate BOM</p>';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CABLE LENGTH OPTIONS — dynamic per distance profile + speed
+   ═══════════════════════════════════════════════════════════════ */
+function getCableLengths(distProfile, speed){
+  const rule=CABLE_RULES.find(r=>r.dist===distProfile&&r.speed===speed);
+  return rule?rule.lengths:['1m','2m','5m'];
+}
+function updateCableLengths(){
+  const dist=q('s-dist')?q('s-dist').value:'In-cabinet';
+  const feSpeed=q('s-fespeed')?q('s-fespeed').value:'25GbE';
+  const rows=[...document.querySelectorAll('#adapt-body tr')];
+  for(const row of rows){
+    const tp=row.querySelector('.at-type')?.value;
+    const cat=ADAPTER_CATALOG[tp];
+    const spd=(cat&&cat.mode!=='SAS'&&cat.mode!=='64G FC')?cat.mode:feSpeed;
+    const lenSel=row.querySelector('.at-clen');
+    if(!lenSel)continue;
+    const prev=lenSel.value;
+    const lens=getCableLengths(dist,spd);
+    const selected=lens.includes(prev)?prev:(lens[0]||'');
+    lenSel.innerHTML=lens.map(l=>`<option value="${l}"${l===selected?' selected':''}>${l}</option>`).join('');
+  }
+  const mainLen=q('h-cable');
+  if(mainLen){
+    const lens=getCableLengths(dist,feSpeed);
+    const prev=mainLen.value;
+    const selected=lens.includes(prev)?prev:(lens[0]||'');
+    mainLen.innerHTML=lens.map(l=>`<option value="${l}"${l===selected?' selected':''}>${l}</option>`).join('');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POWER ESTIMATE
+   ═══════════════════════════════════════════════════════════════ */
+function estimatePower(r){
+  const p=r.platform;
+  const driveW=r.totalDrives*p.pwr.drive;
+  const shelfW=r.shelves*p.pwr.shelf;
+  const adapterW=r.haPairs*2*50;
+  const baseW=r.haPairs*p.pwr.base;
+  const totalW=baseW+driveW+shelfW+adapterW;
+  const psus=Math.ceil(totalW/1600)*2;
+  return{baseW,driveW,shelfW,adapterW,totalW,psus};
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MASTER RECALCULATION
+   ═══════════════════════════════════════════════════════════════ */
+function globalCalc(){
+  const protocol=q('s-proto')?q('s-proto').value:'unified';
+  const cap=+q('s-cap').value;
+  if(q('s-cap-num')&&+q('s-cap-num').value!==cap) q('s-cap-num').value=cap;
+  const se=+q('s-se').value;
+  const drv=+q('s-drv').value;
+  const overhead=+(q('s-overhead')?q('s-overhead').value:0.20);
+  const growth=+(q('s-growth')?q('s-growth').value:0.15);
+  const hostPorts=+(q('s-hports')?q('s-hports').value:8);
+  const overridePlat=q('s-oplat')?q('s-oplat').value:'auto';
+  const r=sizingEngine(protocol,cap,se,overhead,growth,drv,hostPorts,overridePlat,1);
+  lastSizing=r;
+  if(instanceConfigs[currentInstanceIdx]){
+    instanceConfigs[currentInstanceIdx].capacityTiB=r.committed_tib;
+    instanceConfigs[currentInstanceIdx].protocol=r.protocol;
+  }
+
+  const instanceRuns=instanceConfigs.map((ic,idx)=>{
+    if(idx===currentInstanceIdx) return r;
+    return sizingEngine(ic.protocol||'unified',ic.capacityTiB||100,se,overhead,growth,drv,hostPorts,overridePlat,1);
+  });
+  // Build per-HA-pair shelf counts: each HA pair only gets shelves if its instance needs them
+  const _shelvesPerHaPair=[];
+  instanceRuns.forEach(ir=>{
+    const pairs=Math.max(1,ir.haPairs||1);
+    const shPerPair=Math.ceil((ir.shelves||0)/pairs);
+    for(let i=0;i<pairs;i++) _shelvesPerHaPair.push(shPerPair);
+  });
+  const agg={
+    haPairs:instanceRuns.reduce((s,x)=>s+(x.haPairs||0),0),
+    totalDrives:instanceRuns.reduce((s,x)=>s+(x.totalDrives||0),0),
+    shelves:instanceRuns.reduce((s,x)=>s+(x.shelves||0),0),
+    rawTB:instanceRuns.reduce((s,x)=>s+(x.raw_tb||0),0),
+    committedTiB:instanceRuns.reduce((s,x)=>s+(x.committed_tib||0),0),
+    internalDrives:instanceRuns.reduce((s,x)=>s+(x.internalDrives||0),0),
+    externalDrives:instanceRuns.reduce((s,x)=>s+(x.externalDrives||0),0),
+    shelvesPerHA:Math.max(0,...instanceRuns.map(x=>Math.ceil((x.shelves||0)/Math.max(1,x.haPairs||1)))),
+    shelvesPerHaPair:_shelvesPerHaPair
+  };
+  const simHaPairs=Math.max(1,agg.haPairs||r.haPairs||1);
+  haPairLabels=buildHaPairLabels(instanceRuns);
+  while(haPairLabels.length<simHaPairs) haPairLabels.push(`HA${haPairLabels.length+1}`);
+
+  if(simHaPairs>1&&q('h-topo')&&q('h-topo').value==='switchless') q('h-topo').value='switched';
+  if(simHaPairs===1&&q('h-topo')&&q('h-topo').value==='switched') q('h-topo').value='switchless';
+  const topo=q('h-topo')?q('h-topo').value:'switched';
+  console.log('[HW-CFG] Topology:',{instances:instanceConfigs.length,caps:instanceConfigs.map(ic=>ic.capacityTiB),simHaPairs,topo});
+  const islLinks=+(q('s-isl')?q('s-isl').value:4);
+  const sparePorts=+(q('s-spare')?q('s-spare').value:4);
+  const swOverride=q('s-swopt')?q('s-swopt').value:'auto';
+  const swDist=q('s-swdist')?q('s-swdist').value:'In-cabinet';
+  const sw=switchSizing(simHaPairs,topo,islLinks,sparePorts,swOverride,swDist);
+  r.sw=sw;
+
+  hwCfg={platform:r.platform,haPairs:simHaPairs,shelvesPerHA:agg.shelvesPerHA,
+    shelvesPerHaPair:agg.shelvesPerHaPair,totalShelves:agg.shelves,drivesPerShelf:24,
+    totalDrives:agg.totalDrives,addSwitch:sw.needSwitch,
+    internalDrives:agg.internalDrives,externalDrives:agg.externalDrives,sw};
+
+  if(q('h-plat'))q('h-plat').value=r.platform.model;
+  if(q('h-ha'))q('h-ha').value=simHaPairs;
+  if(q('h-shelves'))q('h-shelves').value=agg.shelves;
+  if(q('h-tdrv'))q('h-tdrv').value=agg.totalDrives+' ('+agg.internalDrives+' int + '+agg.externalDrives+' ext)';
+  if(q('h-pcie'))q('h-pcie').textContent=r.platform.pcie+' slots (per controller)';
+  const switchRU=sw.switchRU||0;
+  const totalShelfRU=agg.shelvesPerHaPair?agg.shelvesPerHaPair.reduce((s,x)=>s+x*2,0):agg.shelves*2;
+  numCabs=Math.max(1,Math.ceil((simHaPairs*r.platform.ctrl_ru*2+totalShelfRU+switchRU+2)/cabConfig.height_u));
+  if(q('h-cabs'))q('h-cabs').value=numCabs;
+  if(q('h-sw-status')){
+    q('h-sw-status').textContent=sw.needSwitch?`Yes — ${sw.sw.name}`:'No (switchless)';
+    q('h-sw-status').style.color=sw.needSwitch?'#0067C5':'#0E6027';
+  }
+
+  if(instanceConfigs.length>1){
+    if(q('qc-cap')) q('qc-cap').textContent=r.committed_tib+' TiB (this instance)';
+    if(q('qc-inst')) q('qc-inst').textContent=instanceConfigs.length+' instances ('+simHaPairs+' HA)';
+    if(q('qc-agg')) q('qc-agg').innerHTML='<strong>All instances total:</strong> '+agg.committedTiB+' TiB effective &middot; '+agg.haPairs+' HA pairs &middot; '+agg.totalDrives+' drives';
+  }else{
+    if(q('qc-cap')) q('qc-cap').textContent=r.committed_tib+' TiB';
+    if(q('qc-inst')) q('qc-inst').textContent='1 ('+simHaPairs+' HA)';
+    if(q('qc-agg')) q('qc-agg').textContent='';
+  }
+
+  const nextHwSig=JSON.stringify({
+    plat:r.platform.id,ha:simHaPairs,shPerHA:agg.shelvesPerHaPair,drv:agg.totalDrives,swNeed:sw.needSwitch,swRu:sw.switchRU
+  });
+  const hardwareChanged=nextHwSig!==_lastHwSig;
+  _lastHwSig=nextHwSig;
+
+  updateDriveOptions(r.platform);
+  updateCableLengths();
+  renderResults(r);
+  syncBackToParent(r,instanceRuns,agg);
+  if(window._renderCabCompat) window._renderCabCompat();
+  console.log('[SHELF DEBUG]',{
+    instances:instanceConfigs.length,
+    currentIdx:currentInstanceIdx,
+    perInstance:instanceRuns.map((ir,i)=>({idx:i,cap:ir.committed_tib,shelves:ir.shelves,haPairs:ir.haPairs,rawDrives:ir.rawDrives,intDrives:ir.internalDrives})),
+    aggShelves:agg.shelves,
+    shelvesPerHA:agg.shelvesPerHA,
+    shelvesPerHaPair:agg.shelvesPerHaPair,
+    hwChanged:hardwareChanged
+  });
+  if(hardwareChanged){
+    cableConns=[];
+    rackItems=buildDefaultRackItems();
+    console.log('[SHELF DEBUG] rackItems shelves:',rackItems.filter(r=>r.type==='shelf').map(r=>({id:r.id,ha:r.ha})));
+  }
+  renderSim();
+  updateSite();
+}
+
+function updateDriveOptions(plat){
+  const sel=q('s-drv'); if(!sel)return;
+  const prev=+sel.value;
+  const drvPNs={15.3:'X4032B',30.7:'X4030A',61.4:'X4154A'};
+  sel.innerHTML=plat.drives.map(d=>`<option value="${d}"${d===prev?' selected':''}>${d} TB — ${drvPNs[d]||''}</option>`).join('');
+  if(!plat.drives.includes(prev)) sel.value=plat.drives[0];
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB 1 — kept for compatibility (hidden in 2-tab mode)
+   ═══════════════════════════════════════════════════════════════ */
+(function buildTab1(){
+  const t1=q('subCfg'); if(!t1) return;
+  t1.innerHTML=`<div style="padding:20px"><p style="color:#6e7681">Premium PSL selected — configure in the HW Configurator tab.</p></div>`;
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB 2 — HARDWARE CONFIGURATOR + SIMULATOR (Keystone Premium)
+   ═══════════════════════════════════════════════════════════════ */
+(function buildTab2(){
+  q('hwCfg').innerHTML=`
+  <!-- SUBSCRIPTION CONTEXT BANNER + INSTANCE NAVIGATOR -->
+  <div class="hs" id="quote-context-banner" style="background:#E8F1FC;border-color:#0067C5">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <h3 style="color:#0053A5;margin:0">Subscription Quote Context</h3>
+      <div id="inst-nav" style="display:none;align-items:center;gap:6px">
+        <button id="inst-prev" class="bp sm" style="padding:2px 8px;font-size:12px" disabled>&larr;</button>
+        <span id="inst-label" style="font-size:12px;font-weight:600;color:#0053A5;min-width:100px;text-align:center">Instance 1 of 1</span>
+        <button id="inst-next" class="bp sm" style="padding:2px 8px;font-size:12px" disabled>&rarr;</button>
+      </div>
+    </div>
+    <div id="inst-tabs" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+    <p id="inst-hint" style="display:none;font-size:11px;color:#0067C5;margin:0 0 6px;font-style:italic">&#9432; Click a tab above to switch between instances. Sizing inputs below apply to the selected instance.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:13px">
+      <div><span style="color:#6F6F6F;font-size:11px;display:block">Performance Level</span><strong id="qc-psl" style="color:#0053A5">Premium</strong></div>
+      <div><span style="color:#6F6F6F;font-size:11px;display:block">Effective Capacity</span><strong id="qc-cap" style="color:#0053A5">100 TiB</strong></div>
+      <div><span style="color:#6F6F6F;font-size:11px;display:block">Instances (HA Pairs)</span><strong id="qc-inst" style="color:#0053A5">1</strong></div>
+    </div>
+    <div id="qc-agg" style="font-size:12px;color:#6F6F6F;margin-top:4px"></div>
+    <div id="inst-detail" style="font-size:11px;color:#4A4A4A;margin-top:6px;padding:4px 8px;border-left:3px solid #0067C5;background:#F0F7FF;border-radius:0 4px 4px 0"></div>
+    <p style="font-size:12px;color:#6F6F6F;margin-top:4px">1 instance of Premium = 1 HA Pair of recommended AFF A-Series controller.</p>
+  </div>
+  <!-- INPUTS -->
+  <div class="hs"><h3>Sizing Inputs</h3>
+    <label><span>Protocol</span>
+      <select id="s-proto"><option value="unified" selected>Unified (NAS)</option><option value="san">Block (SAN)</option></select></label>
+    <label><span>Front-End Speed</span>
+      <select id="s-fespeed"><option value="25GbE" selected>25GbE</option><option value="100GbE">100GbE</option></select></label>
+    <label><span>Effective Capacity (TiB)</span>
+      <div style="display:flex;align-items:center;gap:8px;flex:none;width:200px">
+        <input type="number" id="s-cap-num" min="10" max="4000" step="1" value="100" style="width:80px">
+        <input type="range" id="s-cap" min="10" max="4000" step="1" value="100" style="flex:1">
+      </div></label>
+    <label><span>Storage Efficiency Ratio</span>
+      <select id="s-se"><option value="2">2 : 1</option><option value="1.7">1.7 : 1</option><option value="1.5" selected>1.5 : 1</option><option value="1">1 : 1 (none)</option></select></label>
+    <label><span>System Overhead</span>
+      <select id="s-overhead"><option value="0.15">15%</option><option value="0.18">18%</option><option value="0.20" selected>20%</option><option value="0.25">25%</option></select></label>
+    <label><span>Growth Buffer</span>
+      <select id="s-growth"><option value="0.10">10%</option><option value="0.15" selected>15%</option><option value="0.20">20%</option><option value="0.25">25%</option></select></label>
+    <label><span>Requested Host Ports</span>
+      <input type="number" id="s-hports" min="2" max="128" step="2" value="8"></label>
+    <label><span>Drive Size</span>
+      <select id="s-drv"><option value="15.3">15.3 TB — X4032B</option><option value="30.7" selected>30.7 TB — X4030A</option></select></label>
+    <label><span>Distance Profile</span>
+      <select id="s-dist"><option value="In-cabinet" selected>In-cabinet</option><option value="Adjacent rack">Adjacent rack</option><option value="Same row">Same row</option></select></label>
+    <label><span>Override Platform</span>
+      <select id="s-oplat"><option value="auto" selected>Auto (recommended)</option>${PLATFORMS.map(p=>`<option value="${p.id}">${p.model} (${p.form})</option>`).join('')}</select></label>
+  </div>
+  <!-- SIZING RESULTS -->
+  <div class="hs" id="hw-results-card"><h3>Sizing &amp; Scale Outputs</h3><div id="hw-results">—</div></div>
+  <!-- SYSTEM -->
+  <div class="hs"><h3>System</h3>
+    <label><span>Recommended Platform</span><input type="text" id="h-plat" readonly value="—"></label>
+    <label><span>HA Pairs</span><input type="number" id="h-ha" readonly value="1"></label>
+    <label><span>Power Type</span><select id="h-pwr"><option value="titanium">Titanium (AC)</option><option value="dc">DC (-48V)</option></select></label>
+  </div>
+  <!-- STORAGE -->
+  <div class="hs"><h3>Storage</h3>
+    <label><span>Shelves (NS224)</span><input type="number" id="h-shelves" readonly value="0"></label>
+    <label><span>Total Drives</span><input type="text" id="h-tdrv" readonly value="—"></label>
+  </div>
+  <!-- CABINET CONFIGURATOR -->
+  <div class="hs"><h3>Cabinet Configuration</h3>
+    <label><span>Include Cabinet</span><select id="h-cabreq"><option value="yes" selected>Yes</option><option value="no">No</option></select></label>
+    <div id="cab-details">
+      <div style="margin-bottom:8px">
+        <span style="font-size:12px;color:#6F6F6F;display:block;margin-bottom:4px">Quick Presets</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${Object.entries(CABINET_PRESETS).map(([k,v])=>'<button class="bp sm cab-preset'+(k==='general_server_storage'?' on':'')+'" data-preset="'+k+'">'+v.label+'</button>').join('')}
+        </div>
+      </div>
+      <label><span>Cabinet Profile</span>
+        <select id="h-cab-option">
+          ${Object.entries(CABINET_PRESETS).map(([k,v])=>'<option value="'+k+'"'+(k==='general_server_storage'?' selected':'')+'>'+v.label+' ('+(v.owner==='customer'?'Customer-owned':'NetApp')+')</option>').join('')}
+          <option value="custom">Custom / Manual</option>
+        </select></label>
+      <label><span>Cabinet Ownership</span>
+        <select id="h-cab-owner"><option value="netapp" selected>NetApp</option><option value="customer">Customer-owned</option></select></label>
+      <label><span>Number of Cabinets</span><input type="number" id="h-cabs" min="1" max="10" value="1"></label>
+      <label><span>Height (U)</span>
+        <select id="h-cab-h">${CABINET_OPTIONS.height_u.map(h=>'<option value="'+h+'"'+(h===42?' selected':'')+'>'+h+'U</option>').join('')}</select></label>
+      <label><span>Width (mm)</span>
+        <select id="h-cab-w">${CABINET_OPTIONS.width_mm.map(w=>'<option value="'+w+'"'+(w===600?' selected':'')+'>'+w+' mm</option>').join('')}</select></label>
+      <label><span>Depth (mm)</span>
+        <select id="h-cab-d">${CABINET_OPTIONS.depth_mm.map(d=>'<option value="'+d+'"'+(d===1070?' selected':'')+'>'+d+' mm</option>').join('')}</select></label>
+      <label><span>Door Type</span>
+        <select id="h-cab-door">
+          <option value="perforated_front_perforated_rear" selected>Perforated front + rear</option>
+          <option value="perforated_front_solid_rear">Perforated front + solid rear</option>
+          <option value="glass_front_perforated_rear">Glass front + perforated rear</option>
+          <option value="no_front_no_rear">Open frame (no doors)</option>
+        </select></label>
+      <label><span>Side Panels</span>
+        <select id="h-cab-sides"><option value="true" selected>Yes</option><option value="false">No</option></select></label>
+      <label><span>Cable Entry</span>
+        <select id="h-cab-entry"><option value="top" selected>Top</option><option value="bottom">Bottom</option><option value="both">Both (top + bottom)</option></select></label>
+      <label><span>Rail Standard</span><input type="text" value="19-inch EIA" readonly style="color:#6F6F6F"></label>
+      <label><span>Rack Mount Kit</span><select id="h-rack"><option value="4post" selected>4-Post Rail Kit</option><option value="superrail">Super Rail</option></select></label>
+      <label><span>Cabinet Power</span><select id="h-cabpwr"><option value="in" selected>In-Cabinet PDU</option><option value="ext">External PDU</option></select></label>
+      <label><span>Inter-Cabinet Spacing (mm)</span><input type="number" id="h-sp" min="0" max="2000" value="200"></label>
+      <label><span>Cluster Switch</span><span id="h-sw-status" style="font-size:12px;font-weight:600;color:#6F6F6F">Auto (from topology)</span><input type="hidden" id="h-sw"></label>
+      <div id="cab-compat" style="margin-top:8px"></div>
+      <div id="cab-option-compat" style="margin-top:6px"></div>
+    </div>
+  </div>
+  <!-- CABLING -->
+  <div class="hs"><h3>Cabling</h3>
+    <label><span>Cluster Topology</span><select id="h-topo"><option value="switched" selected>Switched</option><option value="switchless">Switchless (2-node)</option></select></label>
+    <label><span>Shelf Preference</span><select id="h-shelf-pref"><option value="NS224" selected>NS224</option></select></label>
+    <label><span>Cable Length</span><select id="h-cable"><option value="0.5m">0.5m</option><option value="1m" selected>1m</option><option value="2m">2m</option><option value="3m">3m</option></select></label>
+  </div>
+  <!-- SWITCH CONFIGURATION -->
+  <div class="hs"><h3>Cluster Switch Configuration</h3>
+    <label><span>Switch Option</span>
+      <select id="s-swopt"><option value="auto" selected>Auto (Cisco Nexus 3636C-R)</option>${SWITCH_OPTIONS.map(s=>'<option value="'+s.id+'">'+s.name+'</option>').join('')}</select></label>
+    <label><span>Cluster Switch Speed</span>
+      <select id="s-swspeed"><option value="100GbE" selected>100GbE QSFP28</option></select></label>
+    <label><span>ISL Links per Switch Pair <span style="color:#0E6027;font-size:10px">(customer-provided)</span></span>
+      <input type="number" id="s-isl" min="0" max="16" step="2" value="4"></label>
+    <label><span>Reserved Spare Ports / Switch</span>
+      <input type="number" id="s-spare" min="0" max="12" step="1" value="4"></label>
+    <label><span>Switch Distance Profile</span>
+      <select id="s-swdist"><option value="In-cabinet" selected>In-cabinet</option><option value="Adjacent rack">Adjacent rack</option><option value="Same row">Same row</option></select></label>
+    <div id="sw-result-card" style="margin-top:10px;padding:10px;background:#F6F8FA;border-radius:6px;border:1px solid #d0d7de;font-size:12.5px">
+      <div id="sw-results">—</div>
+    </div>
+  </div>
+  <!-- ADAPTERS -->
+  <div class="hs"><h3>NICs &amp; Adapters</h3>
+    <p style="font-size:12px;color:#6e7681;margin-bottom:4px">PCIe Slots: <strong style="color:#1a1a1a" id="h-pcie">—</strong></p>
+    <button class="bp sm" id="add-adapt-btn">+ Add Adapter</button>
+    <div class="adapt-wrap"><table class="adapt">
+      <thead><tr><th>Type</th><th>Adapter</th><th>Mode</th><th>Qty</th><th>Cable</th><th>Optics</th><th>Length</th><th></th></tr></thead>
+      <tbody id="adapt-body"></tbody></table></div>
+  </div>
+  <!-- BOM -->
+  <div class="hs"><h3>BOM Inventory</h3><div id="bom-panel"><p style="font-size:11px;color:#6e7681">Add adapters to populate BOM</p></div></div>
+  <!-- POWER MODEL -->
+  <div class="hs"><h3>Power Estimate</h3><div id="pwr-panel">—</div></div>`;
+
+  ['s-proto','s-se','s-drv','s-overhead','s-growth','s-dist','s-fespeed','s-oplat'].forEach(id=>{const el=q(id);if(el)el.onchange=globalCalc;});
+
+  const capSlider=q('s-cap'), capNum=q('s-cap-num');
+  capSlider.oninput=()=>{capNum.value=capSlider.value;globalCalc();};
+  capNum.oninput=()=>{
+    let v=Math.max(10,Math.min(4000,+capNum.value||10));
+    capSlider.value=v;globalCalc();
+  };
+  q('s-hports').onchange=globalCalc;
+
+  q('h-cabreq').onchange=()=>{
+    const show=q('h-cabreq').value==='yes';
+    q('cab-details').style.display=show?'block':'none';
+    renderSim();updateSite();
+  };
+  q('h-cabs').onchange=()=>{numCabs=+q('h-cabs').value;renderSim();updateSite();};
+  q('h-sp').onchange=()=>{cabSpacing=+q('h-sp').value;renderSim();};
+  // h-sw is now auto-driven by topology; no manual toggle needed
+  q('h-pwr').onchange=()=>renderSim();
+
+  function syncCabConfig(){
+    cabConfig.height_u=+(q('h-cab-h')?q('h-cab-h').value:42);
+    cabConfig.width_mm=+(q('h-cab-w')?q('h-cab-w').value:600);
+    cabConfig.depth_mm=+(q('h-cab-d')?q('h-cab-d').value:1070);
+    cabConfig.door=q('h-cab-door')?q('h-cab-door').value:'perforated_front_perforated_rear';
+    cabConfig.side_panels=q('h-cab-sides')?q('h-cab-sides').value==='true':true;
+    cabConfig.cable_entry=q('h-cab-entry')?q('h-cab-entry').value:'top';
+    cabConfig.owner=q('h-cab-owner')?q('h-cab-owner').value:'netapp';
+    if(q('h-cab-option')&&q('h-cab-option').value!=='custom'){
+      cabConfig.preset=q('h-cab-option').value;
+    }
+    renderCabCompat();
+    renderSim();updateSite();
+  }
+  function applyCabinetPreset(presetKey){
+    const p=CABINET_PRESETS[presetKey];
+    if(!p) return;
+    cabConfig.preset=presetKey;
+    if(q('h-cab-option')) q('h-cab-option').value=presetKey;
+    if(q('h-cab-owner')) q('h-cab-owner').value=p.owner||'netapp';
+    if(q('h-cab-h'))q('h-cab-h').value=p.height_u;
+    if(q('h-cab-w'))q('h-cab-w').value=p.width_mm;
+    if(q('h-cab-d'))q('h-cab-d').value=p.depth_mm;
+    if(q('h-cab-door')&&p.door)q('h-cab-door').value=p.door;
+    if(q('h-cab-sides'))q('h-cab-sides').value=String(p.side_panels!==false);
+    if(q('h-cab-entry')&&p.cable_entry)q('h-cab-entry').value=p.cable_entry;
+    syncCabConfig();
+  }
+  window._renderCabCompat=function(){
+    const el=q('cab-compat'); if(!el)return;
+    const issues=checkCabinetCompat();
+    const ownerTxt=(cabConfig.owner||'netapp')==='customer'?'Customer-owned cabinet':'NetApp cabinet';
+    if(!issues.length){el.innerHTML='<div style="font-size:11px;color:#0E6027;padding:6px;background:#ECFDF5;border-radius:4px;border:1px solid #A7F3D0">✓ Hardware compatible with selected '+ownerTxt+'.</div>';} else {
+    el.innerHTML=issues.map(i=>{
+      const bg=i.sev==='error'?'#FEF2F2':'#FFFBEB';
+      const bdr=i.sev==='error'?'#FECACA':'#FDE68A';
+      const clr=i.sev==='error'?'#991B1B':'#0E6027';
+      const icon=i.sev==='error'?'✕':'⚠';
+      return '<div style="font-size:11px;color:'+clr+';padding:6px;background:'+bg+';border:1px solid '+bdr+';border-radius:4px;margin-bottom:4px">'+icon+' '+i.msg+'</div>';
+    }).join('');
+    }
+    const matrix=q('cab-option-compat');
+    if(matrix){
+      const cards=Object.entries(CABINET_PRESETS).map(([k,p])=>{
+        const optCfg={...cabConfig,...p,owner:p.owner||'netapp'};
+        const optIssues=checkCabinetCompatFor(optCfg);
+        const hasErr=optIssues.some(x=>x.sev==='error');
+        const mark=hasErr?'✕':'✓';
+        const clr=hasErr?'#991B1B':'#0E6027';
+        const bg=hasErr?'#FEF2F2':'#ECFDF5';
+        const bdr=hasErr?'#FECACA':'#A7F3D0';
+        const isSel=cabConfig.preset===k||q('h-cab-option')?.value===k;
+        return '<div style="font-size:10.5px;padding:6px;border:1px solid '+bdr+';border-radius:4px;background:'+bg+';margin-bottom:4px'+(isSel?';box-shadow:inset 0 0 0 1px #0067C5':'')+'"><strong style="color:'+clr+'">'+mark+' '+p.label+'</strong> <span style="color:#6F6F6F">('+(p.owner==='customer'?'Customer':'NetApp')+')</span><div style="color:#6F6F6F;margin-top:2px">'+p.height_u+'U · '+p.width_mm+'W × '+p.depth_mm+'D</div></div>';
+      }).join('');
+      matrix.innerHTML='<div style="font-size:12px;color:#6F6F6F;margin-bottom:4px">Compatibility across cabinet options</div>'+cards;
+    }
+  };
+  const renderCabCompat=window._renderCabCompat;
+  ['h-cab-h','h-cab-w','h-cab-d','h-cab-door','h-cab-sides','h-cab-entry','h-rack','h-cabpwr','h-cab-owner'].forEach(id=>{
+    const el=q(id); if(el) el.onchange=syncCabConfig;
+  });
+  if(q('h-cab-option')) q('h-cab-option').onchange=()=>{
+    const key=q('h-cab-option').value;
+    if(key==='custom'){
+      cabConfig.preset='custom';
+      syncCabConfig();
+      return;
+    }
+    applyCabinetPreset(key);
+  };
+  document.querySelectorAll('.cab-preset').forEach(btn=>{
+    btn.onclick=()=>{
+      const p=CABINET_PRESETS[btn.dataset.preset]; if(!p)return;
+      document.querySelectorAll('.cab-preset').forEach(x=>x.classList.remove('on'));
+      btn.classList.add('on');
+      applyCabinetPreset(btn.dataset.preset);
+    };
+  });
+  ['s-swopt','s-swspeed','s-isl','s-spare','s-swdist'].forEach(id=>{const el=q(id);if(el)el.onchange=globalCalc;});
+  q('h-topo').onchange=()=>{
+    const nodes=hwCfg?(hwCfg.haPairs*2):2;
+    if(nodes>2&&q('h-topo').value==='switchless'){q('h-topo').value='switched';alert('Switchless topology only supported for 2-node (1 HA pair) clusters.');}
+    globalCalc();
+  };
+  q('add-adapt-btn').onclick=addAdapterRow;
+
+  /* ── Instance navigator ── */
+  if(q('inst-prev'))q('inst-prev').onclick=()=>{if(currentInstanceIdx>0)loadInstanceState(currentInstanceIdx-1);};
+  if(q('inst-next'))q('inst-next').onclick=()=>{if(currentInstanceIdx<instanceConfigs.length-1)loadInstanceState(currentInstanceIdx+1);};
+
+  /* ── Resize handle: drag to widen/narrow drawer vs canvas ── */
+  const rh=q('resize-handle'), drawer=q('drawer');
+  if(rh&&drawer){
+    let dragging=false,startX=0,startW=0;
+    rh.addEventListener('mousedown',e=>{
+      dragging=true;startX=e.clientX;startW=drawer.offsetWidth;
+      rh.classList.add('dragging');
+      document.body.style.cursor='col-resize';document.body.style.userSelect='none';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove',e=>{
+      if(!dragging)return;
+      const newW=Math.max(400,Math.min(window.innerWidth*0.75,startW+(e.clientX-startX)));
+      drawer.style.width=newW+'px';
+    });
+    document.addEventListener('mouseup',()=>{
+      if(!dragging)return;
+      dragging=false;rh.classList.remove('dragging');
+      document.body.style.cursor='';document.body.style.userSelect='';
+    });
+  }
+
+  const sp=q('simpanel');
+  sp.innerHTML=`
+    <div id="config-status" style="padding:4px 12px;font-size:11px;border:1px solid #E0E0E0;border-radius:0;background:#F5F5F5">Loading...</div>
+    <div class="stb">
+      <button class="vb on" data-v="front">Front</button>
+      <button class="vb" data-v="back">Back</button>
+      <button class="vb" data-v="cabling">Cabling</button>
+      <button class="vb" data-v="rack">Rack</button>
+      <div class="sep"></div>
+      <button id="z-in">+</button><button id="z-out">-</button><button id="z-fit">Fit</button>
+      <div class="sep"></div>
+      <button id="btn-autocable" title="Generate default cabling to switches">Auto-Cable</button>
+      <button id="btn-clearcable" title="Remove all cables">Clear Cables</button>
+      <select id="cable-filter" title="Filter cables by type" style="height:26px;font-size:11px">
+        <option value="all">All Cables</option>
+        <option value="network">Host/Data</option>
+        <option value="cluster">Cluster/ISL</option>
+        <option value="storage">Shelf/Storage</option>
+        <option value="management">Management RJ45</option>
+        <option value="power">Power</option>
+      </select>
+      <div class="sep"></div>
+      <button id="btn-addcab" title="Add another cabinet">+ Cabinet</button>
+      <button id="btn-rmcab" title="Remove last cabinet">− Cabinet</button>
+      <span class="st" id="sim-st"></span>
+    </div>
+    <div class="cwrap" id="cwrap" style="overflow-x:auto;overflow-y:auto"><svg id="simsvg" xmlns="http://www.w3.org/2000/svg"></svg></div>`;
+
+  sp.querySelectorAll('.vb').forEach(b=>b.onclick=()=>{
+    sp.querySelectorAll('.vb').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); simView=b.dataset.v; selPort=null; hideTip();
+    if(simView==='cabling'||simView==='back') resetSimPanZoom();
+    if(simView==='cabling'){
+      renderSim();
+      const rackChanged=_rackLayoutVersion>_cablingLastSyncVersion;
+      if(!cableConns.length||rackChanged){
+        setTimeout(()=>{autoDefaultCabling();_cablingLastSyncVersion=_rackLayoutVersion;renderSim();},100);
+      } else {
+        _cablingLastSyncVersion=_rackLayoutVersion;
+        setTimeout(()=>renderSim(),120);
+      }
+    } else {
+      renderSim();
+    }
+  });
+
+  const pz={x:0,y:0,s:1},svg=q('simsvg');
+  const aT=()=>{svg.style.transform=`translate(${pz.x}px,${pz.y}px) scale(${pz.s})`;svg.style.transformOrigin='0 0';};
+  resetSimPanZoom=()=>{pz.x=0;pz.y=0;pz.s=1;aT();};
+  q('z-in').onclick=()=>{pz.s*=1.15;aT();}; q('z-out').onclick=()=>{pz.s*=0.87;aT();};
+  q('z-fit').onclick=()=>{resetSimPanZoom();};
+  q('btn-autocable').onclick=()=>{
+    if(!rackItems.length) rackItems=buildDefaultRackItems();
+    simView='cabling';
+    document.querySelectorAll('.stb .vb').forEach(b=>{b.classList.toggle('on',b.dataset.v==='cabling');});
+    renderSim();
+    setTimeout(()=>{autoDefaultCabling();_cablingLastSyncVersion=_rackLayoutVersion;renderSim();},100);
+  };
+  q('btn-clearcable').onclick=()=>{cableConns=[];renderSim();};
+  if(q('cable-filter')) q('cable-filter').onchange=()=>{
+    cableRoleFilter=q('cable-filter').value||'all';
+    renderSim();
+  };
+  q('btn-addcab').onclick=()=>{numCabs++;if(q('h-cabs'))q('h-cabs').value=numCabs;rackItems=buildDefaultRackItems();renderSim();updateSite();};
+  q('btn-rmcab').onclick=()=>{if(numCabs<=1)return;numCabs--;if(q('h-cabs'))q('h-cabs').value=numCabs;rackItems.forEach(it=>{if(it.cabIdx>=numCabs)it.cabIdx=numCabs-1;});rackItems=buildDefaultRackItems();renderSim();updateSite();};
+  const cw=q('cwrap'); let pd=false,px2,py2;
+  cw.onmousedown=e=>{const t=e.target;if(t===cw||t===svg||t.tagName==='svg'){pd=true;px2=e.clientX-pz.x;py2=e.clientY-pz.y;}};
+  cw.onmousemove=e=>{
+    if(rackDrag&&simView==='rack'){
+      handleRackDragMove(e,svg,pz);
+      return;
+    }
+    if(pd){pz.x=e.clientX-px2;pz.y=e.clientY-py2;aT();}
+    if(dragLine&&dragFromPort){
+      const r=svg.getBoundingClientRect();
+      dragLine.setAttribute('x2',(e.clientX-r.left-pz.x)/pz.s);
+      dragLine.setAttribute('y2',(e.clientY-r.top-pz.y)/pz.s);
+    }
+  };
+  cw.onmouseup=e=>{
+    if(rackDrag&&simView==='rack'){handleRackDragEnd(e,svg,pz);return;}
+    pd=false;if(dragLine){finishDrag(e);}
+  };
+  cw.onmouseleave=()=>{
+    if(rackDrag){rackDrag=null;renderSim();return;}
+    pd=false;cancelDrag();
+    hideCableTip();
+  };
+  cw.onwheel=e=>{e.preventDefault();pz.s*=e.deltaY<0?1.08:0.93;aT();};
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   RACK DRAG-AND-DROP HANDLERS
+   ═══════════════════════════════════════════════════════════════ */
+let rackDragGhost=null, rackDragMarker=null;
+
+function getGroupRU(it){
+  if(!it.group) return it.ru;
+  return rackItems.filter(o=>o.group===it.group).reduce((s,o)=>s+o.ru,0);
+}
+function handleRackDragMove(e,svg,pz){
+  if(!rackDrag)return;
+  const r=svg.getBoundingClientRect();
+  const mx=(e.clientX-r.left-pz.x)/pz.s;
+  const my=(e.clientY-r.top-pz.y)/pz.s;
+  const it=rackItems[rackDrag.idx]; if(!it)return;
+  const cabU=cabConfig.height_u||42;
+  const groupRU=getGroupRU(it);
+
+  // Remove old ghost / marker
+  if(rackDragGhost){rackDragGhost.remove();rackDragGhost=null;}
+  if(rackDragMarker){rackDragMarker.remove();rackDragMarker=null;}
+
+  // Find which cabinet mouse is over
+  let targetCab=-1;
+  for(let i=0;i<rackCabs.length;i++){
+    const cab=rackCabs[i];
+    if(mx>=cab.x&&mx<=cab.x+cab.w&&my>=cab.y&&my<=cab.y+cab.h){targetCab=i;break;}
+  }
+  if(targetCab<0)return;
+
+  const cab=rackCabs[targetCab];
+  const uH=cab.uH;
+  // snap to nearest RU — use group size for placement
+  const relY=my-cab.iy;
+  const uFromTop=Math.floor(relY/uH);
+  const snapU=cabU-uFromTop-groupRU;
+  const clampedU=Math.max(0,Math.min(cabU-groupRU,snapU));
+  const snapY=cab.iy+cab.ih-(clampedU+groupRU)*uH;
+
+  // ghost rectangle — full group height
+  rackDragGhost=sRect(svg,{x:cab.ix+2,y:snapY,width:cab.iw-4,height:groupRU*uH-2,rx:2,fill:it.stroke,opacity:0.3,stroke:it.stroke,'stroke-width':2,'stroke-dasharray':'4,2',class:'rack-ghost'});
+
+  // RU marker line — full group
+  rackDragMarker=sGrp(svg,{class:'rack-marker'});
+  const markerY=snapY+groupRU*uH;
+  sLine(rackDragMarker,cab.ix-14,snapY,cab.ix+cab.iw+14,snapY,'#fbbf24',1.5,'3,2');
+  sLine(rackDragMarker,cab.ix-14,markerY,cab.ix+cab.iw+14,markerY,'#fbbf24',1.5,'3,2');
+  sRect(rackDragMarker,{x:cab.ix+cab.iw+2,y:snapY,width:28,height:groupRU*uH,rx:3,fill:'#fbbf24'});
+  sText(rackDragMarker,cab.ix+cab.iw+16,snapY+groupRU*uH/2+4,`U${clampedU+1}–${clampedU+groupRU}`,{fill:'#1a1a1a','font-size':'8px','text-anchor':'middle','font-weight':'700'});
+
+  // check overlap — exclude group members from collision test
+  const groupIds=it.group?rackItems.map((o,oi)=>o.group===it.group?oi:-1).filter(i=>i>=0):[];
+  const overlap=rackItems.some((other,oi)=>{
+    if(oi===rackDrag.idx||groupIds.includes(oi)||other.cabIdx!==targetCab)return false;
+    return clampedU<other.startU+other.ru&&clampedU+groupRU>other.startU;
+  });
+  if(overlap){
+    rackDragGhost.setAttribute('stroke','#fc8181');
+    rackDragGhost.setAttribute('fill','#7f1d1d');
+  }
+
+  rackDrag._targetCab=targetCab;
+  rackDrag._targetU=clampedU;
+  rackDrag._overlap=overlap;
+}
+
+function handleRackDragEnd(e,svg,pz){
+  if(!rackDrag)return;
+  const it=rackItems[rackDrag.idx];
+  const moved=it&&rackDrag._targetCab>=0&&!rackDrag._overlap&&
+    (it.cabIdx!==rackDrag._targetCab||it.startU!==rackDrag._targetU);
+  if(moved){
+    const baseU=rackDrag._targetU;
+    const targetCab=rackDrag._targetCab;
+    if(it.group){
+      const members=rackItems.filter(o=>o.group===it.group).sort((a,b)=>(b.groupRole==='top'?1:0)-(a.groupRole==='top'?1:0));
+      let uPos=baseU;
+      for(const m of members){m.cabIdx=targetCab;m.startU=uPos;uPos+=m.ru;}
+    }else{
+      it.cabIdx=targetCab;
+      it.startU=baseU;
+    }
+    _rackLayoutVersion++;
+  }
+  if(rackDragGhost){rackDragGhost.remove();rackDragGhost=null;}
+  if(rackDragMarker){rackDragMarker.remove();rackDragMarker=null;}
+  rackDrag=null;
+  svg.style.cursor='';
+  updateCableWarnings();
+  renderSim();
+  if(moved) notifyRackLayoutChanged();
+}
+
+function notifyRackLayoutChanged(){
+  const st=q('sim-st');
+  if(st){
+    const warns=checkCableWarnings();
+    const warnCount=warns.filter(w=>w.sev==='error').length;
+    st.innerHTML=warnCount>0
+      ?`<span style="color:#C62828">⚠ ${warnCount} cable warning(s) — lengths may need adjustment after rack move</span>`
+      :`RACK | Layout updated — cable lengths recalculated`;
+  }
+}
+
+function updateCableWarnings(){
+  const warns=checkCableWarnings();
+  if(warns.length){
+    const el=q('sim-st');
+    if(el) el.title=warns.map(w=>w.msg).join('\n');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ADAPTER ROW MANAGEMENT — Keystone Premium adapter catalog
+   ═══════════════════════════════════════════════════════════════ */
+function addAdapterRow(){
+  const tbody=q('adapt-body'), tr=document.createElement('tr');
+  const dist=q('s-dist')?q('s-dist').value:'In-cabinet';
+  const typeOpts=Object.keys(ADAPTER_CATALOG).map(k=>`<option value="${k}">${k}</option>`).join('');
+  const defaultLens=getCableLengths(dist,'25GbE');
+  const lenOpts=defaultLens.map(l=>`<option value="${l}">${l}</option>`).join('');
+  tr.innerHTML=`
+    <td><select class="at-type" onchange="onAdaptType(this)"><option value="">—</option>${typeOpts}</select></td>
+    <td class="at-desc">—</td><td class="at-mode">—</td>
+    <td><input type="number" class="at-qty" min="0" max="18" value="0" onchange="onAdaptQtyChange()"></td>
+    <td><select class="at-cable" onchange="onCableType(this)"><option value="Copper">Copper / DAC</option><option value="Fiber">Fiber / Optics</option></select></td>
+    <td style="text-align:center"><input type="checkbox" class="at-sfp" disabled></td>
+    <td><select class="at-clen">${lenOpts}</select></td>
+    <td><button class="bp del" onclick="this.closest('tr').remove();onAdaptQtyChange()">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+function ensureDefaultAdapterRows(){
+  const tbody=q('adapt-body');
+  if(!tbody||tbody.children.length) return;
+  const proto=q('s-proto')?q('s-proto').value:'unified';
+  const hostType=proto==='san'?'FC 64G':'Host 25GbE';
+  const defaults=['Cluster',hostType,'Shelf SAS'];
+  defaults.forEach(tp=>{
+    addAdapterRow();
+    const row=tbody.lastElementChild;
+    const sel=row?row.querySelector('.at-type'):null;
+    if(sel){
+      sel.value=tp;
+      onAdaptType(sel);
+    }
+  });
+}
+function onAdaptType(sel){
+  const row=sel.closest('tr'),tp=sel.value,cat=ADAPTER_CATALOG[tp];
+  if(cat){
+    row.querySelector('.at-desc').textContent=cat.desc;
+    row.querySelector('.at-mode').textContent=cat.mode;
+    row.querySelector('.at-qty').value=cat.defQty;
+    if(cat.media==='FC'){
+      row.querySelector('.at-cable').value='Fiber';
+      row.querySelector('.at-sfp').checked=true;row.querySelector('.at-sfp').disabled=false;
+    }
+  }else{
+    row.querySelector('.at-desc').textContent='—';
+    row.querySelector('.at-mode').textContent='—';
+    row.querySelector('.at-qty').value=0;
+  }
+  onAdaptQtyChange();
+}
+function onCableType(sel){
+  const sfp=sel.closest('tr').querySelector('.at-sfp');
+  if(sel.value==='Copper'){sfp.checked=false;sfp.disabled=true;}
+  else{sfp.checked=true;sfp.disabled=false;}
+  onAdaptQtyChange();
+}
+function onAdaptQtyChange(){ cableConns=[]; renderSim(); }
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER SIZING RESULTS
+   ═══════════════════════════════════════════════════════════════ */
+function renderResults(r){
+  const el=q('hw-results'); if(!el)return;
+  const pwr=estimatePower(r);
+  const maxHA=r.protocol==='san'?r.platform.max_ha.san:r.platform.max_ha.nas;
+  const scaleStatus=r.scaleOk?'Within limits':'EXCEEDS MAX — escalate';
+  const scaleClr=r.scaleOk?'#0E6027':'#C62828';
+  el.innerHTML=`
+  <div class="rg">
+    <div class="rb bl"><div class="rl">Effective Capacity</div><div class="rv2">${r.committed_tib} TiB</div></div>
+    <div class="rb cy"><div class="rl">Usable After SE</div><div class="rv2">${r.usable_after_se.toFixed(1)} TiB</div></div>
+    <div class="rb gr"><div class="rl">Raw Required</div><div class="rv2">${r.raw_tb.toFixed(1)} TB</div></div>
+    <div class="rb or"><div class="rl">Drives</div><div class="rv2">${r.rawDrives} → ${r.totalDrives}</div></div>
+    <div class="rb pu"><div class="rl">Platform</div><div class="rv2">${r.platform.model}</div></div>
+    <div class="rb te"><div class="rl">HA Pairs</div><div class="rv2">${r.haPairs}</div></div>
+  </div>
+  <table class="t"><tr><th>Detail</th><th>Value</th></tr>
+    <tr><td>PSL / Protocol</td><td>Premium / ${r.protocol}</td></tr>
+    <tr><td>SE Ratio</td><td>${r.se_ratio} : 1</td></tr>
+    <tr><td>Overhead</td><td>${(r.overheadPct*100).toFixed(0)}%</td></tr>
+    <tr><td>Growth Buffer</td><td>${(r.growthPct*100).toFixed(0)}%</td></tr>
+    <tr><td>Drive Size</td><td>${r.driveSize} TB</td></tr>
+    <tr><td>Drives (raw → filled) <span class="iinfo">&#9432;<span class="tip">Internal drive bays and any partial NS224 shelves are always fully populated. This ensures consistent performance and simplifies sparing.</span></span></td><td>${r.rawDrives} → ${r.totalDrives} (${r.internalDrives} int + ${r.externalDrives} ext)</td></tr>
+    <tr><td>NS224 Shelves</td><td>${r.shelves}</td></tr>
+    <tr><td>Capacity-driven HA pairs</td><td>${r.capPairs}</td></tr>
+    <tr><td>Port-driven HA pairs</td><td>${r.portPairs}</td></tr>
+    <tr><td>Instance-driven HA pairs (from quote)</td><td>${r.instancePairs}</td></tr>
+    <tr><td>Recommended HA pairs</td><td><strong>${r.haPairs}</strong></td></tr>
+    <tr><td>Scale-out max (${r.protocol})</td><td>${maxHA}</td></tr>
+    <tr><td>Scale-out status</td><td style="color:${scaleClr};font-weight:600">${scaleStatus}</td></tr>
+    <tr><td>Host port target / HA pair</td><td>${r.platform.host_ports_per_ha}</td></tr>
+    <tr><td>Max raw / HA pair</td><td>${r.platform.max_raw_pb} PB</td></tr>
+    <tr><td>Platform form factor</td><td>${r.platform.form}</td></tr>
+    <tr><td>FE speeds supported</td><td>${r.platform.fe_speeds}</td></tr>
+  </table>`;
+
+  const sw=r.sw;
+  const swEl=q('sw-results');
+  if(swEl&&sw){
+    const swClr=sw.fitStatus==='Fit'?'#0E6027':'#C62828';
+    const reqClr=sw.switchRequired==='Required'?'#C62828':sw.switchRequired==='Optional'?'#0E6027':'#0E6027';
+    swEl.innerHTML=`
+    <div style="margin-bottom:6px"><span style="font-weight:600;font-size:13px;color:${reqClr}">${sw.switchRequired}</span>
+    <span style="color:#6e7681;margin-left:6px;font-size:11px">${sw.topoLabel}</span></div>
+    <table class="t" style="font-size:12px"><tr><th>Switch Metric</th><th>Value</th></tr>
+      <tr><td>Recommended Switch</td><td>${sw.sw.name}</td></tr>
+      <tr><td>Switch Pair Count</td><td>${sw.pairCount} (${sw.pairCount*2} switches)</td></tr>
+      <tr><td>Total Nodes</td><td>${sw.totalNodes}</td></tr>
+      <tr><td>Node-to-Switch Links</td><td>${sw.nodeToSwitchLinks}</td></tr>
+      <tr><td>ISL Links <span style="color:#0E6027;font-size:10px">(customer-provided)</span></td><td>${sw.islLinks}</td></tr>
+      <tr><td colspan="2" style="font-weight:600;background:#F0F3F6">Per-Switch Port Reservation</td></tr>
+      <tr><td>Node-Facing Ports / Switch</td><td>${sw.perSwNodePorts}</td></tr>
+      <tr><td>ISL Ports / Switch <span style="color:#0E6027;font-size:10px">(reserved for customer ISL)</span></td><td>${sw.perSwIslPorts}</td></tr>
+      <tr><td>Reserved Spare Ports / Switch</td><td>${sw.sparePorts}</td></tr>
+      <tr><td>Consumed Ports / Switch</td><td><strong>${sw.perSwConsumed}</strong></td></tr>
+      <tr><td>Usable Ports / Switch</td><td>${sw.usablePorts}</td></tr>
+      <tr><td>Free Ports / Switch</td><td>${sw.freePorts}</td></tr>
+      <tr><td>Fit Status</td><td style="color:${swClr};font-weight:600">${sw.fitStatus}</td></tr>
+      <tr><td>NetApp-Provided Switch Cables</td><td>${sw.nodeToSwitchLinks} (${sw.sugMedia}, ${sw.sugLen})</td></tr>
+      <tr><td>Customer-Provided ISL Cables</td><td style="color:#0E6027">${sw.islLinks} (${sw.sugMedia}, ${sw.sugLen})</td></tr>
+      <tr><td>Switch Watts (total)</td><td>${sw.switchWatts} W</td></tr>
+    </table>
+    `;
+  }
+
+  const pwrEl=q('pwr-panel');
+  const swWatts=sw?sw.switchWatts:0;
+  if(pwrEl) pwrEl.innerHTML=`
+  <table class="t"><tr><th>Component</th><th>Watts</th></tr>
+    <tr><td>Base (${r.haPairs} HA × ${r.platform.pwr.base}W)</td><td>${pwr.baseW}</td></tr>
+    <tr><td>Drives (${r.totalDrives} × ${r.platform.pwr.drive}W)</td><td>${pwr.driveW}</td></tr>
+    <tr><td>Shelves (${r.shelves} × ${r.platform.pwr.shelf}W)</td><td>${pwr.shelfW}</td></tr>
+    <tr><td>Adapters (est.)</td><td>${pwr.adapterW}</td></tr>
+    <tr><td>Cluster Switches (${sw?sw.pairCount*2:0} × ${sw?sw.sw.watts:0}W)</td><td>${swWatts}</td></tr>
+    <tr style="font-weight:700"><td>Total Estimated (incl. switches)</td><td>${pwr.totalW+swWatts} W</td></tr>
+    <tr><td>Redundant PSUs required</td><td>${pwr.psus}</td></tr>
+  </table>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SVG HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+function sEl(tag,attrs,parent){
+  const e=document.createElementNS(NS,tag);
+  if(attrs)for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);
+  if(parent)parent.appendChild(e); return e;
+}
+function sRect(p,a){return sEl('rect',a,p);}
+function sText(p,x,y,t,a={}){const e=sEl('text',{x,y,...a},p);e.textContent=t;return e;}
+function sLine(p,x1,y1,x2,y2,s,sw,da){const a={x1,y1,x2,y2,stroke:s,'stroke-width':sw};if(da)a['stroke-dasharray']=da;return sEl('line',a,p);}
+function sPath(p,d,s,sw,cls){const a={d,stroke:s,'stroke-width':sw,fill:'none'};if(cls)a['class']=cls;return sEl('path',a,p);}
+function sGrp(p,a){return sEl('g',a,p);}
+
+/* ═══════════════════════════════════════════════════════════════
+   SVG SIMULATOR — MAIN DISPATCH
+   ═══════════════════════════════════════════════════════════════ */
+function renderSim(){
+  const svg=q('simsvg'); if(!svg)return;
+  hideCableTip();
+  svg.innerHTML=''; portElMap={};
+  if(!rackItems.length) rackItems=buildDefaultRackItems();
+  const m=buildPhysicalModel();
+  addDefs(svg);
+  if(simView==='front') renderFront(svg,m);
+  else if(simView==='back') renderBack(svg,m);
+  else if(simView==='cabling') renderCabling(svg,m);
+  else renderRack(svg,m);
+  if(simView==='cabling'||simView==='back') drawExistingCables(svg);
+  if(q('sim-st'))q('sim-st').textContent=`${simView.toUpperCase()} | ${hwCfg.haPairs} HA, ${m.drives.filter(d=>d.populated).length} drives, ${m.pcie} slots/ctrl`;
+  updateConfigStatus();
+}
+
+function addDefs(svg){
+  const d=sEl('defs',null,svg);
+  d.innerHTML=`<linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5F5F5"/><stop offset="100%" stop-color="#E8E8E8"/></linearGradient>
+    <linearGradient id="gCh" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8F1FC"/><stop offset="100%" stop-color="#D6E6F9"/></linearGradient>
+    <linearGradient id="gSh" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF8E1"/><stop offset="100%" stop-color="#FFF0C0"/></linearGradient>
+    <linearGradient id="gP" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#38a169"/><stop offset="100%" stop-color="#276749"/></linearGradient>
+    <filter id="sh"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>`;
+}
+
+function drawCabInfoBar(svg,W,pad){
+  const showCab=q('h-cabreq')&&q('h-cabreq').value==='yes';
+  if(!showCab)return 0;
+  const g=sGrp(svg,{transform:`translate(${pad},6)`});
+  const bw=W-pad*2;
+  sRect(g,{x:0,y:0,width:bw,height:26,rx:6,fill:'#FFFFFF',stroke:'#E0E0E0','stroke-width':1});
+  sText(g,8,17,`Cabinet: ${cabConfig.height_u}U · ${cabConfig.width_mm}×${cabConfig.depth_mm}mm · ${numCabs} cab(s) · ${cabConfig.door.replace(/_/g,' ')} · Cable: ${cabConfig.cable_entry}`,
+    {fill:'#4A4A4A','font-size':'11px'});
+  return 32;
+}
+
+/* ── FRONT VIEW ── */
+function renderFront(svg,m){
+  const W=700, pad=40;
+  let Y=pad+drawCabInfoBar(svg,W,pad);
+  for(let ha=0;ha<hwCfg.haPairs;ha++){
+    const g=sGrp(svg,{transform:`translate(${pad},${Y})`});
+    Y+=drawChassisFront(g,m,ha,W-pad*2);
+    Y+=10;
+    const haSh=(m.shelvesPerHaPair&&m.shelvesPerHaPair[ha]!==undefined)?m.shelvesPerHaPair[ha]:m.shelves;
+    for(let s=0;s<haSh;s++){
+      const sg=sGrp(svg,{transform:`translate(${pad},${Y})`});
+      Y+=drawShelfFront(sg,s,W-pad*2);
+      Y+=10;
+    }
+    Y+=20;
+  }
+  svg.setAttribute('viewBox',`0 0 ${W} ${Y+pad}`);
+  svg.style.width=W+'px'; svg.style.height=(Y+pad)+'px';
+}
+
+function drawChassisFront(g,m,ha,W){
+  const H=m.ru===4?180:110, cols=12, rows=Math.ceil(m.drives.length/cols);
+  // Chassis frame
+  sRect(g,{x:0,y:0,width:W,height:H,rx:4,fill:'url(#gC)',stroke:'#4299e1','stroke-width':2,filter:'url(#sh)'});
+  // Title bar
+  sRect(g,{x:0,y:0,width:W,height:22,rx:4,fill:'#4299e1',opacity:0.85});
+  sText(g,W/2,15,`${m.platform} — ${getHaLabel(ha)} — FRONT`,{fill:'#fff','font-size':'13px','text-anchor':'middle','font-weight':'700'});
+  // PSU indicators
+  sRect(g,{x:6,y:28,width:18,height:H-36,rx:2,fill:'url(#gP)',stroke:'#276749','stroke-width':0.5});
+  sText(g,15,H/2+4,'PSU',{fill:'#fff','font-size':'9px','text-anchor':'middle',transform:`rotate(-90,15,${H/2+4})`});
+  sRect(g,{x:W-24,y:28,width:18,height:H-36,rx:2,fill:'url(#gP)',stroke:'#276749','stroke-width':0.5});
+  // Drive bays
+  const bayArea={x:32,y:28,w:W-64,h:H-36};
+  const bw=Math.min(46,Math.floor((bayArea.w-4)/cols)-2), bh=Math.min(30,Math.floor((bayArea.h-4)/rows)-2);
+  for(let i=0;i<m.drives.length;i++){
+    const col=i%cols, row=Math.floor(i/cols);
+    const bx=bayArea.x+4+col*(bw+2), by=bayArea.y+4+row*(bh+2);
+    const pop=m.drives[i].populated;
+    sRect(g,{x:bx,y:by,width:bw,height:bh,rx:2,fill:pop?'#2d3748':'#0d1117',stroke:pop?'#4a5568':'#1a202c','stroke-width':0.8});
+    if(pop){
+      sRect(g,{x:bx+2,y:by+2,width:bw-4,height:6,rx:1,fill:'#48bb78',opacity:0.7});
+      sText(g,bx+bw/2,by+bh-4,m.drives[i].bay,{fill:'#718096','font-size':'9px','text-anchor':'middle'});
+    }else{
+      sText(g,bx+bw/2,by+bh/2+3,'—',{fill:'#2d3748','font-size':'9px','text-anchor':'middle'});
+    }
+  }
+  // LED strip
+  for(let i=0;i<4;i++) sRect(g,{x:W-20,y:30+i*10,width:6,height:6,rx:1,fill:i<2?'#48bb78':'#f6ad55'});
+  return H;
+}
+
+function drawShelfFront(g,idx,W){
+  const H=70;
+  sRect(g,{x:0,y:0,width:W,height:H,rx:4,fill:'url(#gSh)',stroke:'#d69e2e','stroke-width':2,filter:'url(#sh)'});
+  sRect(g,{x:0,y:0,width:W,height:20,rx:4,fill:'#d69e2e',opacity:0.85});
+  sText(g,W/2,14,`NS224 Shelf ${idx+1} — FRONT`,{fill:'#fff','font-size':'12px','text-anchor':'middle','font-weight':'700'});
+  const cols=12,bw=Math.min(46,Math.floor((W-20)/cols)-2),bh=18;
+  for(let d=0;d<24;d++){
+    const col=d%cols,row=Math.floor(d/cols);
+    const bx=10+col*(bw+2), by=24+row*(bh+2);
+    const pop=d<(hwCfg.drivesPerShelf||24);
+    sRect(g,{x:bx,y:by,width:bw,height:bh,rx:1,fill:pop?'#4a6741':'#1a1f26',stroke:'#333','stroke-width':0.4});
+    sText(g,bx+bw/2,by+bh-4,(d+1)+'',{fill:'#8b949e','font-size':'8px','text-anchor':'middle'});
+  }
+  return H;
+}
+
+/* ── BACK VIEW ── */
+function renderBack(svg,m){
+  const W=740, pad=40;
+  let Y=pad+drawCabInfoBar(svg,W,pad);
+  for(let ha=0;ha<hwCfg.haPairs;ha++){
+    const g=sGrp(svg,{transform:`translate(${pad},${Y})`});
+    Y+=drawChassisBack(g,m,ha,W-pad*2);
+    Y+=10;
+    const haSh=(m.shelvesPerHaPair&&m.shelvesPerHaPair[ha]!==undefined)?m.shelvesPerHaPair[ha]:m.shelves;
+    for(let s=0;s<haSh;s++){
+      const sg=sGrp(svg,{transform:`translate(${pad},${Y})`});
+      Y+=drawShelfBack(sg,s,W-pad*2,ha);
+      Y+=10;
+    }
+    Y+=20;
+  }
+  svg.setAttribute('viewBox',`0 0 ${W} ${Y+pad}`);
+  svg.style.width=W+'px'; svg.style.height=(Y+pad)+'px';
+}
+
+function drawChassisBack(g,m,ha,W){
+  const ctrlH=60, gap=4, H=ctrlH*2+gap+40;
+  sRect(g,{x:0,y:0,width:W,height:H,rx:4,fill:'url(#gC)',stroke:'#4299e1','stroke-width':2,filter:'url(#sh)'});
+  sRect(g,{x:0,y:0,width:W,height:22,rx:4,fill:'#4299e1',opacity:0.85});
+  sText(g,W/2,15,`${m.platform} — ${getHaLabel(ha)} — REAR`,{fill:'#fff','font-size':'13px','text-anchor':'middle','font-weight':'700'});
+  for(let ci=0;ci<2;ci++){
+    const ctrl=m.controllers[ci], cy=26+ci*(ctrlH+gap);
+    const cg=sGrp(g,{transform:`translate(6,${cy})`});
+    const cw=W-12;
+    sRect(cg,{x:0,y:0,width:cw,height:ctrlH,rx:3,fill:'#1a202c',stroke:'#2d3748','stroke-width':1});
+    sText(cg,4,12,`Controller ${ctrl.id}`,{fill:'#a0aec0','font-size':'11px','font-weight':'700'});
+    // Mgmt port
+    const mp=makePort(cg,8,18,20,16,{id:`ha${ha}-${ctrl.id}-mgmt`,media:'RJ45',speed:'1GbE',role:'management',ctrl:ctrl.id,slot:'mgmt',port:0,ha});
+    sText(cg,18,48,'Mgmt',{fill:'#718096','font-size':'9px','text-anchor':'middle'});
+    // IO slots
+    const slotW=Math.min(110,Math.floor((cw-120)/m.pcie));
+    for(let si=0;si<m.pcie;si++){
+      const sx=40+si*(slotW+4), mod=ctrl.slots[si];
+      sRect(cg,{x:sx,y:16,width:slotW,height:38,rx:2,fill:mod?'#2d3748':'#0d1117',stroke:mod?'#4a5568':'#1a202c','stroke-width':0.8});
+      sText(cg,sx+slotW/2,14,`Slot ${si+1}`,{fill:'#718096','font-size':'9px','text-anchor':'middle'});
+      if(mod){
+        const pCount=mod.portCount||2, pw=Math.min(22,Math.floor((slotW-8)/pCount)-2);
+        for(let pi=0;pi<pCount;pi++){
+          const px=sx+4+pi*(pw+2);
+          const pId=`ha${ha}-${ctrl.id}-s${si+1}-p${pi+1}`;
+          makePort(cg,px,20,pw,14,{id:pId,media:mod.media,speed:mod.speed,role:mod.role,ctrl:ctrl.id,slot:si+1,port:pi+1,ha,pn:mod.pn});
+          sText(cg,px+pw/2,48,`p${pi+1}`,{fill:'#718096','font-size':'8px','text-anchor':'middle'});
+        }
+        sText(cg,sx+slotW/2,42,mod.speed,{fill:ROLE_CLR[mod.role]||'#8b949e','font-size':'9px','text-anchor':'middle','font-weight':'600'});
+      }else{
+        sText(cg,sx+slotW/2,38,'empty',{fill:'#2d3748','font-size':'8px','text-anchor':'middle'});
+      }
+    }
+    // PSU
+    const psuX=cw-46;
+    sRect(cg,{x:psuX,y:4,width:40,height:ctrlH-8,rx:2,fill:'url(#gP)',stroke:'#276749','stroke-width':0.5});
+    sText(cg,psuX+20,ctrlH/2+2,`PSU ${m.psus[ci].id}`,{fill:'#fff','font-size':'10px','text-anchor':'middle','font-weight':'600'});
+    sText(cg,psuX+20,ctrlH/2+12,m.psus[ci].rating,{fill:'#c6f6d5','font-size':'8px','text-anchor':'middle'});
+  }
+  return H;
+}
+
+function drawShelfBack(g,idx,W,ha){
+  const H=50;
+  sRect(g,{x:0,y:0,width:W,height:H,rx:4,fill:'url(#gSh)',stroke:'#d69e2e','stroke-width':2,filter:'url(#sh)'});
+  sRect(g,{x:0,y:0,width:W,height:18,rx:4,fill:'#d69e2e',opacity:0.85});
+  sText(g,W/2,13,`NS224 Shelf ${idx+1} — ${getHaLabel(ha)} — REAR`,{fill:'#fff','font-size':'12px','text-anchor':'middle','font-weight':'700'});
+  // IOM A & B (each has 2 ports)
+  for(let iom=0;iom<2;iom++){
+    const ix=40+iom*(W/2-20);
+    sRect(g,{x:ix,y:22,width:100,height:24,rx:2,fill:'#3d3526',stroke:'#4a5568','stroke-width':0.6});
+    sText(g,ix+2,32,`IOM ${iom?'B':'A'}`,{fill:'#a0aec0','font-size':'10px'});
+    for(let p=0;p<2;p++){
+      makePort(g,ix+50+p*24,24,20,16,{id:`ha${ha}-sh${idx+1}-iom${iom?'B':'A'}-p${p+1}`,media:'QSFP28',speed:'100GbE',role:'storage',ctrl:iom?'B':'A',slot:'shelf',port:p+1,ha});
+    }
+  }
+  return H;
+}
+
+function makePort(parent,x,y,w,h,data){
+  const r=sRect(parent,{x,y,width:w,height:h,rx:2,fill:ROLE_CLR[data.role]||'#4a5568',stroke:'#222','stroke-width':0.6,class:'port-rect','data-port':JSON.stringify(data),cursor:'pointer',opacity:0.85});
+  // Store in registry for cable drawing
+  portElMap[data.id]={el:r,data,cx:0,cy:0}; // cx/cy computed at draw time
+  r.addEventListener('mousedown',e=>{e.stopPropagation();onPortMouseDown(e,data,r);});
+  r.addEventListener('mouseenter',e=>showPortTip(e,data));
+  r.addEventListener('mouseleave',()=>{if(!selPort)hideTip();});
+  return r;
+}
+
+/* ── CABLING VIEW — top-of-rack switches + equipment below ── */
+function renderCabling(svg,m){
+  const W=1100, pad=40, equipW=660;
+  let Y=pad+drawCabInfoBar(svg,W,pad);
+  const topo=q('h-topo')?q('h-topo').value:'switched';
+  const feSpeed=q('s-fespeed')?q('s-fespeed').value:'25GbE';
+  const equipAnchors=[];
+
+  // ─── OVERHEAD MANAGEMENT RJ45 PATCH PANEL ───
+  const swMgmtCount=2+((hwCfg.sw&&hwCfg.sw.needSwitch)?2:0);
+  const mgmtCount=Math.max(1,hwCfg.haPairs*2+swMgmtCount);
+  const mgmtPanelH=34;
+  const mgmtG=sGrp(svg,{transform:`translate(${pad},${Y})`});
+  sRect(mgmtG,{x:0,y:0,width:equipW,height:mgmtPanelH,rx:4,fill:'#111827',stroke:'#4b5563','stroke-width':1,filter:'url(#sh)'});
+  sText(mgmtG,equipW/2,12,'Overhead Management Patch Panel (RJ45 drops)',{fill:'#cbd5e1','font-size':'12px','text-anchor':'middle','font-weight':'700'});
+  const mpw=Math.max(10,Math.min(20,Math.floor((equipW-24)/mgmtCount)-2));
+  for(let i=0;i<mgmtCount;i++){
+    const px=12+i*(mpw+2);
+    makePort(mgmtG,px,16,mpw,12,{id:`overhead-mgmt-p${i+1}`,media:'RJ45',speed:'1GbE',role:'management',ctrl:'patch',slot:'overhead',port:i+1,ha:-1});
+    sText(mgmtG,px+mpw/2,31,`${i+1}`,{fill:'#9ca3af','font-size':'8px','text-anchor':'middle'});
+  }
+  Y+=mgmtPanelH+8;
+
+  // ─── EQUIPMENT LAYOUT — ordered by rack position per cabinet ─── */
+  const sw=hwCfg.sw||{};
+  const pduW=28;
+  const leftPduX=pad-36;
+  const rightPduX=pad+equipW+8;
+
+  const swPorts=sw.sw?sw.sw.ports:36;
+  const switchDefMap={
+    'cust-sw-a':{name:'Customer Switch A',media:feSpeed==='100GbE'?'QSFP28':'SFP28',speed:feSpeed,role:'network',ports:24,color:'#0067C5'},
+    'cust-sw-b':{name:'Customer Switch B',media:feSpeed==='100GbE'?'QSFP28':'SFP28',speed:feSpeed,role:'network',ports:24,color:'#0067C5'},
+    'cl-sw-a':{name:'Cisco 3636 Cluster A',media:'QSFP28',speed:'100GbE',role:'cluster',ports:swPorts,color:'#805ad5',consumed:sw.perSwConsumed,free:sw.freePorts},
+    'cl-sw-b':{name:'Cisco 3636 Cluster B',media:'QSFP28',speed:'100GbE',role:'cluster',ports:swPorts,color:'#805ad5',consumed:sw.perSwConsumed,free:sw.freePorts}
+  };
+
+  function drawSwitchBlock(parentSvg,xOff,yOff,def,eqW){
+    const swH=70;
+    const sg=sGrp(parentSvg,{transform:`translate(${xOff},${yOff})`});
+    sRect(sg,{x:0,y:0,width:eqW,height:swH,rx:4,fill:'#1a202c',stroke:def.color,'stroke-width':1.5,filter:'url(#sh)'});
+    sRect(sg,{x:0,y:0,width:eqW,height:20,rx:4,fill:def.color,opacity:0.85});
+    const isCluster=def.role==='cluster';
+    const label=isCluster?`${def.name} (${def.ports}p QSFP28, 1U)`:`${def.name} (1U — Top of Rack)`;
+    sText(sg,eqW/2,14,label,{fill:'#fff','font-size':'12px','text-anchor':'middle','font-weight':'700'});
+    if(isCluster&&def.consumed!==undefined)
+      sText(sg,eqW-8,14,`${def.consumed} used / ${def.free} free`,{fill:'rgba(255,255,255,0.75)','font-size':'10px','text-anchor':'end'});
+    const swId=def.name.toLowerCase().replace(/ /g,'-');
+    makePort(sg,eqW-36,28,22,14,{id:`${swId}-mgmt`,media:'RJ45',speed:'1GbE',role:'management',ctrl:'sw',slot:swId,port:0,ha:-1});
+    sText(sg,eqW-25,56,'Mgmt',{fill:'#a0aec0','font-size':'9px','text-anchor':'middle','font-weight':'600'});
+    const pw=Math.min(16,Math.floor((eqW-60)/def.ports)-2);
+    for(let p=0;p<def.ports;p++){
+      const px=10+p*(pw+2);
+      const portUsed=isCluster&&sw.needSwitch&&p<(sw.perSwNodePorts||0);
+      const portISL=isCluster&&sw.needSwitch&&p>=(def.ports-(sw.perSwIslPorts||0))&&p<def.ports;
+      const portSpare=isCluster&&sw.needSwitch&&!portUsed&&!portISL&&p<(sw.perSwConsumed||0);
+      makePort(sg,px,26,pw,16,{id:`${swId}-p${p+1}`,media:def.media,speed:def.speed,role:def.role,ctrl:'sw',slot:swId,port:p+1,ha:-1});
+      if(isCluster){
+        const lbl=portUsed?'N':portISL?'I':portSpare?'S':(p+1).toString();
+        const clr=portUsed?'#10b981':portISL?'#f59e0b':portSpare?'#6366f1':'#718096';
+        sText(sg,px+pw/2,58,lbl,{fill:clr,'font-size':'8px','text-anchor':'middle','font-weight':'600'});
+      }else{
+        sText(sg,px+pw/2,58,`${p+1}`,{fill:'#718096','font-size':'8px','text-anchor':'middle'});
+      }
+    }
+    if(isCluster) sText(sg,10,swH-4,'N=Node  I=ISL  S=Spare',{fill:'#718096','font-size':'9px'});
+    return swH;
+  }
+
+  // Sort rackItems by cabinet, then top-to-bottom (descending startU)
+  const sortedRack=[...rackItems].sort((a,b)=>a.cabIdx!==b.cabIdx?a.cabIdx-b.cabIdx:b.startU-a.startU);
+  const cabGroups={};
+  for(const ri of sortedRack){
+    if(!cabGroups[ri.cabIdx]) cabGroups[ri.cabIdx]=[];
+    cabGroups[ri.cabIdx].push(ri);
+  }
+  const cabIdxList=Object.keys(cabGroups).map(Number).sort((a,b)=>a-b);
+  if(!cabIdxList.length) cabIdxList.push(0);
+
+  const drawnHA=new Set();
+  const drawnShelves=new Set();
+
+  for(const ci of cabIdxList){
+    // Cabinet header
+    const cabHdrG=sGrp(svg,{transform:`translate(${pad},${Y})`});
+    sRect(cabHdrG,{x:0,y:0,width:equipW,height:22,rx:4,fill:'#0067C5'});
+    sText(cabHdrG,equipW/2,15,`Cabinet ${ci+1}`,{fill:'#fff','font-size':'12px','text-anchor':'middle','font-weight':'700'});
+    const cabItemCount=(cabGroups[ci]||[]).length;
+    sText(cabHdrG,equipW-10,15,`${cabItemCount} items`,{fill:'rgba(255,255,255,0.7)','font-size':'10px','text-anchor':'end'});
+    Y+=28;
+    const cabAnchors=[];
+
+    for(const ri of (cabGroups[ci]||[])){
+      if(ri.type==='cust-switch'||ri.type==='cluster-switch'){
+        const def=switchDefMap[ri.id];
+        if(!def) continue;
+        const h=drawSwitchBlock(svg,pad,Y,def,equipW);
+        cabAnchors.push({name:def.name,y:Y+h/2});
+        equipAnchors.push({type:'switch',name:def.name,y:Y+h/2});
+        Y+=h+8;
+      } else if(ri.type==='controller'){
+        const ha=ri.ha;
+        if(drawnHA.has(ha)) continue;
+        drawnHA.add(ha);
+        const chY=Y;
+        const g=sGrp(svg,{transform:`translate(${pad},${Y})`});
+        Y+=drawChassisBack(g,m,ha,equipW);
+        cabAnchors.push({name:`${hwCfg.platform.model} Ctrl A — ${getHaLabel(ha)}`,y:chY+56});
+        cabAnchors.push({name:`${hwCfg.platform.model} Ctrl B — ${getHaLabel(ha)}`,y:chY+120});
+        equipAnchors.push({type:'controller',name:`${hwCfg.platform.model} Ctrl A — ${getHaLabel(ha)}`,y:chY+56});
+        equipAnchors.push({type:'controller',name:`${hwCfg.platform.model} Ctrl B — ${getHaLabel(ha)}`,y:chY+120});
+        Y+=8;
+      } else if(ri.type==='shelf'){
+        const ha=ri.ha;
+        const shelfKey=ri.id;
+        if(drawnShelves.has(shelfKey)) continue;
+        drawnShelves.add(shelfKey);
+        const parts=ri.id.match(/shelf-(\d+)-(\d+)/);
+        const shelfIdx=parts?parseInt(parts[2],10):0;
+        const shY=Y;
+        const sg=sGrp(svg,{transform:`translate(${pad},${Y})`});
+        Y+=drawShelfBack(sg,shelfIdx,equipW,ha);
+        cabAnchors.push({name:`NS224 Shelf ${shelfIdx+1} — ${getHaLabel(ha)}`,y:shY+25});
+        equipAnchors.push({type:'shelf',name:`NS224 Shelf ${shelfIdx+1} — ${getHaLabel(ha)}`,y:shY+25});
+        Y+=8;
+      }
+    }
+
+    // Per-cabinet PDU strips
+    if(cabAnchors.length){
+      const pduY0=Math.min(...cabAnchors.map(a=>a.y))-16;
+      const pduY1=Math.max(...cabAnchors.map(a=>a.y))+16;
+      const pduH=Math.max(60,pduY1-pduY0+22);
+      for(let pduSide=0;pduSide<2;pduSide++){
+        const px=pduSide===0?leftPduX:rightPduX;
+        const pduLabel=pduSide===0?`PDU ${ci+1}A`:`PDU ${ci+1}B`;
+        const pg=sGrp(svg,{transform:`translate(${px},${pduY0-10})`});
+        sRect(pg,{x:0,y:0,width:pduW,height:pduH,rx:3,fill:'#1a1a2e',stroke:'#E53E3E','stroke-width':1.1,filter:'url(#sh)'});
+        sText(pg,pduW/2,10,pduLabel,{fill:'#fc8181','font-size':'9px','text-anchor':'middle','font-weight':'700'});
+        cabAnchors.forEach(a=>{
+          const oy=(a.y-(pduY0-10))-4;
+          sRect(pg,{x:4,y:oy,width:pduW-8,height:8,rx:1,fill:'#2d2d44',stroke:'#E53E3E','stroke-width':0.3});
+          const tx=(pduSide===0)?pad+24:pad+equipW-24;
+          const cx1=(pduSide===0)?px+pduW+18:px-18;
+          const cx2=(pduSide===0)?tx-26:tx+26;
+          sPath(svg,`M${px+(pduSide===0?pduW:0)},${a.y} C${cx1},${a.y} ${cx2},${a.y} ${tx},${a.y}`,CABLE_COLORS.power,1.2,'2,2');
+        });
+      }
+      Y=Math.max(Y,pduY1+30);
+    }
+    Y+=16;
+  }
+
+  // ─── CABLE LEGEND (right side, top) ─── */
+  const cmX=pad+equipW+46, cmW=380;
+  let cmY=pad;
+  const lgG=sGrp(svg,{transform:`translate(${cmX},${cmY})`});
+  sRect(lgG,{x:0,y:0,width:cmW,height:20+CABLE_LEGEND.length*18,rx:6,fill:'#FFFFFF',stroke:'#E0E0E0','stroke-width':1});
+  sText(lgG,cmW/2,16,'Cable Color Legend',{fill:'#1C1C1C','font-size':'13px','text-anchor':'middle','font-weight':'700'});
+  CABLE_LEGEND.forEach((leg,i)=>{
+    const ly=26+i*20;
+    const da=leg.dash||'';
+    sLine(lgG,12,ly+6,44,ly+6,CABLE_COLORS[leg.role]||'#888',3,da||undefined);
+    sText(lgG,52,ly+10,leg.label,{fill:'#1C1C1C','font-size':'12px'});
+  });
+  cmY+=30+CABLE_LEGEND.length*20;
+
+  // ─── CABLE & CONNECTIVITY SUMMARY (right side, below legend) ─── */
+  const cableInv=buildCableInventory();
+
+  function drawInvSection(parentG,startY,title,titleClr,borderClr,bgClr,items,showBar){
+    const sg=sGrp(parentG,{transform:`translate(${cmX},${startY})`});
+    sRect(sg,{x:0,y:0,width:cmW,height:28,rx:6,fill:bgClr,stroke:borderClr,'stroke-width':1});
+    sText(sg,12,18,title,{fill:titleClr,'font-size':'13px','font-weight':'700'});
+    let row=36;
+    for(const item of items){
+      const ig=sGrp(sg,{transform:`translate(0,${row})`});
+      const barW=cmW-20;
+      const typeClr=CABLE_COLORS[item.type]||'#888';
+      if(showBar){
+        const ratio=item.total>0?Math.min(1,item.used/item.total):0;
+        sRect(ig,{x:10,y:0,width:barW,height:28,rx:4,fill:'#F5F5F5',stroke:'#E0E0E0','stroke-width':0.5});
+        sRect(ig,{x:10,y:0,width:Math.max(0,barW*ratio),height:28,rx:4,fill:typeClr,opacity:0.15});
+        sLine(ig,10,0,10,28,typeClr,4);
+        sText(ig,18,12,item.label,{fill:'#1C1C1C','font-size':'10px','font-weight':'600'});
+        sText(ig,18,24,`${item.used} / ${item.total}`,{fill:'#6F6F6F','font-size':'9px'});
+        const avail=Math.max(0,item.total-item.used);
+        sText(ig,barW,18,`${avail} avail`,{fill:avail>0?'#0E6027':'#6F6F6F','font-size':'10px','text-anchor':'end','font-weight':'600'});
+      }else{
+        sRect(ig,{x:10,y:0,width:barW,height:28,rx:4,fill:'#F5F5F5',stroke:'#E0E0E0','stroke-width':0.5});
+        sLine(ig,10,0,10,28,borderClr,4);
+        sText(ig,18,12,item.label,{fill:'#1C1C1C','font-size':'10px','font-weight':'600'});
+        sText(ig,barW,12,`${item.total}`,{fill:titleClr,'font-size':'12px','text-anchor':'end','font-weight':'700'});
+        if(item.note) sText(ig,18,24,item.note,{fill:'#6F6F6F','font-size':'9px'});
+      }
+      row+=34;
+    }
+    const totalH=row+6;
+    sRect(sg,{x:0,y:0,width:cmW,height:totalH,rx:6,fill:'none',stroke:borderClr,'stroke-width':1});
+    return totalH;
+  }
+
+  const h1=drawInvSection(svg,cmY,'🔧 NetApp-Supplied Cables (Included in BOM)','#1C1C1C','#0067C5','#E8F4FD',cableInv.netapp,true);
+  cmY+=h1+8;
+  const h2=drawInvSection(svg,cmY,'🔶 Customer-Required Network Connections','#0E6027','#0E6027','#FEF3C7',cableInv.customer,false);
+  cmY+=h2+8;
+  const h3=drawInvSection(svg,cmY,'💎 Optics / Transceivers','#1C1C1C','#805AD5','#F3E8FF',cableInv.optics,false);
+  cmY+=h3+8;
+
+  // ─── Rack sync banner ───
+  const rackSynced=rackItems.length>0;
+  const rackJustUpdated=_rackLayoutVersion>0&&_cablingLastSyncVersion===_rackLayoutVersion;
+  if(rackSynced){
+    const bannerG=sGrp(svg,{transform:`translate(${cmX},${cmY})`});
+    const bannerClr=rackJustUpdated?'#0E6027':'#0067C5';
+    const bannerBg=rackJustUpdated?'#ECFDF5':'#E8F4FD';
+    const bannerTxt=rackJustUpdated
+      ?'✓ Cable lengths recalculated from rack layout (v'+_rackLayoutVersion+')'
+      :'Cable lengths computed from rack positions';
+    sRect(bannerG,{x:0,y:0,width:cmW,height:22,rx:6,fill:bannerBg,stroke:bannerClr,'stroke-width':1});
+    sText(bannerG,cmW/2,15,bannerTxt,{fill:bannerClr,'font-size':'10px','text-anchor':'middle','font-weight':'700'});
+    cmY+=28;
+  }
+
+  // ─── Connection Matrix (from/to/length/compat) with section headers ───
+  const rows=buildCableConnectionRows();
+  const selectedLenM=parseLenMeters(q('h-cable')?q('h-cable').value:'1m');
+  const sectionOrder=['cluster','network','storage','management','power','other'];
+  const sectionLabels={cluster:'Cluster / HA Interconnect',network:'Host / Data Network',storage:'Storage / Shelf',management:'Management',power:'Power',other:'Other'};
+  const sectionColors={cluster:'#805AD5',network:'#0E6027',storage:'#0097A7',management:'#6F6F6F',power:'#E53E3E',other:'#1C1C1C'};
+  const grouped={};
+  rows.forEach(r=>{const k=r.roleKey||'other';if(!grouped[k])grouped[k]=[];grouped[k].push(r);});
+  const rowH=16, headerH=22, colLabelH=18;
+  let matrixRows=0;
+  sectionOrder.forEach(k=>{if(grouped[k]&&grouped[k].length){matrixRows+=1;matrixRows+=grouped[k].length;}});
+  const tblH=Math.max(50,30+colLabelH+matrixRows*rowH);
+  const tbg=sGrp(svg,{transform:`translate(${cmX},${cmY})`});
+  sRect(tbg,{x:0,y:0,width:cmW,height:tblH,rx:6,fill:'#FFFFFF',stroke:'#E0E0E0','stroke-width':1});
+  sText(tbg,10,18,'Cable Connection Matrix',{'font-size':'13px',fill:'#1C1C1C','font-weight':'700'});
+  sText(tbg,cmW-10,18,`${rows.length} connections`,{fill:'#6F6F6F','font-size':'9px','text-anchor':'end'});
+  let ty=30;
+  sText(tbg,10,ty+10,'From → To',{fill:'#6F6F6F','font-size':'10px','font-weight':'600'});
+  sText(tbg,245,ty+10,'Rack Len',{fill:'#6F6F6F','font-size':'10px','text-anchor':'middle','font-weight':'600'});
+  sText(tbg,305,ty+10,'Selected',{fill:'#6F6F6F','font-size':'10px','text-anchor':'middle','font-weight':'600'});
+  sText(tbg,365,ty+10,'Fit?',{fill:'#6F6F6F','font-size':'10px','text-anchor':'middle','font-weight':'600'});
+  ty+=colLabelH;
+  let anyRows=false;
+  sectionOrder.forEach(secKey=>{
+    const secRows=grouped[secKey];
+    if(!secRows||!secRows.length) return;
+    anyRows=true;
+    sRect(tbg,{x:4,y:ty,width:cmW-8,height:headerH,rx:3,fill:sectionColors[secKey]||'#1C1C1C',opacity:0.1});
+    sLine(tbg,4,ty,12,ty,sectionColors[secKey]||'#1C1C1C',3);
+    sText(tbg,16,ty+14,sectionLabels[secKey]||secKey,{fill:sectionColors[secKey]||'#1C1C1C','font-size':'11px','font-weight':'700'});
+    const maxLen=Math.max(...secRows.map(r=>parseFloat(r.used)||0));
+    sText(tbg,cmW-14,ty+14,`${secRows.length} · max ${maxLen.toFixed(1)}m`,{fill:'#6F6F6F','font-size':'10px','text-anchor':'end'});
+    ty+=headerH;
+    secRows.forEach(r=>{
+      const usedM=parseFloat(r.used)||0;
+      const exempt=r.roleKey==='power'||r.roleKey==='management';
+      const fits=exempt||usedM<=selectedLenM;
+      const lenClr=fits?'#0E6027':'#C62828';
+      sText(tbg,10,ty+11,`${r.from} → ${r.to}`,{fill:'#1C1C1C','font-size':'10px'});
+      sText(tbg,245,ty+11,r.used,{fill:exempt?'#6F6F6F':lenClr,'font-size':'10px','text-anchor':'middle','font-weight':'700'});
+      sText(tbg,305,ty+11,r.selected,{fill:'#1C1C1C','font-size':'10px','text-anchor':'middle'});
+      const fitIcon=exempt?'—':fits?'✓':'✗';
+      const fitClr=exempt?'#6F6F6F':fits?'#0E6027':'#C62828';
+      sText(tbg,365,ty+11,fitIcon,{fill:fitClr,'font-size':'12px','text-anchor':'middle','font-weight':'700'});
+      if(!fits) sRect(tbg,{x:4,y:ty,width:cmW-8,height:rowH,rx:2,fill:'#FEE2E2',opacity:0.3});
+      ty+=rowH;
+    });
+  });
+  if(!anyRows){
+    sText(tbg,10,ty+14,'No cables connected yet. Click Auto-Cable or drag between ports.',{fill:'#6F6F6F','font-size':'11px'});
+    ty+=24;
+  }
+  const finalTblH=ty+8;
+  tbg.querySelector('rect').setAttribute('height',finalTblH);
+  cmY+=finalTblH;
+
+  const totalH=Math.max(Y+pad, cmY+pad)+24;
+  const contentLeft=Math.min(0,leftPduX-26,pad-20);
+  const contentRight=Math.max(W,cmX+cmW+30,rightPduX+pduW+26);
+  const totalW=contentRight-contentLeft;
+  svg.setAttribute('viewBox',`${contentLeft} 0 ${totalW} ${totalH}`);
+  svg.style.width=totalW+'px'; svg.style.height=totalH+'px';
+}
+
+function buildCableInventory(){
+  const dist=q('s-dist')?q('s-dist').value:'In-cabinet';
+  const feSpeed=q('s-fespeed')?q('s-fespeed').value:'25GbE';
+  const rule=CABLE_RULES.find(r=>r.dist===dist&&r.speed===feSpeed);
+  const sugLen=rule?rule.suggested:'1m';
+  const haPairs=hwCfg.haPairs;
+  const shelves=hwCfg.totalShelves||0;
+  const sw=hwCfg.sw||{};
+  const controllers=haPairs*2;
+
+  function countUsed(role){return cableConns.filter(c=>c.fromData?.role===role||c.toData?.role===role).length;}
+  function countUsedMulti(...roles){return cableConns.filter(c=>roles.includes(c.fromData?.role)||roles.includes(c.toData?.role)).length;}
+
+  let adapterHostPortsPerHA=0;
+  for(const row of [...document.querySelectorAll('#adapt-body tr')]){
+    const tp=row.querySelector('.at-type')?.value;
+    const qty=+(row.querySelector('.at-qty')?.value||0);
+    const cat=ADAPTER_CATALOG[tp]; if(!cat||!qty)continue;
+    if(tp.startsWith('Host')||tp==='FC 64G') adapterHostPortsPerHA+=qty*cat.ports;
+  }
+  const totalHostPorts=adapterHostPortsPerHA*haPairs;
+
+  const netUsed=countUsedMulti('network','host 25gbe','host 100gbe','host 200gbe','data');
+  const netDrops=Math.max(totalHostPorts,netUsed);
+  const stoUsed=countUsedMulti('storage','shelf sas');
+  const mgUsed=countUsed('management');
+  const swMgmtCount=2+((sw.needSwitch)?2:0);
+  const clUsed=sw.needSwitch?countUsed('cluster'):0;
+
+  const netapp=[];
+  if(sw.needSwitch){
+    netapp.push({label:`Cluster node-to-switch cable (QSFP28 ${sw.sugLen||sugLen})`,total:Math.max(sw.nodeToSwitchLinks||0,clUsed),used:clUsed,type:'cluster'});
+  }
+  netapp.push({label:'100GbE QSFP28 shelf cable',total:Math.max(shelves*4,stoUsed),used:stoUsed,type:'shelf'});
+  netapp.push({label:'Management RJ45 cable',total:Math.max(controllers+swMgmtCount,mgUsed),used:mgUsed,type:'mgmt'});
+  const switchCount=sw.needSwitch?sw.pairCount*2:0;
+  const custSwitchCount=2;
+  const pwrCordTotal=(controllers+shelves+switchCount+custSwitchCount)*2;
+  netapp.push({label:'C13-C14 power cord (dual-feed)',total:pwrCordTotal,used:pwrCordTotal,type:'power'});
+
+  const customer=[];
+  const mediaLabel=feSpeed==='25GbE'?'SFP28':'QSFP28';
+  customer.push({label:`Network drops to customer switch (${feSpeed})`,total:netDrops,used:netUsed,type:'host',note:'Customer-provided cables'});
+  customer.push({label:`Switch ports required (${feSpeed})`,total:netDrops,used:netUsed,type:'host',note:'Ports on customer ToR switches'});
+
+  const optics=[];
+  optics.push({label:`${feSpeed} ${mediaLabel} — controller side (NetApp)`,total:netDrops,used:netUsed,type:'host',scope:'netapp',note:'Installed by NetApp on controller data ports'});
+  optics.push({label:`${feSpeed} ${mediaLabel} — switch side (Customer)`,total:netDrops,used:netUsed,type:'host',scope:'customer',note:'Required on customer switch ports'});
+  if(sw.needSwitch){
+    const clTotal=Math.max(sw.nodeToSwitchLinks||0,clUsed);
+    optics.push({label:`100GbE QSFP28 — cluster switch (NetApp)`,total:clTotal,used:clUsed,type:'cluster',scope:'netapp',note:'Pre-installed on cluster switch ports'});
+  }
+
+  return {netapp,customer,optics,summary:{
+    netapp_supplied_cables:{shelf_cables:Math.max(shelves*4,stoUsed),cluster_switch_cables:sw.needSwitch?Math.max(sw.nodeToSwitchLinks||0,clUsed):0,management_cables:Math.max(controllers+swMgmtCount,mgUsed),power_cords:pwrCordTotal},
+    customer_required:{network_drops:netDrops,switch_ports_required:netDrops,controller_side_optics_netapp:netDrops,switch_side_optics_customer:netDrops,customer_cables:'customer_scope'}
+  }};
+}
+
+function parseLenMeters(v){
+  const n=parseFloat(v||'0');
+  return isNaN(n)?0:n;
+}
+function getPortLabel(pd){
+  if(!pd) return 'Unknown';
+  if(pd.slot==='overhead') return `Overhead RJ45 Drop P${pd.port}`;
+  if(pd.ctrl==='sw') return pd.port===0?`${pd.slot} Mgmt`:`${pd.slot} P${pd.port}`;
+  if(pd.slot==='mgmt') return `HA${(pd.ha||0)+1} Ctrl ${pd.ctrl} Mgmt`;
+  if(pd.slot==='shelf') return `HA${(pd.ha||0)+1} Shelf IOM ${pd.ctrl} P${pd.port}`;
+  return `HA${(pd.ha||0)+1} Ctrl ${pd.ctrl} Slot ${pd.slot} P${pd.port}`;
+}
+function findRackItem(portData){
+  if(!portData||!rackItems.length) return null;
+  const d=portData;
+  if(d.ctrl==='sw'){
+    const slotId=(d.slot||'').toLowerCase();
+    if(slotId.indexOf('customer-switch-a')>=0) return rackItems.find(r=>r.id==='cust-sw-a');
+    if(slotId.indexOf('customer-switch-b')>=0) return rackItems.find(r=>r.id==='cust-sw-b');
+    if(slotId.indexOf('cluster-a')>=0) return rackItems.find(r=>r.id==='cl-sw-a');
+    if(slotId.indexOf('cluster-b')>=0) return rackItems.find(r=>r.id==='cl-sw-b');
+    return null;
+  }
+  if(d.slot==='overhead'||d.slot==='patch') return null;
+  if(d.slot==='shelf'){
+    const shIdx=(d.port<=2?0:1);
+    const iomLetter=(d.ctrl||'A');
+    for(const ri of rackItems){
+      if(ri.type==='shelf'&&ri.ha===d.ha) return ri;
+    }
+    return null;
+  }
+  if(typeof d.ha==='number'&&d.ha>=0){
+    const cid=(d.ctrl||'A').toUpperCase();
+    return rackItems.find(r=>r.type==='controller'&&r.ha===d.ha&&r.id.endsWith('-'+cid.toLowerCase()));
+  }
+  return null;
+}
+
+function estLenMeters(conn){
+  const a=conn.fromData||{}, b=conn.toData||{};
+  const role=(a.role||b.role||'data').toLowerCase();
+
+  const riA=findRackItem(a), riB=findRackItem(b);
+  if(riA&&riB){
+    const cabDist=Math.abs((riA.cabIdx||0)-(riB.cabIdx||0));
+    const uDist=Math.abs(((riA.startU||0)+riA.ru/2)-((riB.startU||0)+riB.ru/2));
+    const vertM=uDist*0.045;
+    if(cabDist===0) return Math.max(0.5, Math.round((vertM+0.3)*10)/10);
+    const interCabM=cabDist*1.5;
+    return Math.round((interCabM+vertM)*10)/10;
+  }
+
+  if(role==='management') return (a.slot==='overhead'||b.slot==='overhead')?3.0:1.5;
+  if(role==='storage'||role==='shelf sas') return 1.0;
+  if(role==='cluster'){
+    const dist=q('s-swdist')?q('s-swdist').value:'In-cabinet';
+    if(dist==='Adjacent rack') return 5.0;
+    if(dist==='Same row') return 10.0;
+    return 1.0;
+  }
+  if(role==='network'||role.indexOf('host')===0||role==='data'){
+    const dist=q('s-dist')?q('s-dist').value:'In-cabinet';
+    if(dist==='Adjacent rack') return 5.0;
+    if(dist==='Same row') return 10.0;
+    return 1.0;
+  }
+  if(role==='power') return 1.0;
+  return 1.0;
+}
+function buildCableConnectionRows(){
+  const selectedLen=parseLenMeters(q('h-cable')?q('h-cable').value:'1m');
+  return cableConns.map((c,idx)=>{
+    const roleRaw=(c.fromData?.role||c.toData?.role||'data');
+    const role=normalizeCableRole(roleRaw);
+    const used=estLenMeters(c);
+    return{
+      idx:idx+1,
+      from:getPortLabel(c.fromData),
+      to:getPortLabel(c.toData),
+      role:roleRaw,
+      roleKey:role,
+      used:used.toFixed(1)+'m',
+      selected:(role==='power')?'n/a':(Math.max(selectedLen,used).toFixed(1)+'m'),
+      ok:true
+    };
+  }).filter(r=>cableRoleFilter==='all'||r.roleKey===cableRoleFilter);
+}
+
+function normalizeCableRole(role){
+  const r=String(role||'data').toLowerCase();
+  if(r==='management') return 'management';
+  if(r==='power') return 'power';
+  if(r==='cluster'||r==='isl') return 'cluster';
+  if(r==='storage'||r==='shelf sas') return 'storage';
+  if(r==='network'||r.indexOf('host')===0||r==='data') return 'network';
+  return 'other';
+}
+
+function showCableTip(e,conn){
+  let tip=q('cable-tip');
+  if(!tip){tip=document.createElement('div');tip.id='cable-tip';tip.className='ptip';q('cwrap').appendChild(tip);}
+  const row=buildCableConnectionRows().find(r=>r.from===getPortLabel(conn.fromData)&&r.to===getPortLabel(conn.toData))||{
+    from:getPortLabel(conn.fromData),to:getPortLabel(conn.toData),role:conn.fromData?.role||conn.toData?.role||'data',
+    used:estLenMeters(conn).toFixed(1)+'m',selected:(parseLenMeters(q('h-cable')?q('h-cable').value:'1m').toFixed(1)+'m'),ok:true
+  };
+  tip.innerHTML=`<div class="ptip-title">Cable Details</div>
+    <div class="ptip-row"><span>Role:</span><strong>${row.role}</strong></div>
+    <div class="ptip-row"><span>From:</span><strong>${row.from}</strong></div>
+    <div class="ptip-row"><span>To:</span><strong>${row.to}</strong></div>
+    <div class="ptip-row"><span>Used:</span><strong>${row.used}</strong></div>
+    <div class="ptip-row"><span>Selected:</span><strong>${row.selected}</strong></div>
+    <div class="ptip-row"><span>Compatibility:</span><strong style="color:#16a34a">✓ Compatible</strong></div>`;
+  const cw=q('cwrap'),cr=cw.getBoundingClientRect();
+  tip.style.left=Math.min(e.clientX-cr.left+12,cr.width-290)+'px';
+  tip.style.top=(e.clientY-cr.top-10)+'px';
+  tip.style.display='block';
+}
+function hideCableTip(){const tip=q('cable-tip');if(tip)tip.style.display='none';}
+
+/* ── AUTO-DEFAULT CABLING ── */
+function isNetworkRole(r){return r==='network'||r==='host 25gbe'||r==='host 100gbe'||r==='host 200gbe'||r==='data';}
+function isStorageRole(r){return r==='storage'||r==='shelf sas';}
+
+function autoDefaultCabling(){
+  cableConns=[];
+  if(!Object.keys(portElMap).length) renderSim();
+  const sw=hwCfg.sw||{};
+  let clSwPortA=1,clSwPortB=1;
+  let custSwPortA=1,custSwPortB=1;
+  let mgmtDropPort=1;
+
+  for(let ha=0;ha<hwCfg.haPairs;ha++){
+    for(const cid of ['A','B']){
+      const ctrlPorts=Object.values(portElMap).filter(p=>p&&p.data&&p.data.ha===ha&&p.data.ctrl===cid&&typeof p.data.slot==='number');
+
+      // --- Cluster ports → cluster switch ---
+      if(sw.needSwitch){
+        const swName=cid==='A'?'cisco-3636-cluster-a':'cisco-3636-cluster-b';
+        let swPort=cid==='A'?clSwPortA:clSwPortB;
+        const clPorts=ctrlPorts.filter(p=>p.data.role==='cluster');
+        for(const cp of clPorts){
+          const swPid=`${swName}-p${swPort}`;
+          if(portElMap[swPid]){
+            cableConns.push({from:cp.data.id,to:swPid,fromData:cp.data,toData:portElMap[swPid].data});
+            swPort++;
+          }
+        }
+        if(cid==='A')clSwPortA=swPort;else clSwPortB=swPort;
+      }
+
+      // --- Host / network ports → customer switch ---
+      const custSw=cid==='A'?'customer-switch-a':'customer-switch-b';
+      let custPort=cid==='A'?custSwPortA:custSwPortB;
+      const netPorts=ctrlPorts.filter(p=>isNetworkRole(p.data.role));
+      for(const np of netPorts){
+        const swPid=`${custSw}-p${custPort}`;
+        if(portElMap[swPid]){
+          cableConns.push({from:np.data.id,to:swPid,fromData:np.data,toData:portElMap[swPid].data});
+          custPort++;
+        }
+      }
+      if(cid==='A')custSwPortA=custPort;else custSwPortB=custPort;
+
+      // --- Shelf / storage ports → shelf IOM ports ---
+      const stoPorts=ctrlPorts.filter(p=>isStorageRole(p.data.role));
+      const haShelves=(hwCfg.shelvesPerHaPair&&hwCfg.shelvesPerHaPair[ha]!==undefined)?hwCfg.shelvesPerHaPair[ha]:hwCfg.shelvesPerHA;
+      if(stoPorts.length&&haShelves>0){
+        let sp=0;
+        for(let s=1;s<=haShelves;s++){
+          for(let pi=1;pi<=2;pi++){
+            const shelfPid=`ha${ha}-sh${s}-iom${cid}-p${pi}`;
+            if(!portElMap[shelfPid]) continue;
+            const ctrlPort=stoPorts[sp%stoPorts.length];
+            if(ctrlPort){
+              cableConns.push({from:ctrlPort.data.id,to:shelfPid,fromData:ctrlPort.data,toData:portElMap[shelfPid].data});
+              sp++;
+            }
+          }
+        }
+      }
+
+      // --- Controller management → overhead patch panel ---
+      const mgPid=`ha${ha}-${cid}-mgmt`;
+      const mgPort=portElMap[mgPid];
+      const ovPid=`overhead-mgmt-p${mgmtDropPort}`;
+      const ovPort=portElMap[ovPid];
+      if(mgPort&&ovPort){
+        cableConns.push({from:ovPid,to:mgPid,fromData:ovPort.data,toData:mgPort.data});
+        mgmtDropPort++;
+      }
+    }
+  }
+
+  // --- Switch management ports → overhead patch panel ---
+  const switchMgmtIds=['customer-switch-a-mgmt','customer-switch-b-mgmt'];
+  if(sw.needSwitch){
+    switchMgmtIds.push('cisco-3636-cluster-a-mgmt','cisco-3636-cluster-b-mgmt');
+  }
+  for(const smId of switchMgmtIds){
+    const smPort=portElMap[smId];
+    const ovPid=`overhead-mgmt-p${mgmtDropPort}`;
+    const ovPort=portElMap[ovPid];
+    if(smPort&&ovPort){
+      cableConns.push({from:ovPid,to:smId,fromData:ovPort.data,toData:smPort.data});
+      mgmtDropPort++;
+    }
+  }
+}
+
+/* ── RACK VIEW — drag-and-drop rack placement with RU markers ── */
+function renderRack(svg,m){
+  const c=hwCfg;
+  const cabU=cabConfig.height_u||42;
+  const pduW=22, equipGap=pduW+4;
+  const cabW=260+equipGap*2, cabH=Math.round(cabU*16.67), uH=cabH/cabU;
+
+  if(!rackItems.length) rackItems=buildDefaultRackItems();
+
+  // ── Cabinet spec header ──
+
+  const issues=checkCabinetCompat();
+  const specY=8;
+  const specG=sGrp(svg,{transform:`translate(60,${specY})`});
+  const specW=numCabs*(cabW+cabSpacing)+40;
+  const rackKit=q('h-rack')?q('h-rack').value:'4post';
+  const rackKitLabel=rackKit==='superrail'?'Super Rail':'4-Post Rail Kit';
+  const cabPwr=q('h-cabpwr')?q('h-cabpwr').value:'in';
+  const cabPwrLabel=cabPwr==='ext'?'External PDU':'In-Cabinet PDU';
+  const pwrType=q('h-pwr')?q('h-pwr').value:'titanium';
+  const pwrTypeLabel=pwrType==='dc'?'DC (-48V)':'Titanium (AC)';
+
+  const specBoxW=Math.max(specW,680);
+  sRect(specG,{x:0,y:0,width:specBoxW,height:82,rx:8,fill:'#FFFFFF',stroke:'#E0E0E0','stroke-width':1});
+  sRect(specG,{x:0,y:0,width:specBoxW,height:28,rx:8,fill:'#0067C5'});
+  sRect(specG,{x:0,y:14,width:specBoxW,height:14,fill:'#0067C5'});
+  sText(specG,14,19,'Cabinet Configuration — drag items between cabinets',{fill:'#FFFFFF','font-size':'13px','font-weight':'700'});
+  sText(specG,specBoxW-14,19,'Rack View',{fill:'rgba(255,255,255,0.75)','font-size':'11px','text-anchor':'end','font-weight':'600'});
+  sText(specG,14,46,`${cabConfig.height_u}U · ${cabConfig.width_mm}mm W × ${cabConfig.depth_mm}mm D · ${cabConfig.door.replace(/_/g,' ')} · Sides: ${cabConfig.side_panels?'Yes':'No'} · Cable entry: ${cabConfig.cable_entry}`,
+    {fill:'#4A4A4A','font-size':'11px'});
+  sText(specG,14,62,`Rail: 19" EIA (${rackKitLabel}) · Power: ${pwrTypeLabel} · PDU: ${cabPwrLabel} · Cabinets: ${numCabs} · Spacing: ${cabSpacing}mm`,
+    {fill:'#6F6F6F','font-size':'10px'});
+  if(issues.length){
+    const errCount=issues.filter(i=>i.sev==='error').length;
+    const warnCount=issues.filter(i=>i.sev==='warning').length;
+    const statusTxt=(errCount?errCount+' error(s)':'')+(errCount&&warnCount?', ':'')+(warnCount?warnCount+' warning(s)':'');
+    sText(specG,14,76,statusTxt,{fill:errCount?'#C62828':'#A85D00','font-size':'11px','font-weight':'600'});
+  }else{
+    sText(specG,14,76,'✓ All components compatible',{fill:'#0E6027','font-size':'11px','font-weight':'600'});
+  }
+
+  const rackTop=specY+106;
+  const cabs=[];
+  rackCabs=[];
+  for(let i=0;i<numCabs;i++){
+    const cx=60+i*(cabW+cabSpacing);
+    const cab={x:cx,y:rackTop,w:cabW,h:cabH,
+      ix:cx+16+equipGap, iy:rackTop+16, iw:cabW-32-equipGap*2, ih:cabH-32,
+      pduLx:cx+10, pduRx:cx+cabW-10-pduW, cabU, uH};
+    cabs.push(cab);
+    rackCabs.push(cab);
+    sRect(svg,{x:cab.x,y:cab.y,width:cab.w,height:cab.h,rx:6,fill:'url(#gC)',stroke:'#D0D0D0','stroke-width':1.5,filter:'url(#sh)'});
+    // RU number labels on left
+    for(let u=1;u<=cabU;u++){
+      const yy=cab.iy+cab.ih-u*uH;
+      if(u%5===0){
+        sText(svg,cab.ix-8,yy+uH/2+3,u,{fill:'#6F6F6F','font-size':'9px','font-family':'monospace','text-anchor':'end'});
+        sLine(svg,cab.ix-14,yy+uH,cab.ix-2,yy+uH,'#D0D0D0',0.5);
+      }else{
+        sLine(svg,cab.ix-6,yy+uH,cab.ix-2,yy+uH,'#333',0.3);
+      }
+    }
+    sText(svg,cab.x+cab.w/2,cab.y-8,`Cabinet ${i+1}`,{fill:'#1C1C1C','font-size':'12px','text-anchor':'middle','font-weight':'bold'});
+    // capacity label
+    const usedU=rackItems.filter(r=>r.cabIdx===i).reduce((s,r)=>s+r.ru,0);
+    const capClr=usedU>cabU?'#C62828':usedU>cabU*0.85?'#A85D00':'#0E6027';
+    sText(svg,cab.x+cab.w/2,cab.y+cab.h+14,`${usedU}/${cabU}U used · ${cabConfig.width_mm}×${cabConfig.depth_mm}mm`,{fill:capClr,'font-size':'10px','text-anchor':'middle','font-weight':'600'});
+    sText(svg,cab.x+cab.w/2,cab.y+cab.h+26,`${cabConfig.door.replace(/_/g,' ')} · Cable: ${cabConfig.cable_entry}`,{fill:'#666','font-size':'9px','text-anchor':'middle'});
+
+    const doorLabel=cabConfig.door==='no_front_no_rear'?'Open Frame':cabConfig.door==='perforated_front_solid_rear'?'Perf+Solid':'Perforated';
+    sRect(svg,{x:cab.x+4,y:cab.y+4,width:50,height:12,rx:2,fill:'#E8F1FC'});
+    sText(svg,cab.x+29,cab.y+13,doorLabel,{fill:'#0067C5','font-size':'8px','text-anchor':'middle','font-weight':'600'});
+    if(cabConfig.cable_entry==='top'||cabConfig.cable_entry==='both')
+      sRect(svg,{x:cab.x+cab.w/2-20,y:cab.y,width:40,height:4,rx:1,fill:'#0E6027',opacity:0.6});
+    if(cabConfig.cable_entry==='bottom'||cabConfig.cable_entry==='both')
+      sRect(svg,{x:cab.x+cab.w/2-20,y:cab.y+cab.h-4,width:40,height:4,rx:1,fill:'#0E6027',opacity:0.6});
+
+    // PDU strips
+    for(const side of ['A','B']){
+      const px=side==='A'?cab.pduLx:cab.pduRx;
+      sRect(svg,{x:px,y:cab.iy,width:pduW,height:cab.ih,rx:2,fill:'#FEF2F2',stroke:'#C62828','stroke-width':0.8});
+      sText(svg,px+pduW/2,cab.iy+12,`PDU ${side}`,{fill:'#C62828','font-size':'9px','text-anchor':'middle','font-weight':'700'});
+      const maxOutlets=Math.floor((cab.ih-20)/12);
+      for(let o=0;o<maxOutlets;o++){
+        sRect(svg,{x:px+3,y:cab.iy+20+o*12,width:pduW-6,height:10,rx:1,fill:'#FFFFFF',stroke:'#D0D0D0','stroke-width':0.3});
+      }
+    }
+  }
+
+  // ── Place rack items using stored positions ──
+  for(let idx=0;idx<rackItems.length;idx++){
+    const it=rackItems[idx];
+    if(it.cabIdx>=numCabs) it.cabIdx=numCabs-1;
+    const cab=cabs[it.cabIdx]; if(!cab)continue;
+    const yy=cab.iy+cab.ih-(it.startU+it.ru)*uH;
+    const bx=cab.ix+2, bw=cab.iw-4, bh=it.ru*uH-2;
+    const box={x:bx,y:yy,w:bw,h:bh};
+
+    // draggable group
+    const g=sGrp(svg,{transform:`translate(0,0)`,style:'cursor:grab','data-rack-idx':idx});
+    sRect(g,{x:bx,y:yy,width:bw,height:bh,rx:2,fill:it.fill,stroke:it.stroke,'stroke-width':1.2});
+    sRect(g,{x:bx,y:yy,width:bw,height:12,rx:1,fill:it.stroke,opacity:0.85});
+    sText(g,bx+bw/2,yy+10,it.label,{fill:'#fff','font-size':'10px','text-anchor':'middle','font-weight':'600'});
+
+    // RU badge
+    sRect(g,{x:bx+bw-28,y:yy+bh-14,width:26,height:12,rx:2,fill:'#FFFFFF',stroke:'#D0D0D0','stroke-width':0.5});
+    sText(g,bx+bw-15,yy+bh-5,`U${it.startU+1}`,{fill:'#6F6F6F','font-size':'9px','text-anchor':'middle'});
+
+    if(it.type==='controller'&&bh>20){
+      for(let p=0;p<4;p++) sRect(g,{x:bx+8+p*14,y:yy+18,width:10,height:Math.min(10,bh-22),rx:1,fill:p<2?'#48bb78':'#718096',stroke:'#222','stroke-width':0.4});
+      sRect(g,{x:bx+bw-42,y:yy+4,width:18,height:bh-8,rx:1,fill:'url(#gP)',stroke:'#222','stroke-width':0.4});
+      sRect(g,{x:bx+bw-22,y:yy+4,width:18,height:bh-8,rx:1,fill:'url(#gP)',stroke:'#222','stroke-width':0.4});
+    }
+    if(it.type==='shelf'&&bh>20){
+      const cols=12,dw=Math.floor((bw-8)/cols);
+      for(let d=0;d<24;d++){const dc=d%cols,dr=Math.floor(d/cols);
+        sRect(g,{x:bx+4+dc*dw,y:yy+14+dr*12,width:dw-1,height:Math.min(10,bh-18),rx:1,fill:d<(c.drivesPerShelf||24)?'#4a6741':'#1a1f26',stroke:'#333','stroke-width':0.2});}
+    }
+    // ── Drag event on group ──
+    g.addEventListener('mousedown',function(e){
+      if(simView!=='rack')return;
+      e.stopPropagation();
+      rackDrag={idx,startMouseX:e.clientX,startMouseY:e.clientY,origCab:it.cabIdx,origU:it.startU};
+      svg.style.cursor='grabbing';
+    });
+  }
+
+  // HA-pair grouping brackets
+  const drawnGroups=new Set();
+  for(const it of rackItems){
+    if(!it.group||drawnGroups.has(it.group))continue;
+    drawnGroups.add(it.group);
+    const members=rackItems.filter(o=>o.group===it.group);
+    if(members.length<2)continue;
+    const cab=cabs[members[0].cabIdx]; if(!cab)continue;
+    const allSameCab=members.every(m=>m.cabIdx===members[0].cabIdx);
+    if(!allSameCab)continue;
+    const minU=Math.min(...members.map(m=>m.startU));
+    const maxU=Math.max(...members.map(m=>m.startU+m.ru));
+    const gy=cab.iy+cab.ih-maxU*uH;
+    const gh=(maxU-minU)*uH;
+    sRect(svg,{x:cab.ix-1,y:gy-1,width:cab.iw+2,height:gh+2,rx:3,fill:'none',stroke:'#0067C5','stroke-width':2,'stroke-dasharray':'6,3',opacity:0.6});
+    const haLbl=members[0].ha!==undefined?getHaLabel(members[0].ha):'HA';
+    sText(svg,cab.ix+cab.iw+6,gy+gh/2+4,haLbl,{fill:'#0067C5','font-size':'10px','font-weight':'700'});
+  }
+
+  // U-grid overlay
+  for(let i=0;i<numCabs;i++){const cab=cabs[i];for(let u=0;u<cabU;u++){const yy=cab.iy+u*uH;
+    sRect(svg,{x:cab.ix,y:yy,width:cab.iw,height:uH,fill:'none',stroke:'#E0E0E0','stroke-width':0.15,rx:0.5});}}
+
+
+  // Inter-cabinet spacing
+  for(let i=0;i<numCabs-1;i++){const a=cabs[i],b=cabs[i+1];const my=a.y+a.h+28;
+    sLine(svg,a.x+a.w,my,b.x,my,'#0E6027',1,'4,3');
+    sText(svg,(a.x+a.w+b.x)/2,my-4,`${cabSpacing} mm`,{fill:'#A85D00','font-size':'9px','text-anchor':'middle','font-weight':'bold'});}
+
+  const totalW=numCabs*(cabW+cabSpacing)+120;
+  const totalH=rackTop+cabH+60;
+  svg.setAttribute('viewBox',`0 0 ${totalW} ${totalH}`);
+  svg.style.width=totalW+'px'; svg.style.height=totalH+'px';
+
+  updateConfigStatus();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PORT INTERACTION — DRAG & DROP CABLING
+   ═══════════════════════════════════════════════════════════════ */
+let dragFromPort=null;
+
+function onPortMouseDown(e,data,el){
+  if(simView!=='cabling'&&simView!=='back')return;
+  e.stopPropagation();
+  // Start drag
+  dragFromPort=data;
+  selPort=data.id;
+  el.classList.add('sel');
+  // Highlight compatible ports
+  for(const[pid,p]of Object.entries(portElMap)){
+    if(pid===data.id)continue;
+    if(isCompatible(data,p.data)) p.el.classList.add('compat');
+  }
+  // Create drag line
+  const svg=q('simsvg');
+  const r=el.getBoundingClientRect(), sr=svg.getBoundingClientRect();
+  const pz=getPanZoom();
+  const cx=(r.left+r.width/2-sr.left-pz.x)/pz.s;
+  const cy=(r.top+r.height/2-sr.top-pz.y)/pz.s;
+  dragLine=sLine(svg,cx,cy,cx,cy,'#f6e05e',2,'4,2');
+  dragLine.style.pointerEvents='none';
+}
+
+function finishDrag(e){
+  if(!dragFromPort||!dragLine)return;
+  const svg=q('simsvg');
+  // Find target port under cursor
+  const els=document.elementsFromPoint(e.clientX,e.clientY);
+  let target=null;
+  for(const el of els){
+    if(el.classList&&el.classList.contains('port-rect')&&el!==portElMap[dragFromPort.id]?.el){
+      try{ target=JSON.parse(el.getAttribute('data-port')); }catch(ex){}
+      break;
+    }
+  }
+  if(target&&isCompatible(dragFromPort,target)){
+    // Check if already connected
+    const exists=cableConns.some(c=>(c.from===dragFromPort.id&&c.to===target.id)||(c.from===target.id&&c.to===dragFromPort.id));
+    if(!exists){
+      cableConns.push({from:dragFromPort.id,to:target.id,fromData:dragFromPort,toData:target});
+      // Consume BOM
+      consumeBom(dragFromPort,target);
+    }
+  }
+  cancelDrag();
+  renderSim();
+}
+
+function cancelDrag(){
+  if(dragLine&&dragLine.parentNode)dragLine.parentNode.removeChild(dragLine);
+  dragLine=null; dragFromPort=null; selPort=null;
+  for(const p of Object.values(portElMap)){
+    p.el.classList.remove('sel','compat');
+  }
+}
+
+function isCompatible(a,b){
+  if(a.id===b.id)return false;
+  // Same media type can connect
+  if(a.media===b.media)return true;
+  // RJ45 can connect to RJ45
+  if(a.media==='RJ45'&&b.media==='RJ45')return true;
+  return false;
+}
+
+function consumeBom(from,to){
+  const media=from.media;
+  const ci=bomStock.findIndex(b=>b.media===media&&b.cat==='cable');
+  if(ci>=0) bomStock[ci].used++;
+  const pi=bomStock.findIndex(b=>b.media===media&&b.cat==='pluggable');
+  if(pi>=0) bomStock[pi].used+=2;
+  renderBomPanel();
+}
+
+let _drawCableGen=0;
+function drawExistingCables(svg){
+  const gen=++_drawCableGen;
+  const doDraw=()=>{
+    if(gen!==_drawCableGen)return;
+    const sr=svg.getBoundingClientRect();
+    if(sr.width===0||sr.height===0){
+      setTimeout(doDraw,80);
+      return;
+    }
+    const pz=getPanZoom();
+    for(const[pid,p]of Object.entries(portElMap)){
+      const r=p.el.getBoundingClientRect();
+      p.cx=(r.left+r.width/2-sr.left-pz.x)/pz.s;
+      p.cy=(r.top+r.height/2-sr.top-pz.y)/pz.s;
+    }
+    for(const c of cableConns){
+      const from=portElMap[c.from], to=portElMap[c.to];
+      if(!from||!to)continue;
+      if(isNaN(from.cx)||isNaN(from.cy)||isNaN(to.cx)||isNaN(to.cy))continue;
+      const role=c.fromData.role||c.toData.role||'data';
+      const roleKey=normalizeCableRole(role);
+      if(cableRoleFilter!=='all'&&roleKey!==cableRoleFilter) continue;
+      const clr=CABLE_COLORS[role]||'#8b949e';
+      const legEntry=CABLE_LEGEND.find(l=>l.role===role);
+      const dash=legEntry?legEntry.dash:'';
+      const dx=Math.abs(to.cx-from.cx)*0.4;
+      const d=`M${from.cx},${from.cy} C${from.cx+dx},${from.cy} ${to.cx-dx},${to.cy} ${to.cx},${to.cy}`;
+      const path=sPath(svg,d,clr,2.5,'cable-path');
+      if(dash) path.setAttribute('stroke-dasharray',dash);
+      path.setAttribute('stroke-linecap','round');
+      path.addEventListener('contextmenu',e=>{
+        e.preventDefault();
+        cableConns=cableConns.filter(cc=>cc!==c);
+        returnBom(c.fromData,c.toData);
+        renderSim();
+      });
+      path.addEventListener('mouseenter',()=>{path.setAttribute('stroke-width','4');path.setAttribute('opacity','1');});
+      path.addEventListener('mousemove',e=>showCableTip(e,c));
+      path.addEventListener('mouseleave',()=>{path.setAttribute('stroke-width','2.5');path.setAttribute('opacity','0.85');hideCableTip();});
+      path.setAttribute('opacity','0.85');
+    }
+  };
+  setTimeout(doDraw,60);
+}
+
+function returnBom(from,to){
+  const media=from.media;
+  const ci=bomStock.findIndex(b=>b.media===media&&b.cat==='cable');
+  if(ci>=0) bomStock[ci].used=Math.max(0,bomStock[ci].used-1);
+  const pi=bomStock.findIndex(b=>b.media===media&&b.cat==='pluggable');
+  if(pi>=0) bomStock[pi].used=Math.max(0,bomStock[pi].used-2);
+  renderBomPanel();
+}
+
+function getPanZoom(){
+  const svg=q('simsvg');
+  const t=svg.style.transform;
+  if(!t||t==='none')return{x:0,y:0,s:1};
+  const tm=t.match(/translate\(([-\d.]+)px[, ]+([-\d.]+)px\)/);
+  const sm=t.match(/scale\(([-\d.]+)\)/);
+  return{x:tm?+tm[1]:0,y:tm?+tm[2]:0,s:sm?+sm[1]:1};
+}
+
+/* ── PORT TOOLTIP ── */
+function showPortTip(e,data){
+  let tip=q('port-tip');
+  if(!tip){tip=document.createElement('div');tip.id='port-tip';tip.className='ptip';q('cwrap').appendChild(tip);}
+  const media=data.media, speed=data.speed, role=data.role;
+  const connCount=cableConns.filter(c=>c.from===data.id||c.to===data.id).length;
+  const available=bomStock.filter(b=>b.media===media&&b.cat==='cable').map(b=>`${b.part}: ${b.total-b.used} left`).join('<br>');
+  const sfpAvail=bomStock.filter(b=>b.media===media&&b.cat==='pluggable').map(b=>`${b.part}: ${b.total-b.used} left`).join('<br>');
+  tip.innerHTML=`<span class="ptip-close" onclick="hideTip()">✕</span>
+    <div class="ptip-title">${data.ctrl==='sw'?data.slot:('Ctrl '+data.ctrl+' Slot '+data.slot)} Port ${data.port}</div>
+    <div class="ptip-row"><span>Media:</span><strong>${media}</strong></div>
+    <div class="ptip-row"><span>Speed:</span><strong>${speed}</strong></div>
+    <div class="ptip-row"><span>Role:</span><strong style="color:${ROLE_CLR[role]||'#fff'}">${role}</strong></div>
+    <div class="ptip-row"><span>Connected:</span><strong>${connCount}</strong></div>
+    ${(simView==='cabling'||simView==='back')?`<hr style="border-color:#30363d;margin:6px 0">
+    <div style="font-size:10px;color:#8b949e">📦 Available from BOM:</div>
+    <div style="font-size:10px">${available||'—'}</div>
+    ${sfpAvail?`<div style="font-size:10px">${sfpAvail}</div>`:''}
+    <div style="font-size:10px;color:#f6ad55;margin-top:4px">↕ Drag to connect</div>`:''}`;
+  const cw=q('cwrap'),cr=cw.getBoundingClientRect();
+  tip.style.left=Math.min(e.clientX-cr.left+12,cr.width-270)+'px';
+  tip.style.top=(e.clientY-cr.top-10)+'px';
+  tip.style.display='block';
+}
+function hideTip(){const tip=q('port-tip');if(tip)tip.style.display='none';}
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB 3 — SITE REQUIREMENTS
+   ═══════════════════════════════════════════════════════════════ */
+(function buildTab3(){
+  q('sitePnl').innerHTML=`
+  <div style="display:flex;gap:16px;flex-wrap:wrap;padding:0 0 8px">
+    <div style="flex:1;min-width:320px;border:2px solid #0067C5;border-radius:8px;overflow:hidden">
+      <div style="background:#0067C5;color:#fff;padding:10px 16px;font-weight:700;font-size:16px">NetApp-Provided (Included in Keystone Subscription)</div>
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:14px">
+        <div class="src" id="sp-netapp" style="border:none;padding:0"><h3 style="color:#0067C5">Cabling &amp; Hardware</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-optics" style="border:none;padding:0"><h3 style="color:#0067C5">Optics / Transceivers (NetApp-Supplied)</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-det" style="border:none;padding:0"><h3 style="color:#0067C5">Component Breakdown</h3><div class="sb">—</div></div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:320px;border:2px solid #0E6027;border-radius:8px;overflow:hidden">
+      <div style="background:#0E6027;color:#fff;padding:10px 16px;font-weight:700;font-size:16px">Customer-Provided (Not Included in Subscription)</div>
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:14px">
+        <div class="src" id="sp-cust" style="border:none;padding:0"><h3 style="color:#0E6027">Network Connectivity</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-cust-optics" style="border:none;padding:0"><h3 style="color:#0E6027">Optics / Transceivers (Customer-Supplied)</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-cust-det" style="border:none;padding:0"><h3 style="color:#0E6027">Customer Equipment</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-pdu" style="border:none;padding:0"><h3 style="color:#0E6027">Power Distribution Unit (PDU)</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-pwr" style="border:none;padding:0"><h3 style="color:#0E6027">Power Draw</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-cool" style="border:none;padding:0"><h3 style="color:#0E6027">Cooling</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-ip" style="border:none;padding:0"><h3 style="color:#0E6027">IP Requirements</h3><div class="sb">—</div></div>
+        <div class="src" id="sp-vm" style="border:none;padding:0"><h3 style="color:#0E6027">Monitoring VMs</h3><div class="sb">—</div></div>
+      </div>
+    </div>
+  </div>`;
+})();
+
+function updateSite(){
+  if(!lastSizing)return;
+  const s=lastSizing,c=hwCfg,p=s.platform;
+  const drv=DRIVES.find(d=>d.tb===s.driveSize)||DRIVES[1];
+  const ctrlN=c.haPairs*2;
+  const shN=c.totalShelves||0;
+  const totalDrv=c.totalDrives||s.totalDrives;
+  const baseW=p.pwr?p.pwr.base:1000;
+  const ctTw=ctrlN*(baseW*0.65),ctMw=ctrlN*baseW;
+  const shelfW=p.pwr?p.pwr.shelf:250;
+  const shTw=shN*(shelfW*0.65),shMw=shN*shelfW;
+  const dTw=totalDrv*drv.tw,dMw=totalDrv*drv.mw;
+  const swN=c.sw&&c.sw.needSwitch?c.sw.pairCount*2:0;
+  const swW=swN*250;
+  const tTw=ctTw+shTw+dTw,tMw=ctMw+shMw+dMw+swW;
+
+  sc2('sp-pwr',`<table class="t"><tr><th></th><th>Typical</th><th>Max</th></tr>
+    <tr><td>Controllers (${ctrlN})</td><td>${ctTw} W</td><td>${ctMw} W</td></tr>
+    ${shN?`<tr><td>Shelves (${shN})</td><td>${shTw} W</td><td>${shMw} W</td></tr>`:''}
+    <tr><td>Drives (${totalDrv})</td><td>${dTw} W</td><td>${dMw} W</td></tr>
+    ${swN?`<tr><td>Switches (${swN})</td><td>${(swW*0.65).toFixed(0)} W</td><td>${swW} W</td></tr>`:''}
+    <tr class="tot"><td><strong>Total</strong></td><td><strong>${tTw} W (${(tTw/1000).toFixed(2)} kW)</strong></td><td><strong>${tMw} W (${(tMw/1000).toFixed(2)} kW)</strong></td></tr></table>`);
+
+  const bTw=tTw*3.412,bMw=tMw*3.412,tonT=bTw/12000,tonM=bMw/12000;
+  sc2('sp-cool',`<table class="t"><tr><th></th><th>Typical</th><th>Max</th></tr>
+    <tr><td>BTU/hr</td><td>${bTw.toFixed(0)}</td><td>${bMw.toFixed(0)}</td></tr>
+    <tr><td>Tons cooling</td><td>${tonT.toFixed(2)} tons</td><td>${tonM.toFixed(2)} tons</td></tr>
+    <tr class="tot"><td>+15% headroom</td><td>${(tonT*1.15).toFixed(2)} tons</td><td><strong>${(tonM*1.15).toFixed(2)} tons</strong></td></tr></table>
+    <p class="sn">1 kW ≈ 3,412 BTU/hr | 12k BTU/hr = 1 ton</p>`);
+
+  const custSw=2;
+  const pcw=tMw/numCabs,amps=pcw/208;
+  const ampsPerFeed=amps/2;
+  const feedsNeeded=Math.ceil(ampsPerFeed/24);
+  const pdusPerCab=Math.max(2,feedsNeeded*2);
+  const deviceCount=ctrlN+shN+swN+custSw;
+  const pwrCords=deviceCount*2;
+  const devBreakdown=[`${ctrlN} ctrl`];
+  if(shN) devBreakdown.push(`${shN} shelf`);
+  if(swN) devBreakdown.push(`${swN} cluster sw`);
+  devBreakdown.push(`${custSw} cust sw`);
+  sc2('sp-pdu',`<table class="t">
+    <tr><td>PDUs / cabinet (dual-feed A+B)</td><td><strong>${pdusPerCab}</strong> (${pdusPerCab/2}A + ${pdusPerCab/2}B)</td></tr>
+    <tr><td>Total PDUs required</td><td><strong>${pdusPerCab*numCabs}</strong> across ${numCabs} cabinet(s)</td></tr>
+    <tr><td>PDU outlets (C13/C14)</td><td><strong>${pwrCords} outlets</strong> across ${pdusPerCab*numCabs} PDUs</td></tr>
+    <tr><td>Devices</td><td>${deviceCount} (${devBreakdown.join(' + ')}) × dual PSU = ${pwrCords} C13-C14 connections</td></tr>
+    <tr><td>Max W / cabinet</td><td>${pcw.toFixed(0)} W</td></tr>
+    <tr><td>Amps @ 208V (total)</td><td>${amps.toFixed(1)} A</td></tr>
+    <tr><td>Amps / feed (A+B)</td><td>${ampsPerFeed.toFixed(1)} A per feed</td></tr>
+    </table>
+    <p class="sn">208V single-phase, dual-feed (A+B) for redundancy. PDUs must have C13/C14 receptacles.</p>`);
+
+  const sw=c.sw||{};
+  const swCount=sw.needSwitch?sw.pairCount*2:0;
+  const nodeCount=ctrlN;
+  const clusterCount=1;
+  const ips=[];
+  if(swCount>0) ips.push(['Switch Mgmt',IP_REQ.sw_mgmt*swCount,`1 per switch × ${swCount} switches`]);
+  ips.push(['SP / BMC',IP_REQ.sp_bmc*nodeCount,`1 per node × ${nodeCount} nodes`]);
+  ips.push(['Cluster Mgmt',IP_REQ.cluster_mgmt*clusterCount,`1 per cluster`]);
+  ips.push(['Node Mgmt',IP_REQ.node_mgmt*nodeCount,`1 per node × ${nodeCount} nodes`]);
+  const totalIP=ips.reduce((a,r)=>a+r[1],0);
+  sc2('sp-ip',`<table class="t"><tr><th>Role</th><th>IPs</th><th>Basis</th></tr>
+    ${ips.map(r=>`<tr><td>${r[0]}</td><td><strong>${r[1]}</strong></td><td style="font-size:12px;color:#6F6F6F">${r[2]}</td></tr>`).join('')}
+    <tr class="tot"><td><strong>Total</strong></td><td><strong>${totalIP}</strong></td><td></td></tr></table>
+    <p class="sn">IPs must be configured based on the hardware configuration above.</p>`);
+
+  const vms=[
+    ['Keystone Collector',VM_REQ.keystone_collector,'Metering & telemetry — required for all Keystone deployments']
+  ];
+  const totalVMs=vms.reduce((a,r)=>a+r[1],0);
+  sc2('sp-vm',`<table class="t"><tr><th>VM</th><th>Qty</th><th>Purpose</th></tr>
+    ${vms.map(r=>`<tr><td>${r[0]}</td><td><strong>${r[1]}</strong></td><td style="font-size:12px;color:#6F6F6F">${r[2]}</td></tr>`).join('')}
+    <tr class="tot"><td><strong>Total VMs</strong></td><td><strong>${totalVMs}</strong></td><td></td></tr></table>
+    <p class="sn">Monitoring VMs run on customer-provided infrastructure (VMware / KVM). Network connectivity to the NetApp cluster and internet egress required.</p>`);
+
+  // Build structured cable summary
+  const inv=buildCableInventory();
+  const summ=inv.summary;
+  const sw2=c.sw||{};
+  const feSpeed2=q('s-fespeed')?q('s-fespeed').value:'25GbE';
+  const mediaLabel2=feSpeed2==='25GbE'?'SFP28':'QSFP28';
+
+  // NetApp-supplied cabling (only show rows with qty > 0)
+  const naRows=[];
+  if(summ.netapp_supplied_cables.shelf_cables>0)
+    naRows.push({item:`100GbE QSFP28 shelf cables (controller ↔ shelf)`,qty:summ.netapp_supplied_cables.shelf_cables,note:`${shN} shelf(s) × 4 links each`});
+  if(sw2.needSwitch)
+    naRows.push({item:`Cluster switch cables (QSFP28 ${sw2.sugLen||'1m'})`,qty:summ.netapp_supplied_cables.cluster_switch_cables,note:`${ctrlN} nodes × 2 links + ${sw2.islLinks||0} ISL`});
+  naRows.push({item:'C13-C14 power cords (dual-feed)',qty:summ.netapp_supplied_cables.power_cords,note:`${deviceCount} devices × 2 feeds`});
+  sc2('sp-netapp',`<table class="t"><tr><th>Cable Type</th><th>Qty</th><th>Notes</th></tr>
+    ${naRows.filter(r=>r.qty>0).map(r=>`<tr><td>${r.item}</td><td><strong>${r.qty}</strong></td><td style="font-size:12px;color:#6F6F6F">${r.note}</td></tr>`).join('')}
+    </table>
+    <p class="sn" style="color:#0067C5;margin-top:8px">All items above are included in the NetApp Keystone subscription and installed by NetApp professional services.</p>`);
+
+  // Customer-provided network connectivity
+  const custReqs=[];
+  const perCtrl=ctrlN>0?Math.ceil(summ.customer_required.network_drops/ctrlN):0;
+  custReqs.push({item:`Network drops required (${feSpeed2})`,qty:`${summ.customer_required.network_drops} total (${perCtrl} per controller × ${ctrlN} controllers)`,
+    note:'Physical cable runs from NetApp controller data ports to customer ToR switches — customer-provided cables'});
+  custReqs.push({item:`Customer switch ports required (${feSpeed2})`,qty:summ.customer_required.switch_ports_required,
+    note:`Available ports on customer Top-of-Rack switches for ${ctrlN} controller connections`});
+  custReqs.push({item:'Top-of-Rack customer data switches',qty:2,
+    note:'Customer-provided data/network switches (paired for redundancy)'});
+  custReqs.push({item:'Network uplinks from ToR switches',qty:'As needed',
+    note:'Uplinks from customer ToR switches to the data center fabric'});
+  const clSwMgmt=sw2.needSwitch?swCount:0;
+  const custSwMgmt=custSw;
+  const mgmtPorts=ctrlN+clSwMgmt+custSwMgmt;
+  const mgmtParts=[`${ctrlN} controller BMC`];
+  if(clSwMgmt>0) mgmtParts.push(`${clSwMgmt} cluster switch mgmt`);
+  mgmtParts.push(`${custSwMgmt} customer switch mgmt`);
+  custReqs.push({item:'Management network switch port(s)',qty:mgmtPorts,note:mgmtParts.join(' + ')+' — customer management network'});
+  custReqs.push({item:'Management RJ45 cables',qty:summ.netapp_supplied_cables.management_cables,
+    note:`${ctrlN} controllers + ${clSwMgmt+custSwMgmt} switches to overhead patch panel`});
+  if(sw2.needSwitch&&sw2.islLinks>0){
+    custReqs.push({item:`ISL cables (${sw2.sugMedia||'QSFP28'}, ${sw2.sugLen||'1m'})`,qty:sw2.islLinks,
+      note:`Inter-switch link between cluster switch pair — ${sw2.perSwIslPorts} ports per switch`});
+  }
+  sc2('sp-cust',`<table class="t"><tr><th>Requirement</th><th>Qty</th><th>Details</th></tr>
+    ${custReqs.map(r=>`<tr><td>${r.item}</td><td><strong>${r.qty}</strong></td><td style="font-size:12px;color:#6F6F6F">${r.note}</td></tr>`).join('')}
+    </table>
+    <p class="sn" style="color:#0E6027;margin-top:8px">Customer must provide cables, switch ports, and uplinks. Cable length and media type must match the controller port requirements.</p>`);
+
+  // Optics — NetApp-provided
+  const naOpt=[];
+  naOpt.push({item:`${feSpeed2} ${mediaLabel2} transceivers — controller side`,qty:summ.customer_required.controller_side_optics_netapp,
+    note:'Pre-installed in controller data port slots — included with system'});
+  if(sw2.needSwitch){
+    naOpt.push({item:'100GbE QSFP28 — cluster switch side',qty:summ.netapp_supplied_cables.cluster_switch_cables,
+      note:'Pre-installed on Cisco cluster switch ports'});
+  }
+  if(sw2.needSwitch&&sw2.islLinks>0){
+    naOpt.push({item:'ISL transceivers (QSFP28)',qty:sw2.islLinks,
+      note:'Pre-installed for ISL ports (not required if DAC cables used)'});
+  }
+  sc2('sp-optics',`<table class="t"><tr><th>Optic / Transceiver</th><th>Qty</th><th>Notes</th></tr>
+    ${naOpt.filter(r=>r.qty>0).map(r=>`<tr><td>${r.item}</td><td><strong>${r.qty}</strong></td><td style="font-size:12px;color:#6F6F6F">${r.note}</td></tr>`).join('')}
+    </table>`);
+
+  // Optics — Customer-provided
+  const custOpt=[];
+  custOpt.push({item:`${feSpeed2} ${mediaLabel2} transceivers — customer switch side`,qty:summ.customer_required.switch_side_optics_customer,
+    note:'Must be installed on customer ToR switch ports — correct media type required'});
+  sc2('sp-cust-optics',`<table class="t"><tr><th>Optic / Transceiver</th><th>Qty</th><th>Notes</th></tr>
+    ${custOpt.filter(r=>r.qty>0).map(r=>`<tr><td>${r.item}</td><td><strong>${r.qty}</strong></td><td style="font-size:12px;color:#6F6F6F">${r.note}</td></tr>`).join('')}
+    </table>`);
+
+  const swRU=c.sw&&c.sw.switchRU?c.sw.switchRU:0;
+  const naRU=ctrlN*p.ctrl_ru+shN*2+swRU;
+  sc2('sp-det',`<table class="t"><tr><th>Component</th><th>Qty</th><th>RU</th><th>Notes</th></tr>
+    <tr><td>${p.model} Controller</td><td>${ctrlN}</td><td>${ctrlN*p.ctrl_ru}</td><td>${c.haPairs} HA pair(s)</td></tr>
+    ${shN?`<tr><td>NS224 Disk Shelf</td><td>${shN}</td><td>${shN*2}</td><td>24 bays each</td></tr>`:''}
+    <tr><td>Drives (${s.driveSize}TB)</td><td>${totalDrv}</td><td>—</td><td>${c.internalDrives} int + ${c.externalDrives} ext</td></tr>
+    ${swN?'<tr><td>Cluster Switch</td><td>'+swN+'</td><td>'+swRU+'</td><td>'+(c.sw?c.sw.sw.name:'')+'</td></tr>':''}
+    <tr class="tot"><td><strong>NetApp RU Total</strong></td><td></td><td><strong>${naRU}</strong></td><td>of ${numCabs*cabConfig.height_u} avail</td></tr></table>`);
+
+  const custSwRU=custSw*1;
+  sc2('sp-cust-det',`<table class="t"><tr><th>Component</th><th>Qty</th><th>RU</th><th>Notes</th></tr>
+    <tr><td>Top-of-Rack Customer Data Switch</td><td>${custSw}</td><td>${custSwRU}</td><td>Customer-provided network switches (paired for redundancy)</td></tr>
+    <tr class="tot"><td><strong>Customer RU Total</strong></td><td></td><td><strong>${custSwRU}</strong></td><td></td></tr></table>`);
+}
+function sc2(id,h){const el=q(id);if(el){const sb=el.querySelector('.sb');if(sb)sb.innerHTML=h;}}
+
+/* ═══════════════════════════════════════════════════════════════
+   SYNC BACK TO PARENT — update subscription context via postMessage
+   ═══════════════════════════════════════════════════════════════ */
+function syncBackToParent(r,instanceRuns,agg){
+  try{
+    const sw=r.sw||{};
+    const runs=instanceRuns&&instanceRuns.length?instanceRuns:[r];
+    const totals=agg||{
+      haPairs:r.haPairs,totalDrives:r.totalDrives,shelves:r.shelves,rawTB:r.raw_tb,committedTiB:r.committed_tib
+    };
+    const instanceSummaries=runs.map((ir,idx)=>{
+      const ic=instanceConfigs[idx]||{};
+      const ql=(quoteContext.instanceList||[])[idx]||{};
+      return{
+        index:idx,
+        label:ic.workloadLabel||('Instance '+(idx+1)),
+        workloadId:ql.workloadId||ic.workloadId||'',
+        psl:ic.psl||quoteContext.psl||'Premium',
+        protocol:ir.protocol,
+        platform:ir.platform?ir.platform.model:r.platform.model,
+        haPairs:ir.haPairs||1,
+        totalDrives:ir.totalDrives||0,
+        shelves:ir.shelves||0,
+        rawTB:ir.raw_tb||0,
+        capacityTiB:ir.committed_tib||0
+      };
+    });
+    const msg={
+      type:'hwConfigUpdate',
+      instanceIndex:currentInstanceIdx,
+      instanceCount:instanceConfigs.length,
+      capacityTiB:r.committed_tib,
+      protocol:r.protocol,
+      platform:r.platform.model,
+      haPairs:totals.haPairs,
+      totalDrives:totals.totalDrives,
+      shelves:totals.shelves,
+      rawTB:totals.rawTB,
+      capacityTiBTotal:totals.committedTiB,
+      instanceSummaries:instanceSummaries,
+      switchRequired:sw.switchRequired||'Not needed',
+      switchFamily:sw.sw?sw.sw.name:'',
+      switchPairCount:sw.pairCount||0,
+      switchPortsConsumed:sw.perSwConsumed||0,
+      switchPortsFree:sw.freePorts||0,
+      switchWatts:sw.switchWatts||0
+    };
+    if(window.parent&&window.parent!==window){
+      window.parent.postMessage(msg,'*');
+    }
+    sessionStorage.setItem('hwConfigResult',JSON.stringify(msg));
+  }catch(e){}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOAD QUOTE CONTEXT FROM PARENT (sessionStorage)
+   ═══════════════════════════════════════════════════════════════ */
+(function loadQuoteContext(){
+  try{
+    const raw=sessionStorage.getItem('hwConfigContext');
+    if(raw){
+      const ctx=JSON.parse(raw);
+      console.log('[HW-CFG] Loaded context from sessionStorage:',JSON.stringify(ctx,null,2));
+      if(ctx.psl) quoteContext.psl=ctx.psl;
+      if(ctx.capacityTiB) quoteContext.capacityTiB=ctx.capacityTiB;
+      if(ctx.instances) quoteContext.instances=Math.max(1,ctx.instances);
+      if(ctx.protocol) quoteContext.protocol=ctx.protocol;
+      if(ctx.instanceList) quoteContext.instanceList=ctx.instanceList;
+    }else{
+      console.warn('[HW-CFG] No hwConfigContext in sessionStorage — using defaults');
+    }
+  }catch(e){console.error('[HW-CFG] Error loading context:',e);}
+
+  initInstanceConfigs();
+  const ic=instanceConfigs[0]||quoteContext;
+
+  if(q('qc-psl')) q('qc-psl').textContent=ic.psl||quoteContext.psl;
+  if(q('qc-cap')) q('qc-cap').textContent=(ic.capacityTiB||quoteContext.capacityTiB)+' TiB';
+  if(q('qc-inst')) q('qc-inst').textContent=instanceConfigs.length;
+
+  if(q('s-proto')) q('s-proto').value=ic.protocol||quoteContext.protocol;
+  if(q('s-cap')){
+    q('s-cap').value=ic.capacityTiB||quoteContext.capacityTiB;
+    if(q('s-cap-num')) q('s-cap-num').value=ic.capacityTiB||quoteContext.capacityTiB;
+  }
+  ensureDefaultAdapterRows();
+  updateInstanceNav();
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   INITIAL CALCULATION
+   ═══════════════════════════════════════════════════════════════ */
+globalCalc();
+
+(function bindHwSizerFooterActions(){
+  function postToParent(type){
+    globalCalc();
+    try{
+      if(window.parent&&window.parent!==window){
+        window.parent.postMessage({type:type},'*');
+      }
+    }catch(e){}
+  }
+  const draft=q('btn-hw-save-draft');
+  if(draft)draft.addEventListener('click',function(){postToParent('hwSizerDraftSave');});
+  const appr=q('btn-hw-approve-return');
+  if(appr)appr.addEventListener('click',function(){postToParent('hwSizerApproveAndClose');});
+})();
+</script>
+</body>
+</html>

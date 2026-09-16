@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Quote 123 | Sizing</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="margin-analysis.css?v=20260421b">
+  <link rel="stylesheet" href="sizing.css?v=20260915c">
+</head>
+<body class="sizing-page quote-prototype">
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <a href="index.html" class="logo"><span class="logo-icon">N</span><span class="logo-text">Subscription Engine</span></a>
+    </div>
+    <div class="header-center">
+    </div>
+    <div class="header-right">
+      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Derek Keller (Sales)</span></div>
+      <button class="icon-btn" aria-label="Notifications">N</button>
+      <button class="icon-btn" aria-label="Help">?</button>
+      <div class="user-avatar">JD</div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <ul class="nav-list">
+      <li><a href="create-opportunity.html" class="nav-link">Opportunity</a></li>
+      <li><a href="sales-dashboard.html" class="nav-link">Sales dashboard</a></li>
+      <li><a href="sizing.html" class="nav-link active">Sizing</a></li>
+      <li><a href="staas-tco-npv.html" class="nav-link" style="color:#0067c5;font-weight:600;">STaaS TCO &amp; NPV</a></li>
+      <li><a href="deviations.html" class="nav-link">Feature requests</a></li>
+      <li><a href="index.html" class="nav-link">Deal dashboard</a></li>
+      <li><a href="margin-analysis.html" class="nav-link">Deal margin</a></li>
+      <li><a href="#" class="nav-link">Analytics</a></li>
+      <li><a href="#" class="nav-link">Projects</a></li>
+      <li><a href="#" class="nav-link">Settings</a></li>
+      <li><a href="#" class="nav-link">Billing</a></li>
+    </ul>
+  </nav>
+
+  <!-- Progress steps: 6 steps — Apply feature request = step 3 -->
+  <div class="progress-strip">
+    <div class="progress-steps">
+      <a href="create-opportunity.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Create an opportunity</span>
+      </a>
+      <a href="sales-dashboard.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Sales dashboard</span>
+      </a>
+      <a href="sizing.html" class="step active">
+        <span class="step-icon">3</span>
+        <span class="step-label">Create a quote</span>
+      </a>
+      <a href="deviations.html" class="step">
+        <span class="step-icon">4</span>
+        <span class="step-label">Apply feature request</span>
+      </a>
+      <a href="index.html" class="step">
+        <span class="step-icon">5</span>
+        <span class="step-label">Deal approval</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">6</span>
+        <span class="step-label">Site readiness</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">7</span>
+        <span class="step-label">Activate subscription</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="layout-wrapper">
+    <main class="main-content quote-prototype-main">
+      <div class="sizing-top-section">
+        <div class="sizing-title-row">
+          <div class="sizing-title-group">
+            <h1 class="page-title">Quote 123</h1>
+            <span class="sovereign-tag" id="sizing-sovereign-tag" hidden>Sovereign</span>
+          </div>
+          <div class="sizing-title-actions">
+            <button type="button" class="sizing-reset-link" id="btn-edit-submitted-quote" aria-label="Edit submitted quote" hidden>Edit</button>
+            <button type="button" class="sizing-reset-link" id="btn-reset-sizing" aria-label="Reset sizing to original state">Reset sizing</button>
+          </div>
+        </div>
+
+        <!-- Metadata / status card — same size, spacing, lining as Deal margin -->
+        <div class="metadata-card card">
+          <div class="meta-col status-col">
+            <div class="status-block">
+              <span class="status-dot draft" id="quote-status-dot"></span>
+              <div>
+                <span class="meta-label">Status</span>
+                <strong class="meta-value" id="quote-status-text">Draft</strong>
+                <div class="status-meta" id="quote-status-meta">Auto saved Dec 10, 2025, 2:36 PM MST</div>
+              </div>
+            </div>
+          </div>
+          <div class="meta-col meta-col-opportunity">
+            <span class="meta-label">Opportunity ID</span>
+            <span class="meta-value" id="meta-opportunity-id">3876523</span>
+          </div>
+          <div class="meta-col">
+            <span class="meta-label">Opportunity name</span>
+            <span class="meta-value" id="meta-opportunity-name">Enterprise Multi-Area</span>
+          </div>
+          <div class="meta-col">
+            <span class="meta-label">Customer</span>
+            <span class="meta-value"><a href="#" id="meta-customer-name">AUMOVIO Germany GmbH</a></span>
+            <span class="meta-link-tooltip-wrap">
+              <a href="#" class="meta-link" onclick="return false">View contact details</a>
+              <div class="meta-tooltip">
+                <p><strong>James Whitfield</strong></p>
+                <p>VP of Infrastructure</p>
+                <p>james.whitfield@megahostings.com</p>
+                <p>+1 (214) 555-0193</p>
+                <p>4200 Commerce St, Dallas, TX 75226</p>
+              </div>
+            </span>
+          </div>
+          <div class="meta-col">
+            <span class="meta-label">Sales motion</span>
+            <span class="meta-value" id="meta-sales-motion">Direct</span>
+          </div>
+          <div class="meta-col">
+            <span class="meta-label">Partner</span>
+            <span class="meta-value"><a href="#" id="meta-partner-name">Not applicable</a></span>
+            <span class="meta-link-tooltip-wrap">
+              <a href="#" class="meta-link" onclick="return false">View contact details</a>
+              <div class="meta-tooltip">
+                <p><strong>Sarah Chen</strong></p>
+                <p>Channel Account Manager</p>
+                <p>s.chen@arrowtechsolutions.com</p>
+                <p>+1 (408) 555-0247</p>
+                <p>1100 Innovation Way, San Jose, CA 95134</p>
+              </div>
+            </span>
+          </div>
+          <div class="meta-col">
+            <span class="meta-label">Distributor</span>
+            <span class="meta-value"><a href="#" id="meta-distributor-name">Not applicable</a></span>
+            <span class="meta-link-tooltip-wrap">
+              <a href="#" class="meta-link" onclick="return false">View contact details</a>
+              <div class="meta-tooltip">
+                <p><strong>Michael Torres</strong></p>
+                <p>Distribution Sales Lead</p>
+                <p>m.torres@techdata-dist.com</p>
+                <p>+1 (305) 555-0381</p>
+                <p>8700 NW 36th St, Miami, FL 33178</p>
+              </div>
+            </span>
+          </div>
+          <div class="meta-col meta-col-version">
+            <span class="meta-label">Keystone version</span>
+            <span class="meta-value" id="meta-keystone-version">3.0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quotes: list of quote tabs + Add quote / Duplicate (compact) -->
+      <div class="quote-tabs-wrap card quote-tabs-wrap-quotes-only" id="quote-and-tabs-row">
+        <div class="sizing-quote-tabs-wrap" id="opportunity-quotes-section" role="region" aria-label="Quotes in this opportunity">
+          <div class="sizing-quote-tabs" role="tablist" id="sizing-quote-tablist">
+            <button type="button" role="tab" class="sizing-quote-tab active" aria-selected="true" data-quote-id="42001" id="sizing-quote-tab-42001">Quote 42001</button>
+          </div>
+          <div class="quote-tabs-actions">
+            <button type="button" class="quote-tab-action-link" id="btn-add-quote" aria-label="Add new quote" hidden>Add quote</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="quote-prototype-columns">
+        <div class="quote-prototype-left">
+          <!-- 1) Contract terms (card-style options per screenshot) -->
+          <section class="quote-card card contract-terms-panel">
+            <h2 class="contract-terms-title">Contract terms</h2>
+            <p class="contract-terms-subtitle">Set contract length, billing frequency and deal customizations</p>
+            <div class="contract-terms-divider"></div>
+            <div class="contract-terms-group" role="radiogroup" aria-label="Contract length">
+              <span class="contract-terms-group-label">Contract length</span>
+              <div class="contract-terms-cards">
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="5" class="contract-terms-input">
+                  <span class="contract-terms-card-label">5 Years</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="4" class="contract-terms-input">
+                  <span class="contract-terms-card-label">4 Years</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card selected" tabindex="0" role="radio" aria-checked="true">
+                  <input type="radio" name="contract-length" value="3" checked class="contract-terms-input">
+                  <span class="contract-terms-card-label">3 Years</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="2" class="contract-terms-input">
+                  <span class="contract-terms-card-label">2 Years</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="1" class="contract-terms-input">
+                  <span class="contract-terms-card-label">1 Year</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="contract-length" value="custom" class="contract-terms-input">
+                  <span class="contract-terms-card-label">Custom</span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+            <div class="contract-terms-divider"></div>
+            <div class="contract-terms-group" role="radiogroup" aria-label="Billing frequency">
+              <span class="contract-terms-group-label">Billing frequency</span>
+              <div class="contract-terms-cards">
+                <label class="contract-terms-card contract-terms-card-with-helper selected" tabindex="0" role="radio" aria-checked="true">
+                  <input type="radio" name="billing-frequency" value="annually" checked class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Annually</span>
+                    <span class="contract-terms-card-helper">Billed annually</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card contract-terms-card-with-helper" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="billing-frequency" value="semi" class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Semi-annually</span>
+                    <span class="contract-terms-card-helper">Billed every 6 months</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card contract-terms-card-with-helper" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="billing-frequency" value="quarterly" class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Quarterly</span>
+                    <span class="contract-terms-card-helper">Billed every 3 months</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card contract-terms-card-with-helper" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="billing-frequency" value="monthly" class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Monthly</span>
+                    <span class="contract-terms-card-helper">Billed monthly</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+                <label class="contract-terms-card contract-terms-card-with-helper" tabindex="0" role="radio" aria-checked="false">
+                  <input type="radio" name="billing-frequency" value="custom" class="contract-terms-input">
+                  <span class="contract-terms-card-text">
+                    <span class="contract-terms-card-label">Custom</span>
+                    <span class="contract-terms-card-helper">Define a billing cycle</span>
+                  </span>
+                  <span class="contract-terms-radio" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+            <div class="contract-terms-divider"></div>
+            <div class="contract-terms-group contract-terms-group-auto-renew" role="radiogroup" aria-label="Auto renew">
+              <div class="contract-terms-auto-row">
+                <span class="contract-terms-group-label">Auto renew</span>
+                <div class="config-toggle-group config-toggle-group--sm contract-terms-auto-toggle" role="radiogroup" aria-label="Auto renew">
+                  <label class="config-toggle-opt"><input type="radio" name="auto-renewal" value="yes" checked> Yes</label>
+                  <label class="config-toggle-opt"><input type="radio" name="auto-renewal" value="no"> No</label>
+                </div>
+                <div class="contract-terms-auto-duration-wrap" id="auto-renewal-duration-wrap">
+                  <label class="contract-terms-duration-label" for="auto-renewal-duration">Auto renewal duration</label>
+                  <select class="quote-select-sm contract-terms-duration-select" id="auto-renewal-duration" name="auto-renewal-duration" aria-label="Auto renewal duration">
+                    <option value="12" selected>12 months</option>
+                    <option value="contract">Same as term length</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                  <span id="auto-renewal-term-years-msg" class="auto-renewal-term-years" hidden aria-live="polite"></span>
+                  <div id="auto-renewal-custom-wrap" class="contract-terms-auto-custom-wrap" hidden>
+                    <input type="number" id="auto-renewal-custom-value" class="contract-terms-auto-custom-input" min="1" max="120" value="12" aria-label="Custom renewal value">
+                    <select id="auto-renewal-custom-unit" class="quote-select-sm contract-terms-auto-custom-unit" aria-label="Unit">
+                      <option value="months">months</option>
+                      <option value="years">years</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2) Add workloads — contract-terms style -->
+          <section class="quote-card card add-workloads-card">
+            <h2 class="contract-terms-title">Add workloads <span class="quote-card-count" id="workload-count">(1/5 selected)</span></h2>
+            <p class="contract-terms-subtitle">Select one or more workloads to size your subscription</p>
+            <div class="contract-terms-divider"></div>
+
+            <div class="wl-workload-group" id="wl-panel-general">
+              <span class="contract-terms-group-label">General workloads</span>
+              <div class="quote-workload-tiles quote-workload-tiles-general">
+                <label class="quote-workload-tile" data-workload="mission-critical"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Mission critical (&lt; 1 ms)</span></label>
+                <label class="quote-workload-tile" data-workload="general-purpose"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">General purpose (2-4 ms)</span></label>
+                <label class="quote-workload-tile" data-workload="secondary"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Secondary (&gt; 5 ms)</span></label>
+              </div>
+            </div>
+
+            <div class="wl-workload-group" id="wl-panel-detailed">
+              <button type="button" class="wl-group-toggle" id="wl-app-toggle" aria-expanded="true" aria-controls="workload-tiles-wrap">
+                <span class="contract-terms-group-label">Application workloads</span>
+                <svg class="wl-group-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="quote-workload-tiles-wrap" id="workload-tiles-wrap">
+                <div class="quote-workload-tiles" id="workload-specific">
+                  <label class="quote-workload-tile" data-workload="ai-ml"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">AI / ML</span></label>
+                  <label class="quote-workload-tile" data-workload="hpc"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">HPC</span></label>
+                  <label class="quote-workload-tile" data-workload="inmem-db"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">In-memory DB</span></label>
+                  <label class="quote-workload-tile" data-workload="analytics"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Analytics</span></label>
+                  <label class="quote-workload-tile" data-workload="eda"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">EDA</span></label>
+                  <label class="quote-workload-tile" data-workload="oltp"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">OLTP</span></label>
+                  <label class="quote-workload-tile" data-workload="sap-hana"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">SAP HANA</span></label>
+                  <label class="quote-workload-tile" data-workload="oracle"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Oracle</span></label>
+                  <label class="quote-workload-tile" data-workload="mssql"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">MS SQL Server</span></label>
+                  <label class="quote-workload-tile" data-workload="epic"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">EPIC</span></label>
+                  <label class="quote-workload-tile" data-workload="olap"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">OLAP</span></label>
+                  <label class="quote-workload-tile" data-workload="iot"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">IoT</span></label>
+                  <label class="quote-workload-tile workload-tile-more" data-workload="containers"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Containers</span></label>
+                  <label class="quote-workload-tile workload-tile-more" data-workload="backup"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Backup</span></label>
+                  <label class="quote-workload-tile workload-tile-more" data-workload="archive"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Archive</span></label>
+                </div>
+                <button type="button" class="workload-expand-btn" id="workload-expand-btn" aria-expanded="false">Show more (<span id="workload-more-count">3</span>)</button>
+              </div>
+            </div>
+
+            <div class="wl-tab-panel" id="wl-panel-techrefresh" data-wl-panel="techrefresh" role="tabpanel" hidden>
+              <div class="tco-placeholder">
+                <svg class="tco-placeholder-icon" width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 14.3-4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M20 12a8 8 0 0 1-14.3 4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M16 7l2.3-.8.7-2.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 17l-2.3.8-.7 2.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <h3 class="tco-placeholder-title">Existing Configuration / Tech Refresh</h3>
+                <p class="tco-placeholder-desc">This feature is coming soon. Import an existing deployment configuration or plan a technology refresh with updated hardware and service levels.</p>
+                <span class="tco-placeholder-badge">Coming soon</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3) Configure workload requirements — one card per selected workload -->
+          <section class="config-workload-section" id="configure-workload-section">
+            <h2 class="config-workload-page-title">Configure workload requirements</h2>
+            <div class="config-workload-links-row" aria-label="Workload reference links">
+              <a href="#" id="rate-card-open-link">Rate card</a>
+              <span aria-hidden="true">|</span>
+              <a href="#" id="keystone-performance-levels-open-link">Keystone performance levels</a>
+              <span aria-hidden="true">|</span>
+              <a href="staas-tco-npv.html?view=new-workload" id="npv-viewer-open-link">NPV Viewer</a>
+            </div>
+            <div id="configure-workload-body">
+              <div id="configure-workload-cards" class="config-workload-cards-container"></div>
+              <div id="configure-workload-empty" class="config-workload-empty">
+                <p>Select one or more workloads above to configure them here.</p>
+              </div>
+            </div>
+
+          <!-- Inline forecasting panel (flips with workload config) -->
+          <div class="sizing-output-panel" id="sizing-output-panel" hidden>
+            <a href="#" id="back-to-config-link" class="forecasting-back-link">← Back to configuration</a>
+            <h2 class="quote-card-title">Forecasting</h2>
+            <p class="quote-card-desc">Capacity forecast and recommended Keystone sizing based on your workload configuration</p>
+
+            <div class="sizing-output-body">
+              <h3 class="sizing-output-section-label">Forecast capacity by year</h3>
+              <div class="sizing-output-table-wrap">
+                <table class="sizing-output-table" id="sizing-output-forecast-table">
+                  <thead>
+                    <tr>
+                      <th>Year</th>
+                      <th>Usable TiB</th>
+                      <th>Effective TiB</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sizing-output-forecast-body"></tbody>
+                </table>
+              </div>
+
+              <h3 class="sizing-output-section-label" style="margin-top:16px;">Recommended sizing</h3>
+              <div class="sizing-output-cards">
+                <div class="sizing-output-card sizing-output-card--keystone" id="sizing-out-card-usable" data-billing="usable">
+                  <div class="sizing-output-card-label">Keystone Usable</div>
+                  <div class="sizing-output-card-value" id="sizing-out-usable-min">—</div>
+                  <div class="sizing-output-card-hint">Recommended min billing</div>
+                  <div class="sizing-output-card-meta">
+                    <span>Burst: <strong id="sizing-out-usable-burst">—</strong></span>
+                    <span>Full capacity: <strong id="sizing-out-usable-full">—</strong></span>
+                  </div>
+                </div>
+                <div class="sizing-output-card sizing-output-card--keystone" id="sizing-out-card-effective" data-billing="effective">
+                  <div class="sizing-output-card-label">Keystone Effective</div>
+                  <div class="sizing-output-card-value" id="sizing-out-eff-min">—</div>
+                  <div class="sizing-output-card-hint">Recommended min billing</div>
+                  <div class="sizing-output-card-meta">
+                    <span>Burst: <strong id="sizing-out-eff-burst">—</strong></span>
+                    <span>Full capacity: <strong id="sizing-out-eff-full">—</strong></span>
+                  </div>
+                </div>
+                <div class="sizing-output-card sizing-output-card--eg1" id="sizing-out-card-eg1">
+                  <div class="sizing-output-card-label">Pure EG1 Effective</div>
+                  <div class="sizing-output-card-value" id="sizing-out-eg1-min">—</div>
+                  <div class="sizing-output-card-hint">Recommended min billing</div>
+                  <div class="sizing-output-card-meta">
+                    <span>Burst: <strong id="sizing-out-eg1-burst">—</strong></span>
+                    <span>Full capacity: <strong id="sizing-out-eg1-full">—</strong></span>
+                  </div>
+                </div>
+                <div class="sizing-output-card sizing-output-card--capex" id="sizing-out-card-capex">
+                  <div class="sizing-output-card-label">CAPEX Capacity</div>
+                  <div class="sizing-output-card-value" id="sizing-out-capex-min">—</div>
+                  <div class="sizing-output-card-hint">End-of-term usable demand</div>
+                  <div class="sizing-output-card-meta">
+                    <span>Usable TiB at end of contract</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Confirm bar removed: suggested capacity is now auto-populated -->
+
+              <div class="sizing-output-chart-section" style="margin-top:20px;">
+                <div class="sizing-output-chart-head">
+                  <h3 class="sizing-output-section-label" style="margin:0;">Forecast vs commit capacity</h3>
+                  <label class="sizing-output-chart-toggle">
+                    <input type="checkbox" id="sizingOutputChartToggle">
+                    <span>Show chart</span>
+                  </label>
+                </div>
+                <div id="sizingOutputChartBody" class="sizing-output-chart-body" style="display:none;">
+                  <p class="sizing-output-chart-hint">Year-end demand (bars) vs minimum billed commit (lines), in TiB.</p>
+                  <div class="sizing-output-chart-mode-btns" role="group" aria-label="Chart view mode">
+                    <button type="button" class="sizing-chart-mode-btn is-active" data-chart-mode="both">Both</button>
+                    <button type="button" class="sizing-chart-mode-btn" data-chart-mode="usable">Usable</button>
+                    <button type="button" class="sizing-chart-mode-btn" data-chart-mode="effective">Effective</button>
+                  </div>
+                  <div class="sizing-output-chart-wrap">
+                    <canvas id="sizingOutputCapChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <h3 class="sizing-output-section-label" style="margin-top:16px;">Capacity threshold timing</h3>
+              <div class="sizing-output-table-wrap">
+                <table class="sizing-output-table" id="sizing-output-timing-table">
+                  <thead>
+                    <tr>
+                      <th>Metric</th>
+                      <th>Usable</th>
+                      <th>Effective</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Month demand exceeds min billing</td>
+                      <td id="sizing-out-month-min-usable">—</td>
+                      <td id="sizing-out-month-min-eff">—</td>
+                    </tr>
+                    <tr>
+                      <td>Month demand exceeds burst capacity</td>
+                      <td id="sizing-out-month-burst-usable">—</td>
+                      <td id="sizing-out-month-burst-eff">—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="sizing-output-deeplink">
+                <a href="staas-tco-npv.html?view=new-workload" id="sizing-output-deeplink">Open full NPV &amp; TCO analysis →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- CAPEX comparison panel (flips with workload config, like forecast panel) -->
+          <div class="capex-financial-panel" id="capex-financial-panel" hidden>
+            <a href="#" id="back-from-capex-link" class="forecasting-back-link">← Back to configuration</a>
+            <h2 class="quote-card-title">Compare to CAPEX</h2>
+            <p class="quote-card-desc">CAPEX vs Keystone financial comparison based on your workload forecast</p>
+
+            <div class="capex-fin-body">
+
+              <div class="capex-fin-inputs-row">
+                <div class="capex-fin-input-group">
+                  <span class="capex-fin-input-label">CAPEX capacity</span>
+                  <span class="capex-fin-input-value" id="capex-fin-capacity">—</span>
+                </div>
+                <div class="capex-fin-input-group">
+                  <span class="capex-fin-input-label">Hardware / license</span>
+                  <span class="capex-fin-input-value" id="capex-fin-hw">—</span>
+                </div>
+                <div class="capex-fin-input-group">
+                  <span class="capex-fin-input-label">Term</span>
+                  <span class="capex-fin-input-value" id="capex-fin-term">—</span>
+                </div>
+              </div>
+
+              <div class="capex-fin-section-label">NPV comparison</div>
+              <div class="capex-fin-summary-grid">
+                <div class="capex-fin-summary-box capex-fin-box--capex">
+                  <div class="capex-fin-box-label">CAPEX NPV</div>
+                  <div class="capex-fin-box-value" id="capex-fin-npv-capex">—</div>
+                </div>
+                <div class="capex-fin-summary-box capex-fin-box--keystone">
+                  <div class="capex-fin-box-label">Keystone NPV</div>
+                  <div class="capex-fin-box-value" id="capex-fin-npv-keystone">—</div>
+                </div>
+              </div>
+
+              <div class="capex-fin-verdict" id="capex-fin-verdict">
+                <span id="capex-fin-verdict-icon">—</span>
+                <span id="capex-fin-verdict-text">Computing comparison…</span>
+              </div>
+
+              <div class="capex-fin-outcome-card">
+                <div class="capex-fin-outcome-title">Exec Summary</div>
+                <div class="capex-fin-outcome-summary" id="capex-fin-exec-summary">Run comparison to generate executive outcome.</div>
+                <div class="capex-fin-outcome-detail" id="capex-fin-exec-detail">Key KPIs will appear here: CAPEX total, Keystone total, threshold months, and winner by NPV.</div>
+              </div>
+
+              <div class="capex-fin-section-label">Cash flow and NPV charts</div>
+              <div class="capex-fin-chart-row">
+                <div class="capex-fin-chart-box">
+                  <h3>Cash flow by year</h3>
+                  <div class="capex-fin-chart-wrap">
+                    <canvas id="capexFinCashflowChart"></canvas>
+                  </div>
+                </div>
+                <div class="capex-fin-chart-box">
+                  <h3>NPV comparison</h3>
+                  <div class="capex-fin-chart-wrap">
+                    <canvas id="capexFinNpvChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <div class="capex-fin-costs-view">
+                <div class="capex-fin-section-label">Expected yearly costs</div>
+                <p class="capex-fin-costs-hint">CAPEX Year 0 includes hardware, installation, tax, and pre-paid maintenance. Years 1+ show datacenter only. Keystone shows annual subscription cost.</p>
+                <div class="capex-fin-table-wrap">
+                  <table class="capex-fin-data-table" id="capex-fin-yearly-table">
+                    <thead><tr><th>Year</th><th class="num">CAPEX</th><th class="num">Keystone</th></tr></thead>
+                    <tbody id="capex-fin-yearly-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="sizing-output-deeplink" style="margin-top:16px;">
+                <a href="staas-tco-npv.html?view=new-workload" id="capex-fin-deeplink">Open full NPV &amp; TCO analysis →</a>
+              </div>
+            </div>
+          </div>
+          </section>
+
+          <!-- 4) Subscription add-ons (quote-level) — card experience -->
+          <section class="quote-card card subscription-addons-section">
+            <h2 class="quote-card-title">Subscription add-ons</h2>
+            <p class="quote-card-desc">Optional services for Keystone subscriptions</p>
+            <div class="quote-addon-group">
+              <h4 class="quote-addon-category">Data resilience and optimization</h4>
+              <div class="quote-addon-cards">
+                <label class="addon-card">
+                  <input type="checkbox" class="addon-card-input" name="addon_subscription" value="advanced-protection" aria-label="Metro Cluster">
+                  <span class="addon-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.5-8 11-4.6-1.5-8-6-8-11V5l8-3zm0 4.2L8 7.7V11c0 3.5 2.2 6.8 4 7.8 1.8-1 4-4.3 4-7.8V7.7l-4-1.5z"/></svg>
+                  </span>
+                  <span class="addon-card-label">Metro Cluster</span>
+                  <span class="addon-card-desc">Blurb about product</span>
+                  <span class="addon-card-cost" id="adp-card-rate">$X.XX / TiB / month</span>
+                  <span class="addon-card-action">Add to quote</span>
+                </label>
+                <label class="addon-card">
+                  <input type="checkbox" class="addon-card-input" name="addon_subscription" value="tiering" aria-label="Data tiering">
+                  <span class="addon-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4v3l-9 4-9-4v-3z"/></svg>
+                  </span>
+                  <span class="addon-card-label">Data tiering</span>
+                  <span class="addon-card-desc">Blurb about product</span>
+                  <span class="addon-card-cost" id="tiering-card-rate">$XX.XX / TiB / month</span>
+                  <span class="addon-card-action">Add to quote</span>
+                </label>
+                <label class="addon-card">
+                  <input type="checkbox" class="addon-card-input" name="addon_subscription" value="dii" aria-label="Data infrastructure insights">
+                  <span class="addon-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M11 17h2v2h-2v-2zm0-12h2v10h-2V5zm-8 6a9 9 0 1118 0 9 9 0 01-18 0z"/></svg>
+                  </span>
+                  <span class="addon-card-label">Data infrastructure insights</span>
+                  <span class="addon-card-desc">Blurb about product</span>
+                  <span class="addon-card-cost" id="dii-card-rate">$0.18 – $2.00 / TiB / month</span>
+                  <span class="addon-card-action">Add to quote</span>
+                </label>
+              </div>
+            </div>
+            <div class="quote-addon-group">
+              <h4 class="quote-addon-category">Supplemental services</h4>
+              <div class="quote-addon-cards">
+                <label class="addon-card">
+                  <input type="checkbox" class="addon-card-input" name="addon_subscription" value="co-mingling" aria-label="Cluster Join">
+                  <span class="addon-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M7 7h6v6H7V7zm4 4h6v6h-6v-6z"/></svg>
+                  </span>
+                  <span class="addon-card-label">Cluster Join</span>
+                  <span class="addon-card-cost">$7,200 — one-time charge</span>
+                  <span class="addon-card-action">Add to quote</span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quote-level options (outside configuration) -->
+          <section class="quote-card card quote-level-options-section">
+            <h2 class="quote-card-title">Additional configs</h2>
+            <div class="quote-level-options">
+              <div class="quote-field-group">
+                <span class="quote-field-label">Site location</span>
+                <select class="quote-select-sm" name="deployment_location" aria-label="Deployment location">
+                  <option value="">— Select —</option>
+                  <option value="EU-Sovereign-Berlin">EU Sovereign — Berlin</option>
+                  <option value="Dark-Site-Frankfurt">Dark Site — Frankfurt</option>
+                  <option value="Site-Santa Clara">Site-Santa Clara</option>
+                  <option value="Dallas_FW">Dallas_FW</option>
+                  <option value="BRL">BRL</option>
+                  <option value="Vancouver_BC" selected>Vancouver_BC</option>
+                </select>
+              </div>
+              <div class="quote-field-group">
+                <span class="quote-field-label">Subscription type</span>
+                <select class="quote-select-sm" id="subscription-type" aria-label="Subscription type">
+                  <option value="USPS" selected>USPS</option>
+                  <option value="Non USPS">Non USPS</option>
+                  <option value="Sovereign">Sovereign</option>
+                </select>
+              </div>
+              <div class="quote-field-group">
+                <label class="quote-field-label" for="bill-to-address">Bill-to address</label>
+                <textarea class="quote-select-sm" id="bill-to-address" rows="2" placeholder="Street, City, State/Province, Country"></textarea>
+              </div>
+              <div class="quote-field-group">
+                <label class="quote-field-label" for="ship-to-address">Ship-to address</label>
+                <textarea class="quote-select-sm" id="ship-to-address" rows="2" placeholder="Street, City, State/Province, Country"></textarea>
+              </div>
+            </div>
+          </section>
+
+          </div>
+
+        <!-- Right sidebar: Quote (inspired by design — Itemization first, then Discounts, Cost) -->
+        <aside class="quote-prototype-sidebar">
+          <div class="quote-sidebar-card card" id="quote-sidebar-flip-card">
+            <h2 class="quote-sidebar-title">
+              <span class="quote-sidebar-title-main"><span class="quote-sidebar-icon" aria-hidden="true">Q</span> Quote</span>
+            </h2>
+
+            <div class="quote-sidebar-compare-wrap">
+              <!-- CAPEX column — auto-computed from forecast CAPEX capacity -->
+              <div class="quote-sidebar-capex-col" id="sidebar-capex-col">
+                <h3 class="quote-sidebar-col-heading">CAPEX (Buy)</h3>
+
+                <div class="capex-section">
+                  <h4 class="capex-section-title">Inputs (auto-derived)</h4>
+                  <div class="capex-row"><span class="capex-label">CAPEX capacity</span><span class="capex-value" id="capex-capacity">—</span></div>
+                  <div class="capex-row"><span class="capex-label">Hardware / license</span><span class="capex-value" id="capex-hw-cost">—</span></div>
+                  <div class="capex-row"><span class="capex-label">Tax rate</span><span class="capex-value" id="capex-tax-rate">10%</span></div>
+                  <div class="capex-row"><span class="capex-label">Installation / PS</span><span class="capex-value" id="capex-installation">$25,000</span></div>
+                  <div class="capex-row"><span class="capex-label">Upfront setup</span><span class="capex-value" id="capex-setup">$5,000</span></div>
+                  <div class="capex-row"><span class="capex-label">Maintenance / yr</span><span class="capex-value" id="capex-maintenance">$75,000</span></div>
+                  <div class="capex-row"><span class="capex-label">Datacenter / yr</span><span class="capex-value" id="capex-datacenter">$40,000</span></div>
+                  <div class="capex-row"><span class="capex-label">Success manager / yr</span><span class="capex-value" id="capex-success-mgr">$15,000</span></div>
+                </div>
+
+                <div class="capex-section capex-section--summary">
+                  <h4 class="capex-section-title">Financials</h4>
+                  <div class="capex-row"><span class="capex-label">Upfront (Year 0)</span><span class="capex-value" id="capex-year0">—</span></div>
+                  <div class="capex-row"><span class="capex-label">Annual ongoing</span><span class="capex-value" id="capex-annual-ongoing">—</span></div>
+                  <div class="capex-row capex-row--total"><span class="capex-label">CAPEX NPV</span><span class="capex-value" id="capex-npv">—</span></div>
+                  <div class="capex-row capex-row--total"><span class="capex-label">Keystone NPV</span><span class="capex-value" id="capex-keystone-npv">—</span></div>
+                </div>
+
+                <div class="capex-section">
+                  <div class="capex-verdict" id="capex-verdict"></div>
+                </div>
+              </div>
+
+              <!-- Keystone column (existing quote content) -->
+              <div class="quote-sidebar-keystone-col">
+
+            <div class="quote-sidebar-section quote-sidebar-hardware-view" id="sidebar-hardware-view" hidden>
+              <h3 class="quote-sidebar-section-title">Hardware details</h3>
+              <div id="hw-config-summary" class="hw-config-summary" role="region" aria-label="Hardware sizing summary" hidden></div>
+              <div class="quote-hardware-list" id="sidebar-hardware-list"></div>
+            </div>
+
+            <div class="quote-sidebar-section quote-sidebar-itemization">
+              <h3 class="quote-sidebar-section-title">Itemization</h3>
+              <div class="quote-empty-state" id="quote-itemization">
+                <div class="quote-empty-icon">Q</div>
+                <p class="quote-empty-title">Your quote is empty</p>
+                <p class="quote-empty-desc">Add workloads and select a performance plan, then add to quote.</p>
+              </div>
+              <div class="quote-itemization-list" id="quote-items-list" hidden></div>
+            </div>
+
+            <div class="quote-sidebar-section quote-sidebar-summary-compact" id="quote-sidebar-summary" hidden>
+              <h3 class="quote-sidebar-section-title">Summary</h3>
+              <div class="quote-selections-list" id="sidebar-selections"></div>
+            </div>
+
+            <div class="quote-sidebar-section quote-sidebar-deviations-section">
+              <h3 class="quote-sidebar-section-title">Feature requests</h3>
+              <div class="quote-input-row">
+                <label class="quote-field-label" for="sidebar-deviations">Add feature request</label>
+                <select class="quote-select-sm" id="sidebar-deviations" aria-label="Add or select feature request">
+                  <option value="">—</option>
+                  <optgroup label="Quote configuration">
+                    <option value="burst-80">Burst capacity to 80%</option>
+                    <option value="custom-term">Custom term length</option>
+                    <option value="custom-billing">Custom billing frequency</option>
+                    <option value="payment-terms">Flexible payment terms</option>
+                  </optgroup>
+                  <optgroup label="Deal margin impact">
+                    <option value="three-months-free">Three months free</option>
+                    <option value="one-month-free">One month free</option>
+                    <option value="discount-tier">Discount tier exception</option>
+                  </optgroup>
+                  <optgroup label="Legal language only">
+                    <option value="custom-sla">Custom SLA terms</option>
+                    <option value="legal-compliance">Legal / compliance clause</option>
+                    <option value="support-level">Premium support level (legal)</option>
+                  </optgroup>
+                  <option value="custom">Other</option>
+                </select>
+              </div>
+              <div class="sidebar-deviations-box" id="sidebar-deviations-box"></div>
+            </div>
+
+            <div class="quote-sidebar-section">
+              <h3 class="quote-sidebar-section-title">Pricing</h3>
+              <div class="quote-input-row quote-discount-rate-row">
+                <label class="quote-field-label" for="sidebar-discount-rate">Discount rate</label>
+                <div class="quote-inline-group">
+                  <input type="number" class="quote-input quote-input-pct" id="sidebar-discount-rate" min="0" max="100" value="0" placeholder="0" aria-label="Discount percentage">
+                  <span class="quote-input-suffix">%</span>
+                  <button type="button" class="quote-btn-apply" id="sidebar-discount-apply">Apply</button>
+                </div>
+              </div>
+              <p class="quote-discount-warning quote-discount-warning-hidden" id="sidebar-discount-warning" role="status">Discount rate requires approval</p>
+            </div>
+
+            <div class="quote-sidebar-section">
+              <h3 class="quote-sidebar-section-title">Cost</h3>
+              <div class="quote-input-row quote-currency-row">
+                <label class="quote-field-label">Currency</label>
+                <select class="quote-select-sm" id="sidebar-currency" aria-label="Currency"><option>USD</option><option>EUR</option></select>
+              </div>
+              <div class="quote-cost-breakdown">
+                <div class="quote-summary-row"><span class="quote-meta-label">Subtotal</span><span class="quote-summary-value" id="sidebar-subtotal">$0</span></div>
+                <div class="quote-summary-row" id="sidebar-row-adp" hidden><span class="quote-meta-label">Add-on: Adv. data protection</span><span class="quote-summary-value" id="sidebar-adp-value">$0</span></div>
+                <div class="quote-summary-row" id="sidebar-row-dt" hidden><span class="quote-meta-label">Add-on: Data tiering</span><span class="quote-summary-value" id="sidebar-dt-value">$0</span></div>
+                <div class="quote-summary-row" id="sidebar-row-dii" hidden><span class="quote-meta-label">Add-on: Data infra. insights</span><span class="quote-summary-value" id="sidebar-dii-value">$0</span></div>
+                <div class="quote-summary-row" id="sidebar-row-cj" hidden><span class="quote-meta-label">Add-on: Cluster Join (one-time)</span><span class="quote-summary-value" id="sidebar-cj-value">$7,200</span></div>
+                <div class="quote-summary-row"><span class="quote-meta-label">Monthly cost</span><span class="quote-summary-value" id="sidebar-monthly-cost">$0</span></div>
+                <div class="quote-summary-row"><span class="quote-meta-label">Per TiB / month</span><span class="quote-summary-value" id="sidebar-per-tib-month">$0</span></div>
+                <div class="quote-summary-row"><span class="quote-meta-label">Yearly cost</span><span class="quote-summary-value" id="sidebar-total-year">$0</span></div>
+                <div class="quote-summary-row quote-summary-row--negative" id="sidebar-row-deviations" hidden><span class="quote-meta-label">Feature requests</span><span class="quote-summary-value" id="sidebar-deviations-value">−$0</span></div>
+                <div class="quote-summary-row quote-summary-total"><span class="quote-meta-label">Total per year</span><span class="quote-summary-value" id="sidebar-total-year-final">$0</span></div>
+                <div class="quote-summary-row"><span class="quote-meta-label">Total contract price (before discount)</span><span class="quote-summary-value" id="sidebar-total-before-discount">$0</span></div>
+                <div class="quote-summary-row quote-summary-row--negative" id="sidebar-row-contract-discount" hidden><span class="quote-meta-label">Total contract discount</span><span class="quote-summary-value" id="sidebar-contract-discount-value">−$0</span></div>
+                <div class="quote-summary-row quote-summary-total quote-summary-contract-total"><span class="quote-meta-label">Total contract price (after discount)</span><span class="quote-summary-value" id="sidebar-total">$0</span></div>
+              </div>
+            </div>
+            <div class="quote-sidebar-actions">
+              <p class="quote-approval-notice quote-discount-warning-hidden" id="quote-approval-notice" role="status">Deal approved</p>
+              <p class="quote-send-notice quote-discount-warning-hidden" id="quote-send-notice" role="status"></p>
+              <button type="button" class="quote-btn-secondary" id="btn-download" disabled>Download</button>
+              <button type="button" class="quote-btn-secondary" id="btn-send-quote" disabled>Send quote to customer</button>
+              <button type="button" class="quote-btn-secondary" id="btn-review-hardware" disabled>Review and update HW configuration</button>
+              <button type="button" class="quote-btn-secondary" id="btn-copy-quote" aria-label="Duplicate quote (copy all configurations to a new quote)">Duplicate quote</button>
+              <button type="button" class="quote-btn-primary" id="btn-submit" disabled>Send for approval</button>
+            </div>
+
+              </div><!-- /quote-sidebar-keystone-col -->
+            </div><!-- /quote-sidebar-compare-wrap -->
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete quote confirmation modal -->
+  <div class="modal-overlay" id="delete-quote-modal" role="dialog" aria-labelledby="delete-quote-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="delete-quote-modal-title">Delete quote</h2>
+      <p class="modal-desc">This action will delete this quote. Are you sure?</p>
+      <div class="modal-actions">
+        <button type="button" class="quote-btn-secondary modal-btn-cancel" id="delete-quote-cancel">Cancel</button>
+        <button type="button" class="quote-btn-primary" id="delete-quote-confirm">Yes, delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add feature request modal (when "Other" is selected) -->
+  <div class="modal-overlay" id="add-deviation-modal" role="dialog" aria-labelledby="add-deviation-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="add-deviation-modal-title">Add feature request</h2>
+      <p class="modal-desc">Enter the details for your feature request. It will appear in the feature requests section below.</p>
+      <form id="add-deviation-form" class="modal-form">
+        <div class="modal-field">
+          <label for="add-deviation-opportunity">Opportunity ID</label>
+          <input type="text" id="add-deviation-opportunity" class="deviation-modal-input" value="OPP-123" readonly aria-readonly="true">
+        </div>
+        <div class="modal-field">
+          <label for="add-deviation-quote">Quote ID</label>
+          <input type="text" id="add-deviation-quote" class="deviation-modal-input" value="123" readonly aria-readonly="true">
+        </div>
+        <div class="modal-field">
+          <label for="add-deviation-select">Requested feature request</label>
+          <select id="add-deviation-select" class="quote-select-sm" aria-label="Select feature request type">
+            <option value="">— Select —</option>
+            <optgroup label="Quote configuration">
+              <option value="burst-80">Burst capacity to 80%</option>
+              <option value="custom-term">Custom term length</option>
+              <option value="custom-billing">Custom billing frequency</option>
+              <option value="payment-terms">Flexible payment terms</option>
+            </optgroup>
+            <optgroup label="Deal margin impact">
+              <option value="three-months-free">Three months free</option>
+              <option value="one-month-free">One month free</option>
+              <option value="discount-tier">Discount tier exception</option>
+            </optgroup>
+            <optgroup label="Legal language only">
+              <option value="custom-sla">Custom SLA terms</option>
+              <option value="legal-compliance">Legal / compliance clause</option>
+              <option value="support-level">Premium support level (legal)</option>
+            </optgroup>
+            <option value="custom">Other — describe below</option>
+          </select>
+        </div>
+        <div class="modal-field" id="add-deviation-custom-wrap" hidden>
+          <label for="add-deviation-description">Describe your feature request</label>
+          <textarea id="add-deviation-description" class="deviation-modal-textarea" rows="3" placeholder="Enter the feature request details..." aria-label="Feature request description"></textarea>
+        </div>
+        <div class="modal-field" id="add-deviation-legal-wrap" hidden>
+          <label for="add-deviation-legal-text">Legal language / text that will appear in the quote</label>
+          <textarea id="add-deviation-legal-text" class="deviation-modal-textarea" rows="5" placeholder="Enter the legal language or text to include in the quote..." aria-label="Legal language for quote"></textarea>
+        </div>
+        <div class="modal-field">
+          <label for="add-deviation-comment">Comment (optional)</label>
+          <textarea id="add-deviation-comment" class="deviation-modal-textarea" rows="2" placeholder="Additional notes..." aria-label="Comment"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="add-deviation-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary modal-btn-submit">Add feature request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom contract length modal -->
+  <div class="modal-overlay" id="custom-contract-length-modal" role="dialog" aria-labelledby="custom-contract-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="custom-contract-modal-title">Custom contract length</h2>
+      <form id="custom-contract-length-form" class="modal-form">
+        <div class="modal-field">
+          <label for="custom-contract-length-value">What is the custom length?</label>
+          <div class="modal-length-inputs">
+            <input type="number" id="custom-contract-length-value" name="custom_length_value" min="1" max="99" placeholder="e.g. 2" aria-label="Custom length number">
+            <select id="custom-contract-length-unit" name="custom_length_unit" aria-label="Custom length unit">
+              <option value="years">Years</option>
+              <option value="months">Months</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label for="custom-contract-justification">Justification</label>
+          <textarea id="custom-contract-justification" name="custom_justification" rows="4" placeholder="Enter justification for the custom contract length..." aria-label="Justification"></textarea>
+        </div>
+        <div class="modal-field modal-apply-to">
+          <label class="modal-apply-to-label">Apply to quotes</label>
+          <div class="modal-quote-checkboxes" id="custom-contract-quote-list"></div>
+          <button type="button" class="modal-link-select-all" id="custom-contract-select-all">Select all</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="custom-contract-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary modal-btn-submit">Apply to selected</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom burst modal -->
+  <div class="modal-overlay" id="custom-burst-modal" role="dialog" aria-labelledby="custom-burst-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="custom-burst-modal-title">Custom burst</h2>
+      <form id="custom-burst-form" class="modal-form">
+        <div class="modal-field">
+          <label for="custom-burst-value">Burst (%)</label>
+          <input type="number" id="custom-burst-value" name="custom_burst_value" min="0" max="100" placeholder="e.g. 75" aria-label="Custom burst percentage">
+        </div>
+        <div class="modal-field">
+          <label for="custom-burst-justification">Justification</label>
+          <textarea id="custom-burst-justification" name="custom_burst_justification" rows="4" placeholder="Enter justification for the custom burst..." aria-label="Justification"></textarea>
+        </div>
+        <div class="modal-field modal-apply-to">
+          <label class="modal-apply-to-label">Apply to quotes</label>
+          <div class="modal-quote-checkboxes" id="custom-burst-quote-list"></div>
+          <button type="button" class="modal-link-select-all" id="custom-burst-select-all">Select all</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="custom-burst-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary modal-btn-submit">Apply to selected</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Send quote modal -->
+  <div class="modal-overlay" id="send-quote-modal" role="dialog" aria-labelledby="send-quote-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="send-quote-modal-title">Send quote to customer</h2>
+      <p class="modal-desc">Send the approved quote details to the customer email address.</p>
+      <form id="send-quote-form" class="modal-form">
+        <div class="modal-field">
+          <label for="send-quote-email">Customer email</label>
+          <input type="email" id="send-quote-email" class="deviation-modal-input" placeholder="customer@example.com" required aria-label="Customer email">
+        </div>
+        <div class="modal-field">
+          <p class="modal-desc" style="font-size:0.88rem;margin:0;line-height:1.45">Keystone Console opens from <strong>Sales dashboard → My Quotes</strong> after the deal is approved: use <strong>Send email</strong> to notify the customer, then you are taken to Console in a full window (with a link back here).</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="send-quote-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary modal-btn-submit">Send quote</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Plan details modal -->
+  <div class="modal-overlay" id="plan-details-modal" role="dialog" aria-labelledby="plan-details-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="plan-details-title">Performance service level details</h2>
+      <div class="modal-desc" id="plan-details-body"></div>
+      <div class="modal-actions">
+        <button type="button" class="quote-btn-primary" id="plan-details-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="rate-card-modal" role="dialog" aria-labelledby="rate-card-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="rate-card-title">Rate card (50 TiB and 100 TiB)</h2>
+      <div class="modal-desc">
+        <table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e6e9ee;">Capacity</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e6e9ee;">Burst</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e6e9ee;">$/TiB/Month</th>
+              <th style="text-align:left; padding:8px; border-bottom:1px solid #e6e9ee;">$/TiB (Yearly)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:8px;">50 TiB</td><td style="padding:8px;">20%</td><td style="padding:8px;">$405.50</td><td style="padding:8px;">$4,866.00</td></tr>
+            <tr><td style="padding:8px;">50 TiB</td><td style="padding:8px;">40%</td><td style="padding:8px;">$433.89</td><td style="padding:8px;">$5,206.68</td></tr>
+            <tr><td style="padding:8px;">50 TiB</td><td style="padding:8px;">60%</td><td style="padding:8px;">$466.33</td><td style="padding:8px;">$5,595.96</td></tr>
+            <tr><td style="padding:8px;">100 TiB</td><td style="padding:8px;">20%</td><td style="padding:8px;">$226.27</td><td style="padding:8px;">$2,715.24</td></tr>
+            <tr><td style="padding:8px;">100 TiB</td><td style="padding:8px;">40%</td><td style="padding:8px;">$242.11</td><td style="padding:8px;">$2,905.32</td></tr>
+            <tr><td style="padding:8px;">100 TiB</td><td style="padding:8px;">60%</td><td style="padding:8px;">$260.21</td><td style="padding:8px;">$3,122.52</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="quote-btn-primary" id="rate-card-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="keystone-performance-levels-modal" role="dialog" aria-labelledby="keystone-performance-levels-title" aria-modal="true" hidden>
+    <div class="modal-dialog keystone-levels-modal-dialog">
+      <h2 class="modal-title" id="keystone-performance-levels-title">Keystone STaaS 3.0 performance levels (Section 2.3)</h2>
+      <div class="modal-desc keystone-levels-modal-content">
+        <p class="keystone-levels-source">Source: NetApp Keystone STaaS Service Description v3.0 (2025-06-30), Section 2.3(a).</p>
+
+        <h3 class="keystone-levels-section-title">(i) Unified</h3>
+        <div class="keystone-levels-meta-grid">
+          <div><strong>Data Storage Type</strong><span>Unified (ONTAP)</span></div>
+          <div><strong>Supported Protocols</strong><span>FC, iSCSI, NFS, NFSv4/RDMA, NVMe/FC, NVMe/TCP, SMB, S3</span></div>
+          <div><strong>Committed Capacity Increment</strong><span>25 TiB</span></div>
+          <div><strong>Committed/Metered Capacity Type</strong><span>Logical Capacity or Physical Capacity</span></div>
+        </div>
+        <table class="keystone-levels-table">
+          <thead>
+            <tr>
+              <th>Service level</th>
+              <th>Example workloads</th>
+              <th>Target 90th percentile latency</th>
+              <th>Target maximum IOPS</th>
+              <th>Target maximum GBps</th>
+              <th>Platform</th>
+              <th>Min committed capacity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Extreme</td><td>AI/ML, HPC, InMem DB</td><td>&lt;= 1ms</td><td>1M</td><td>40</td><td>AFF A-Series</td><td>50 TiB</td></tr>
+            <tr><td>Premium</td><td>Analytics, EDA, OLTP</td><td>&lt;= 1ms</td><td>550K</td><td>20</td><td>AFF A-Series</td><td>100 TiB</td></tr>
+            <tr><td>Standard</td><td>OLAP, IoT, Containers</td><td>&lt;= 4ms</td><td>500K</td><td>20</td><td>AFF C-Series</td><td>100 TiB</td></tr>
+            <tr><td>Value</td><td>Backup, Archive</td><td>&gt; 4ms</td><td>N/A</td><td>N/A</td><td>FAS</td><td>100 TiB</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="keystone-levels-section-title">(ii) Block Optimized</h3>
+        <div class="keystone-levels-meta-grid">
+          <div><strong>Data Storage Type</strong><span>Block Optimized (ONTAP)</span></div>
+          <div><strong>Supported Protocols</strong><span>NVMe/TCP, NVMe/FC, FC, iSCSI</span></div>
+          <div><strong>Committed Capacity Increment</strong><span>25 TiB</span></div>
+          <div><strong>Committed/Metered Capacity Type</strong><span>Logical Capacity or Physical Capacity</span></div>
+        </div>
+        <table class="keystone-levels-table">
+          <thead>
+            <tr>
+              <th>Service level</th>
+              <th>Example workloads</th>
+              <th>Target 90th percentile latency</th>
+              <th>Target maximum IOPS</th>
+              <th>Target maximum GBps</th>
+              <th>Platform</th>
+              <th>Min committed capacity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Extreme</td><td>SAP HANA, Oracle, MS SQL Server, EPIC</td><td>&lt;= 1ms</td><td>850K</td><td>65</td><td>ASA A-Series</td><td>50 TiB</td></tr>
+            <tr><td>Premium</td><td>SAP HANA, Oracle, MS SQL Server, EPIC</td><td>&lt;= 1ms</td><td>450K</td><td>25</td><td>ASA A-Series</td><td>50 TiB</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="keystone-levels-section-title">(iii) Object</h3>
+        <div class="keystone-levels-meta-grid">
+          <div><strong>Data Storage Type</strong><span>Object (StorageGrid)</span></div>
+          <div><strong>Supported Protocols</strong><span>S3</span></div>
+          <div><strong>Committed/Metered Capacity Type</strong><span>Physical Capacity</span></div>
+        </div>
+        <table class="keystone-levels-table">
+          <thead>
+            <tr>
+              <th>Service level</th>
+              <th>Platform</th>
+              <th>Min committed capacity per order</th>
+              <th>Committed capacity increase increment</th>
+              <th>Committed/metered capacity type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Standard</td><td>SGF6112</td><td>200 TiB</td><td>25 TiB</td><td>Physical Capacity</td></tr>
+            <tr><td>Value</td><td>SG6160</td><td>500 TiB</td><td>100 TiB</td><td>Physical Capacity</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="keystone-levels-section-title">(iv) Cloud Volumes ONTAP</h3>
+        <div class="keystone-levels-meta-grid">
+          <div><strong>Data Storage Type</strong><span>Cloud Volumes ONTAP</span></div>
+          <div><strong>Supported Protocols</strong><span>NFS, CIFS, iSCSI, S3 (AWS and Azure only)</span></div>
+          <div><strong>Platform</strong><span>CVO</span></div>
+          <div><strong>Min committed capacity per order</strong><span>4 TiB</span></div>
+          <div><strong>Capacity increase increment</strong><span>1 TiB</span></div>
+          <div><strong>Committed/Metered Capacity Type</strong><span>Logical Capacity</span></div>
+        </div>
+        <table class="keystone-levels-table">
+          <thead>
+            <tr>
+              <th>Data storage type</th>
+              <th>Supported protocols</th>
+              <th>Platform</th>
+              <th>Min committed capacity per order</th>
+              <th>Capacity increase increment</th>
+              <th>Committed/metered capacity type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Cloud Volumes ONTAP</td><td>NFS, CIFS, iSCSI, S3 (AWS and Azure only)</td><td>CVO</td><td>4 TiB</td><td>1 TiB</td><td>Logical Capacity</td></tr>
+          </tbody>
+        </table>
+        <p class="keystone-levels-footnote">* Target maximum IOPS and target maximum GBps are mutually exclusive targets.</p>
+        <p class="keystone-levels-footnote">** Actual performance may differ based on OS version, hardware, workload type, and simultaneity.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="quote-btn-primary" id="keystone-performance-levels-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div>
+      <p class="footer-copy">© 2025 Subscription Engine. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Custom billing frequency modal (embedded feature request) -->
+  <div class="modal-overlay" id="custom-billing-modal" role="dialog" aria-labelledby="custom-billing-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="custom-billing-modal-title">Custom billing frequency</h2>
+      <form id="custom-billing-form" class="modal-form">
+        <div class="modal-field">
+          <label for="custom-billing-interval">Billing interval</label>
+          <div class="modal-length-inputs">
+            <input type="number" id="custom-billing-interval" name="custom_billing_interval" min="1" max="24" placeholder="e.g. 4" aria-label="Interval number">
+            <select id="custom-billing-unit" name="custom_billing_unit" aria-label="Interval unit">
+              <option value="months">Months</option>
+              <option value="weeks">Weeks</option>
+            </select>
+          </div>
+          <span class="modal-field-hint">e.g. every 4 months</span>
+        </div>
+        <div class="modal-field">
+          <label for="custom-billing-justification">Justification</label>
+          <textarea id="custom-billing-justification" name="custom_billing_justification" rows="4" placeholder="Enter justification for the custom billing frequency..." aria-label="Justification"></textarea>
+        </div>
+        <div class="modal-field modal-apply-to">
+          <label class="modal-apply-to-label">Apply to quotes</label>
+          <div class="modal-quote-checkboxes" id="custom-billing-quote-list"></div>
+          <button type="button" class="modal-link-select-all" id="custom-billing-select-all">Select all</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="custom-billing-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary modal-btn-submit">Apply to selected</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Data Tiering capacity modal -->
+  <div class="modal-overlay" id="tiering-capacity-modal" role="dialog" aria-labelledby="tiering-capacity-modal-title" aria-modal="true" hidden>
+    <div class="modal-dialog">
+      <h2 class="modal-title" id="tiering-capacity-modal-title">Data tiering — committed capacity</h2>
+      <p class="modal-desc">Enter the committed capacity (TiB) you want data tiering on. The price per TiB/month is set by the capacity tier.</p>
+      <form id="tiering-capacity-form" class="modal-form">
+        <div class="modal-field">
+          <label class="modal-label" for="tiering-capacity-input">Committed capacity (TiB)</label>
+          <input type="number" id="tiering-capacity-input" class="deviation-modal-input" min="1" step="1" placeholder="e.g. 100">
+        </div>
+        <p id="tiering-capacity-rate-preview" style="margin:4px 0 8px;font-size:13px;color:#0067c5;font-weight:600;min-height:18px;"></p>
+        <div class="modal-field" style="background:#f5f7f9;border-radius:6px;padding:10px 12px;">
+          <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#555;">Rate tiers (per TiB / month)</p>
+          <table style="width:100%;font-size:12px;border-collapse:collapse;">
+            <thead><tr><th style="text-align:left;padding:2px 6px;color:#888;">Capacity</th><th style="text-align:right;padding:2px 6px;color:#888;">Rate</th></tr></thead>
+            <tbody>
+              <tr><td style="padding:2px 6px;">1 – 99 TiB</td><td style="text-align:right;padding:2px 6px;">$16.89 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">100 – 249 TiB</td><td style="text-align:right;padding:2px 6px;">$14.87 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">250 – 499 TiB</td><td style="text-align:right;padding:2px 6px;">$10.98 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">500 – 999 TiB</td><td style="text-align:right;padding:2px 6px;">$9.46 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">1,000+ TiB</td><td style="text-align:right;padding:2px 6px;">$8.45 / TiB / mo</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="quote-btn-secondary modal-btn-cancel" id="tiering-capacity-cancel">Cancel</button>
+          <button type="submit" class="quote-btn-primary modal-btn-submit" id="tiering-capacity-apply">Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <!-- HW Sizer fullscreen modal -->
+  <div id="hw-sizer-modal" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center">
+    <div style="position:relative;width:96vw;height:94vh;background:#fff;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,0.3);overflow:hidden;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;background:#fff;color:#1C1C1C;border-bottom:1px solid #E0E0E0;flex-shrink:0">
+        <span style="font-weight:700;font-size:15px">Hardware Configurator &amp; Simulator</span>
+        <button id="hw-sizer-close" style="background:none;border:none;color:#1C1C1C;font-size:22px;cursor:pointer;padding:0 6px;line-height:1" aria-label="Close">&times;</button>
+      </div>
+      <iframe id="hw-sizer-iframe" src="" style="flex:1;border:none;width:100%;height:100%"></iframe>
+    </div>
+  </div>
+
+  <!-- Keystone Console (prototype) fullscreen modal -->
+  <div id="console-module-modal" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center">
+    <div style="position:relative;width:96vw;height:94vh;background:#fff;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,0.3);overflow:hidden;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;background:#fff;color:#1C1C1C;border-bottom:1px solid #E0E0E0;flex-shrink:0;flex-wrap:wrap">
+        <span style="font-weight:700;font-size:15px">Keystone Console</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button type="button" id="console-module-email" class="quote-btn-secondary" style="font-size:13px;padding:6px 12px">Continue to email customer</button>
+          <button id="console-module-close" style="background:none;border:none;color:#1C1C1C;font-size:22px;cursor:pointer;padding:0 6px;line-height:1" aria-label="Close Console">&times;</button>
+        </div>
+      </div>
+      <iframe id="console-module-iframe" src="" title="Keystone Console" style="flex:1;border:none;width:100%;height:100%"></iframe>
+    </div>
+  </div>
+
+  <script src="persona-switcher.js"></script>
+  <script>
+  /* Offline Chart.js subset (canvas) — shared with TCO/NPV page */
+  (function () {
+    function moneyTick(v) {
+      if (typeof v !== 'number' || !Number.isFinite(v)) return String(v);
+      if (Math.abs(v) >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
+      if (Math.abs(v) >= 1e3) return '$' + (v / 1e3).toFixed(0) + 'K';
+      return '$' + Math.round(v);
+    }
+    function pickColor(spec, i) {
+      if (Array.isArray(spec)) return spec[i % spec.length] || '#888';
+      return spec || '#888';
+    }
+    function SimpleChart(canvas, config) {
+      this.canvas = typeof canvas === 'string' ? document.getElementById(canvas) : canvas;
+      this.ctx = this.canvas && this.canvas.getContext ? this.canvas.getContext('2d') : null;
+      this.config = config || {};
+      this.destroyed = false;
+      this._resizeTimer = null;
+      this._bound = this._onResize.bind(this);
+      if (this.config.options && this.config.options.responsive !== false) {
+        window.addEventListener('resize', this._bound);
+      }
+      this._draw();
+    }
+    SimpleChart.prototype._onResize = function () {
+      if (this._resizeTimer) clearTimeout(this._resizeTimer);
+      this._resizeTimer = setTimeout(function () { if (!this.destroyed) this._draw(); }.bind(this), 60);
+    };
+    SimpleChart.prototype.destroy = function () {
+      this.destroyed = true;
+      window.removeEventListener('resize', this._bound);
+      if (this.ctx && this.canvas) {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+    };
+    SimpleChart.prototype.toBase64Image = function (type, quality) {
+      if (!this.destroyed) this._draw();
+      return this.canvas.toDataURL(type || 'image/png', quality);
+    };
+    SimpleChart.prototype._draw = function () {
+      if (this.destroyed || !this.ctx || !this.canvas) return;
+      var cfg = this.config;
+      var fixed = cfg.options && cfg.options.responsive === false;
+      var dpr = Math.max(1, window.devicePixelRatio || 1);
+      var cssW, cssH;
+      if (fixed) {
+        cssW = this.canvas.width || 520;
+        cssH = this.canvas.height || 280;
+        dpr = 1;
+      } else {
+        cssW = this.canvas.clientWidth || (this.canvas.parentElement && this.canvas.parentElement.clientWidth) || 700;
+        cssH = this.canvas.clientHeight || 280;
+      }
+      if (cssW < 80) cssW = 700;
+      if (cssH < 40) cssH = 280;
+      if (!fixed) {
+        this.canvas.width = Math.floor(cssW * dpr);
+        this.canvas.height = Math.floor(cssH * dpr);
+      }
+      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.fillRect(0, 0, cssW, cssH);
+      var pls = cfg.plugins;
+      if (Array.isArray(pls)) {
+        var fake = { ctx: this.ctx, width: cssW, height: cssH };
+        pls.forEach(function (p) {
+          if (p && typeof p.beforeDraw === 'function') { try { p.beforeDraw(fake); } catch (e) {} }
+        });
+      }
+      this._drawVBar(cssW, cssH, cfg);
+    };
+    SimpleChart.prototype._drawVBar = function (cssW, cssH, cfg) {
+      var ctx = this.ctx;
+      var labels = cfg.data.labels || [];
+      var datasets = cfg.data.datasets || [];
+      var barDs = datasets.filter(function (d) { return d.type !== 'line'; });
+      var lineDs = datasets.filter(function (d) { return d.type === 'line'; });
+      var unifiedY = !!(cfg.options && cfg.options.unifiedY);
+      var padL = 52, padR = 10, padT = 16, padB = 44;
+      var plotW = cssW - padL - padR;
+      var plotH = cssH - padT - padB;
+      var maxY = 1;
+      barDs.forEach(function (ds) {
+        (ds.data || []).forEach(function (v) {
+          var n0 = Number(v);
+          if (Number.isFinite(n0)) maxY = Math.max(maxY, Math.abs(n0));
+        });
+      });
+      if (unifiedY && lineDs.length) {
+        lineDs.forEach(function (ds) {
+          (ds.data || []).forEach(function (v) {
+            if (v == null || v === '') return;
+            var n0 = Number(v);
+            if (Number.isFinite(n0)) maxY = Math.max(maxY, Math.abs(n0));
+          });
+        });
+      }
+      var maxCap = unifiedY ? maxY : 1;
+      if (!unifiedY && lineDs.length) {
+        lineDs.forEach(function (ds) {
+          (ds.data || []).forEach(function (v) {
+            if (v == null || v === '') return;
+            var n0 = Number(v);
+            if (Number.isFinite(n0)) maxCap = Math.max(maxCap, Math.abs(n0));
+          });
+        });
+      }
+      var lineScale = unifiedY ? maxY : maxCap;
+      var yTick = cfg.options && cfg.options.scales && cfg.options.scales.y && cfg.options.scales.y.ticks && cfg.options.scales.y.ticks.callback;
+      ctx.strokeStyle = 'rgba(48, 54, 61, 0.18)';
+      ctx.lineWidth = 1;
+      for (var g = 0; g <= 4; g++) {
+        var yy = padT + (plotH * g) / 4;
+        ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(padL + plotW, yy); ctx.stroke();
+      }
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px system-ui,sans-serif';
+      ctx.textAlign = 'right';
+      for (var g2 = 0; g2 <= 4; g2++) {
+        var yy2 = padT + (plotH * g2) / 4;
+        var val = maxY * (1 - g2 / 4);
+        var t = yTick ? yTick(val) : String(Math.round(val));
+        ctx.fillText(String(t), padL - 4, yy2 + 3);
+      }
+      var n = Math.max(1, labels.length);
+      var slotW = plotW / n;
+      var grp = barDs.length ? slotW * 0.8 : slotW;
+      var gap = barDs.length > 1 ? 2 : 0;
+      var barW = barDs.length ? (grp - gap * (barDs.length - 1)) / barDs.length : 6;
+      barDs.forEach(function (ds, j) {
+        for (var i = 0; i < n; i++) {
+          var v = Number(ds.data[i]) || 0;
+          var h = (v / maxY) * plotH;
+          var x0 = padL + i * slotW + (slotW - grp) / 2 + j * (barW + gap);
+          var y0 = padT + plotH - h;
+          ctx.fillStyle = pickColor(ds.backgroundColor, i);
+          ctx.strokeStyle = pickColor(ds.borderColor, i);
+          ctx.fillRect(x0, y0, Math.max(1, barW), h);
+          ctx.strokeRect(x0, y0, Math.max(1, barW), h);
+        }
+      });
+      lineDs.forEach(function (ds) {
+        ctx.strokeStyle = ds.borderColor || '#2e7d32';
+        ctx.lineWidth = ds.borderWidth || 2;
+        if (Array.isArray(ds.borderDash) && ds.borderDash.length) ctx.setLineDash(ds.borderDash);
+        else ctx.setLineDash([]);
+        ctx.beginPath();
+        var started = false;
+        for (var i = 0; i < n; i++) {
+          var raw = ds.data[i];
+          if (raw == null || raw === '') continue;
+          var v = Number(raw);
+          if (!Number.isFinite(v)) continue;
+          var x = padL + i * slotW + slotW / 2;
+          var y = padT + plotH - (v / lineScale) * plotH;
+          if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+        }
+        if (started) ctx.stroke();
+        ctx.setLineDash([]);
+        for (var i2 = 0; i2 < n; i2++) {
+          var raw2 = ds.data[i2];
+          if (raw2 == null || raw2 === '') continue;
+          var v2 = Number(raw2);
+          if (!Number.isFinite(v2)) continue;
+          var x2 = padL + i2 * slotW + slotW / 2;
+          var y2 = padT + plotH - (v2 / lineScale) * plotH;
+          ctx.fillStyle = ds.backgroundColor || ds.borderColor || '#2e7d32';
+          ctx.beginPath();
+          ctx.arc(x2, y2, ds.pointRadius || 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px system-ui,sans-serif';
+      ctx.textAlign = 'center';
+      for (var li = 0; li < n; li++) {
+        var lx = padL + li * slotW + slotW / 2;
+        var lab = String(labels[li] || '');
+        ctx.fillText(lab.length > 12 ? lab.slice(0, 11) + '…' : lab, lx, cssH - 12);
+      }
+      // Legend
+      var legendY = cssH - 30;
+      ctx.font = '10px system-ui,sans-serif';
+      ctx.textAlign = 'left';
+      var lx2 = padL;
+      datasets.forEach(function (ds) {
+        ctx.fillStyle = ds.borderColor || ds.backgroundColor || '#888';
+        if (ds.type === 'line') {
+          ctx.beginPath(); ctx.moveTo(lx2, legendY); ctx.lineTo(lx2 + 16, legendY);
+          ctx.strokeStyle = ds.borderColor || '#888'; ctx.lineWidth = 2;
+          if (Array.isArray(ds.borderDash) && ds.borderDash.length) ctx.setLineDash(ds.borderDash);
+          else ctx.setLineDash([]);
+          ctx.stroke(); ctx.setLineDash([]);
+        } else {
+          ctx.fillRect(lx2, legendY - 5, 12, 10);
+        }
+        lx2 += 18;
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(ds.label || '', lx2, legendY + 3);
+        lx2 += ctx.measureText(ds.label || '').width + 14;
+      });
+    };
+    window.Chart = function Chart(canvas, config) {
+      return new SimpleChart(canvas, config);
+    };
+  })();
+  </script>
+  <script src="sizing.js?v=20260915c"></script>
+  <script>
+  (function () {
+    var link = document.getElementById('npv-viewer-open-link');
+    if (!link) return;
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var params = new URLSearchParams();
+      params.set('view', 'new-workload');
+
+      // Contract length
+      var clEl = document.querySelector('input[name="contract-length"]:checked');
+      if (clEl && clEl.value !== 'custom') params.set('term', clEl.value);
+
+      // First selected workload config
+      var firstCard = document.querySelector('.config-workload-card');
+      if (firstCard) {
+        var wid = firstCard.dataset.workloadId;
+
+        // Used capacity
+        var capEl = document.getElementById('capacity-' + wid);
+        if (capEl && capEl.value) params.set('capacity', capEl.value);
+
+        // Storage efficiency ratio
+        var seEl = document.getElementById('storage-efficiency-' + wid);
+        if (seEl && seEl.value) params.set('se', seEl.value);
+
+        // Annual growth rate
+        var growthEl = document.getElementById('annual-growth-' + wid);
+        if (growthEl && growthEl.value) params.set('growth', growthEl.value);
+
+        // Burst
+        var burstEl = firstCard.querySelector('[data-workload-input="burst"]');
+        if (burstEl && burstEl.value && burstEl.value !== 'custom') params.set('burst', burstEl.value);
+
+        // Selected plan → service level + service type
+        var planCard = firstCard.querySelector('.config-plan-card.selected');
+        if (planCard) {
+          var planName = (planCard.dataset.planName || '').toLowerCase();
+          if (planName.indexOf('extreme') !== -1 || planName.indexOf('premium') !== -1) {
+            params.set('level', 'premium');
+          } else if (planName.indexOf('standard') !== -1) {
+            params.set('level', 'standard');
+          } else if (planName.indexOf('value') !== -1) {
+            params.set('level', 'value');
+          }
+          if (planName.indexOf('block') !== -1) {
+            params.set('stype', 'block');
+          } else if (planName.indexOf('object') !== -1) {
+            params.set('stype', 'object');
+          } else {
+            params.set('stype', 'unified');
+          }
+        }
+      }
+
+      if (typeof window._sizingSaveBeforeNpv === 'function') window._sizingSaveBeforeNpv();
+      window.location.href = 'staas-tco-npv.html?' + params.toString();
+    });
+  })();
+
+  // Save state before navigating to NPV via any deep link
+  (function () {
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest('a[href*="staas-tco-npv"]');
+      if (!link) return;
+      if (typeof window._sizingSaveBeforeNpv === 'function') window._sizingSaveBeforeNpv();
+    });
+  })();
+
+  // Forecasting flip toggle
+  (function () {
+    var backLink = document.getElementById('back-to-config-link');
+    var configBody = document.getElementById('configure-workload-body');
+    var linksRow = document.querySelector('.config-workload-links-row');
+    var forecastPanel = document.getElementById('sizing-output-panel');
+    if (!backLink || !configBody || !forecastPanel) return;
+
+    var sf = window._sizingForecast;
+
+    document.addEventListener('click', function (e) {
+      var viewBtn = e.target.closest('.config-view-forecasting');
+      if (viewBtn) {
+        e.preventDefault();
+        if (sf) {
+          sf.setConfirmed(false);
+          sf.setPendingBilling(null);
+          sf.render();
+        }
+        configBody.hidden = true;
+        if (linksRow) linksRow.hidden = true;
+        forecastPanel.hidden = false;
+      }
+    });
+
+    backLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      forecastPanel.hidden = true;
+      configBody.hidden = false;
+      if (linksRow) linksRow.hidden = false;
+    });
+
+    // Confirm button removed — suggested capacity is now auto-populated on the config page
+  })();
+
+  // CAPEX comparison panel flip toggle + render
+  (function () {
+    var backLink = document.getElementById('back-from-capex-link');
+    var configBody = document.getElementById('configure-workload-body');
+    var linksRow = document.querySelector('.config-workload-links-row');
+    var capexPanel = document.getElementById('capex-financial-panel');
+    var forecastPanel = document.getElementById('sizing-output-panel');
+    if (!backLink || !configBody || !capexPanel) return;
+
+    var capexCashflowChart = null;
+    var capexNpvBarChart = null;
+
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('.config-plan-compare-capex-btn') || e.target.closest('.config-capex-verdict-cta');
+      if (!btn) return;
+      e.preventDefault();
+      configBody.hidden = true;
+      if (linksRow) linksRow.hidden = true;
+      if (forecastPanel) forecastPanel.hidden = true;
+      capexPanel.hidden = false;
+      renderCapexFinancialPanel();
+    });
+
+    backLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      capexPanel.hidden = true;
+      configBody.hidden = false;
+      if (linksRow) linksRow.hidden = false;
+    });
+
+    function fmt(n) {
+      if (n == null || isNaN(n)) return '—';
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function renderCapexFinancialPanel() {
+      var api = window._capexFinApi;
+      if (!api) return;
+      var result = api.compute();
+      if (!result) {
+        clearCapexPanel();
+        return;
+      }
+
+      var d = result.defaults;
+      var termYears = result.termYears;
+      var hwLicense = result.hwLicense;
+      var capexCapTiB = result.capexCapTiB;
+      var planName = result.planName || '—';
+      var keystoneYearly = result.keystoneYearlyCost;
+
+      // Inputs row
+      var elCap = document.getElementById('capex-fin-capacity');
+      var elHw = document.getElementById('capex-fin-hw');
+      var elTerm = document.getElementById('capex-fin-term');
+      if (elCap) elCap.textContent = capexCapTiB + ' TiB';
+      if (elHw) elHw.textContent = fmt(hwLicense);
+      if (elTerm) elTerm.textContent = termYears + (termYears === 1 ? ' year' : ' years');
+
+      // CAPEX NPV calc (matches staas-tco-npv.html computeCapexNpv)
+      var acq = hwLicense + d.installation + d.setup + d.successManager;
+      var prePaidSupport = d.maintenance * termYears;
+      var acqGross = acq + prePaidSupport;
+      var acqWithTax = Math.round(acqGross * (1 + d.taxRate));
+      var annualOngoing = d.datacenter;
+      var discountRate = 0.12;
+
+      var capexNpv = acqWithTax;
+      for (var y = 1; y <= termYears; y++) {
+        capexNpv += annualOngoing / Math.pow(1 + discountRate, y);
+      }
+      capexNpv = Math.round(capexNpv);
+
+      // Keystone NPV
+      var keystoneNpv = 0;
+      for (var ky = 1; ky <= termYears; ky++) {
+        keystoneNpv += keystoneYearly / Math.pow(1 + discountRate, ky);
+      }
+      keystoneNpv = Math.round(keystoneNpv);
+
+      // NPV boxes
+      document.getElementById('capex-fin-npv-capex').textContent = fmt(capexNpv);
+      document.getElementById('capex-fin-npv-keystone').textContent = fmt(keystoneNpv);
+
+      // Verdict
+      var verdictEl = document.getElementById('capex-fin-verdict');
+      var verdictIcon = document.getElementById('capex-fin-verdict-icon');
+      var verdictText = document.getElementById('capex-fin-verdict-text');
+      var diff = capexNpv - keystoneNpv;
+      var pctSavings = capexNpv > 0 ? Math.round(Math.abs(diff) / Math.max(capexNpv, keystoneNpv) * 100) : 0;
+      if (keystoneNpv < capexNpv) {
+        verdictEl.className = 'capex-fin-verdict keystone-wins';
+        verdictIcon.textContent = '✓';
+        verdictText.innerHTML = '<strong>Keystone saves ' + fmt(Math.abs(diff)) + '</strong> (' + pctSavings + '% lower NPV over ' + termYears + ' yrs)';
+      } else if (capexNpv < keystoneNpv) {
+        verdictEl.className = 'capex-fin-verdict capex-wins';
+        verdictIcon.textContent = '✓';
+        verdictText.innerHTML = '<strong>CAPEX saves ' + fmt(Math.abs(diff)) + '</strong> (' + pctSavings + '% lower NPV over ' + termYears + ' yrs)';
+      } else {
+        verdictEl.className = 'capex-fin-verdict';
+        verdictIcon.textContent = '=';
+        verdictText.textContent = 'Both options have equal NPV';
+      }
+
+      // Exec Summary
+      var execSummary = document.getElementById('capex-fin-exec-summary');
+      var execDetail = document.getElementById('capex-fin-exec-detail');
+      var winner = keystoneNpv <= capexNpv ? 'Keystone' : 'CAPEX';
+      var savingsAmt = fmt(Math.abs(diff));
+      execSummary.textContent = winner + ' is the recommended option, saving ' + savingsAmt + ' in NPV over ' + termYears + ' years.';
+      execDetail.textContent = 'CAPEX total (Year 0): ' + fmt(acqWithTax) +
+        ' · Ongoing: ' + fmt(annualOngoing) + '/yr · CAPEX NPV: ' + fmt(capexNpv) +
+        ' · Keystone: ' + fmt(keystoneYearly) + '/yr · Keystone NPV: ' + fmt(keystoneNpv);
+
+      // Yearly cost table
+      var tbody = document.getElementById('capex-fin-yearly-body');
+      var rows = '';
+      var capexTotal = 0;
+      var keystoneTotal = 0;
+      for (var yr = 0; yr <= termYears; yr++) {
+        var capexCost = yr === 0 ? acqWithTax : annualOngoing;
+        var ksCost = yr === 0 ? 0 : keystoneYearly;
+        capexTotal += capexCost;
+        keystoneTotal += ksCost;
+        rows += '<tr><td>Year ' + yr + '</td><td class="num">' + fmt(capexCost) + '</td><td class="num">' + fmt(ksCost) + '</td></tr>';
+      }
+      rows += '<tr><td>Total</td><td class="num">' + fmt(capexTotal) + '</td><td class="num">' + fmt(keystoneTotal) + '</td></tr>';
+      tbody.innerHTML = rows;
+
+      // Build chart data
+      var yearLabels = [];
+      var capexData = [];
+      var keystoneData = [];
+      var capexCumNpvData = [];
+      var keystoneCumNpvData = [];
+      var capexCumNpv = 0;
+      var keystoneCumNpv = 0;
+      for (var cy = 0; cy <= termYears; cy++) {
+        yearLabels.push('Year ' + cy);
+        var cc = cy === 0 ? acqWithTax : annualOngoing;
+        var kc = cy === 0 ? 0 : keystoneYearly;
+        capexData.push(cc);
+        keystoneData.push(kc);
+        if (cy === 0) {
+          capexCumNpv = cc;
+          keystoneCumNpv = 0;
+        } else {
+          capexCumNpv += annualOngoing / Math.pow(1 + discountRate, cy);
+          keystoneCumNpv += keystoneYearly / Math.pow(1 + discountRate, cy);
+        }
+        capexCumNpvData.push(Math.round(capexCumNpv));
+        keystoneCumNpvData.push(Math.round(keystoneCumNpv));
+      }
+
+      // Cash flow chart
+      var cfCanvas = document.getElementById('capexFinCashflowChart');
+      if (cfCanvas && window.Chart) {
+        if (capexCashflowChart && capexCashflowChart.destroy) capexCashflowChart.destroy();
+        capexCashflowChart = new Chart(cfCanvas, {
+          type: 'bar',
+          data: {
+            labels: yearLabels,
+            datasets: [
+              { label: 'CAPEX', data: capexData, backgroundColor: 'rgba(25, 118, 210, 0.6)', borderColor: '#1976d2', borderWidth: 1 },
+              { label: 'Keystone', data: keystoneData, backgroundColor: 'rgba(63, 185, 80, 0.6)', borderColor: '#3fb950', borderWidth: 1 }
+            ]
+          },
+          options: { scales: { y: { beginAtZero: true } } }
+        });
+      }
+
+      // NPV comparison chart
+      var npvCanvas = document.getElementById('capexFinNpvChart');
+      if (npvCanvas && window.Chart) {
+        if (capexNpvBarChart && capexNpvBarChart.destroy) capexNpvBarChart.destroy();
+        capexNpvBarChart = new Chart(npvCanvas, {
+          type: 'bar',
+          data: {
+            labels: yearLabels,
+            datasets: [
+              { type: 'line', label: 'CAPEX cumulative NPV', data: capexCumNpvData, borderColor: '#1976d2', backgroundColor: 'transparent', borderWidth: 2, borderDash: [6, 3], pointRadius: 3, fill: false },
+              { type: 'line', label: 'Keystone cumulative NPV', data: keystoneCumNpvData, borderColor: '#3fb950', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, fill: false }
+            ]
+          },
+          options: { scales: { y: { beginAtZero: true } } }
+        });
+      }
+    }
+
+    function clearCapexPanel() {
+      ['capex-fin-capacity', 'capex-fin-hw', 'capex-fin-term', 'capex-fin-plan',
+       'capex-fin-npv-capex', 'capex-fin-npv-keystone'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = '—';
+      });
+      var verdict = document.getElementById('capex-fin-verdict');
+      if (verdict) { verdict.className = 'capex-fin-verdict'; }
+      var vText = document.getElementById('capex-fin-verdict-text');
+      if (vText) vText.textContent = 'No workload configuration available.';
+      var tbody = document.getElementById('capex-fin-yearly-body');
+      if (tbody) tbody.innerHTML = '';
+    }
+  })();
+  </script>
+  <script>
+  (function(){
+    document.querySelectorAll('.meta-link-tooltip-wrap').forEach(function(wrap){
+      var link = wrap.querySelector('.meta-link');
+      var tip = wrap.querySelector('.meta-tooltip');
+      if(!link||!tip) return;
+      var col = wrap.closest('.meta-col');
+      if(col){
+        var val = col.querySelector('.meta-value');
+        var txt = (val ? val.textContent : '').trim().toLowerCase();
+        if(!txt || txt === 'not applicable' || txt === 'n/a' || txt === '—' || txt === '-'){
+          wrap.style.display = 'none';
+          return;
+        }
+      }
+      wrap.addEventListener('mouseenter', function(){
+        var r = link.getBoundingClientRect();
+        tip.style.left = r.left + 'px';
+        tip.style.top = (r.bottom + 6) + 'px';
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

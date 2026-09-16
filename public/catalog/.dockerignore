@@ -1,0 +1,14 @@
+.git
+.gitignore
+.cursor
+.dockerignore
+Dockerfile
+docker-compose.yml
+node_modules
+console
+scripts
+package.json
+package-lock.json
+README-SUB-SIZER-BUNDLE.txt
+DEVIATIONS_EXPERIENCE.md
+*.zip

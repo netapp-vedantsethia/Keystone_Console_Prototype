@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote 123 | Deal Approval · Margin Analysis</title>
+  <link rel="stylesheet" href="../../margin-analysis.css">
+</head>
+<body class="margin-analysis-page">
+  <!-- Progress steps: 6 steps — Apply feature request = step 3 -->
+  <div class="progress-strip">
+    <div class="progress-steps">
+      <a href="../../create-opportunity.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Create an opportunity</span>
+      </a>
+      <a href="../../sizing.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Create a quote</span>
+      </a>
+      <a href="../../deviations.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Apply feature request</span>
+      </a>
+      <a href="../../index.html" class="step active">
+        <span class="step-icon">4</span>
+        <span class="step-label">Deal approval</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">5</span>
+        <span class="step-label">Site readiness</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">6</span>
+        <span class="step-label">Activate subscription</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <h1 class="page-title">Quote 123</h1>
+
+    <!-- Metadata / status card -->
+    <div class="metadata-card card">
+      <div class="meta-col status-col">
+        <div class="status-block">
+          <span class="status-dot pending"></span>
+          <div>
+            <span class="meta-label">Status</span>
+            <strong class="meta-value">Pending review</strong>
+            <div class="status-meta">Sent for review Dec 17, 2025, 12:16 PM MST</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Opportunity ID</span>
+        <span class="meta-value" id="meta-opportunity-id">OPP-001</span>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Customer</span>
+        <span class="meta-value"><a href="#">Customer name</a></span>
+        <a href="#" class="meta-link">View contact details</a>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Partner</span>
+        <span class="meta-value"><a href="#">Partner name</a></span>
+        <a href="#" class="meta-link">View contact details</a>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Distributor</span>
+        <span class="meta-value"><a href="#">Distributor name</a></span>
+        <a href="#" class="meta-link">View contact details</a>
+      </div>
+      <div class="meta-col">
+        <span class="meta-label">Keystone version</span>
+        <span class="meta-value">3.0</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-row">
+      <button type="button" class="tab active" data-tab="quote">Margin analysis</button>
+      <button type="button" class="tab" data-tab="justification">Justification</button>
+      <button type="button" class="tab" data-tab="deal-score">Deal score</button>
+      <button type="button" class="tab" data-tab="deviations">Feature requests</button>
+      <button type="button" class="tab" data-tab="comments">Comments</button>
+    </div>
+
+    <!-- Quote summary cards — same structure as Deal margin (Figma tokens) -->
+    <div class="summary-cards">
+      <div class="card summary-card quote-details-card">
+        <h3 class="summary-card-title">Quote details</h3>
+        <div class="quote-metrics">
+          <div class="metric-block">
+            <span class="metric-value" id="summary-deal-margin">20%</span>
+            <span class="metric-label">Deal margin</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-value" id="summary-contract-length">5 Years</span>
+            <span class="metric-label">Contract length</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-value">Annual</span>
+            <span class="metric-label">Billing frequency</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-value" id="summary-discount">40%</span>
+            <span class="metric-label">Discount</span>
+          </div>
+        </div>
+      </div>
+      <div class="card summary-card proposed-value-card">
+        <h3 class="summary-card-title">Proposed quote value (USD)</h3>
+        <div class="quote-value-equation">
+          <div class="eq-part">
+            <span class="eq-amount" id="summary-total-bookings">$925,498</span>
+            <span class="eq-label">Total bookings</span>
+          </div>
+          <span class="eq-op" aria-hidden="true">−</span>
+          <div class="eq-part">
+            <span class="eq-amount" id="summary-costs">$349,103</span>
+            <span class="eq-label">Costs</span>
+          </div>
+          <span class="eq-op" aria-hidden="true">=</span>
+          <div class="eq-part">
+            <span class="eq-amount eq-amount-result" id="summary-deal-value">$576,395</span>
+            <span class="eq-label">Deal value</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main two-column: controls + deal economics (same as Deal margin tab) -->
+    <div class="main-two-col">
+      <!-- Left: Deal simulator -->
+      <aside class="controls-panel card">
+        <h2 class="controls-panel-title">Deal simulator</h2>
+        <div class="control-group">
+          <label class="control-label">
+            <span>Contract length</span>
+            <span class="control-value" id="display-contract-length">5 Years</span>
+          </label>
+          <input type="range" class="slider" id="slider-contract-length" min="0" max="84" value="60" data-unit="months">
+          <div class="slider-ticks"><span>0</span><span>7 Years</span></div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">
+            <span>Service level agreement credits</span>
+            <span class="control-value" id="display-sla-credits">$26,000</span>
+          </label>
+          <input type="range" class="slider" id="slider-sla-credits" min="0" max="100000" value="26000" step="1000">
+        </div>
+        <div class="control-group">
+          <label class="control-label">
+            <span>Discount rate</span>
+            <span class="control-value" id="display-discount-rate">26%</span>
+          </label>
+          <input type="range" class="slider" id="slider-discount-rate" min="0" max="100" value="26">
+        </div>
+        <div class="control-group">
+          <label class="control-label">
+            <span>Discount amount</span>
+            <span class="control-value" id="display-discount-amount">$20,000</span>
+          </label>
+          <input type="range" class="slider" id="slider-discount-amount" min="0" max="1000000" value="20000" step="5000">
+          <div class="slider-ticks"><span>$0</span><span>$1M</span></div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">
+            <span>Gross margin with SLA</span>
+            <span class="control-value" id="display-gross-margin-sla">20%</span>
+          </label>
+          <input type="range" class="slider" id="slider-gross-margin-sla" min="0" max="100" value="20">
+        </div>
+        <div class="control-group">
+          <label class="control-label">
+            <span>Gross margin without SLA</span>
+            <span class="control-value" id="display-gross-margin-no-sla">20%</span>
+          </label>
+          <input type="range" class="slider" id="slider-gross-margin-no-sla" min="0" max="100" value="20">
+        </div>
+        <div class="control-group">
+          <label class="control-label">
+            <span>Break even point</span>
+            <span class="control-value" id="display-break-even">0 Years 8 Months</span>
+          </label>
+          <input type="range" class="slider" id="slider-break-even" min="0" max="84" value="8" data-unit="months">
+          <div class="slider-ticks"><span>0</span><span>7 Years</span></div>
+        </div>
+        <button type="button" class="btn btn-secondary reset-btn" id="reset-values">Reset values</button>
+      </aside>
+
+      <!-- Right: Deal economics panel -->
+      <section class="deal-economics-panel card">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Deal economics</h2>
+            <p class="panel-subtitle">Values shown per year</p>
+            <p class="panel-opportunity" id="deal-economics-opportunity-id-wrap">Opportunity: <span id="deal-economics-opportunity-id" aria-label="Opportunity ID">OPP-001</span></p>
+          </div>
+          <div class="view-toggle">
+            <button type="button" class="toggle-pill active" data-view="annual">Annual</button>
+            <button type="button" class="toggle-pill" data-view="cumulative">Cumulative</button>
+          </div>
+        </div>
+        <div class="info-callout">
+          <div class="info-callout-header">
+            <span class="info-icon" aria-hidden="true">ℹ</span>
+            <span>Deal simulated</span>
+          </div>
+          <p class="info-callout-body">The values shown here are a model of the proposed deal.</p>
+        </div>
+        <div class="economics-table-wrapper">
+          <table class="economics-table" id="economics-table">
+            <thead>
+              <tr>
+                <th class="col-charges">Charges</th>
+                <th>Year 1</th>
+                <th>Year 2</th>
+                <th>Year 3</th>
+                <th>Year 4</th>
+                <th>Year 5</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-charges">Bookings in local currency</td>
+                <td class="num">$185,100</td>
+                <td class="num">$185,100</td>
+                <td class="num">$185,100</td>
+                <td class="num">$185,100</td>
+                <td class="num">$185,100</td>
+              </tr>
+              <tr>
+                <td class="col-charges">Bookings in USD</td>
+                <td class="num">$185,100</td>
+                <td class="num">$185,100</td>
+                <td class="num">$185,100</td>
+                <td class="num">$185,100</td>
+                <td class="num">$185,100</td>
+              </tr>
+              <tr>
+                <td class="col-charges">Partner incentive</td>
+                <td class="num neg">($12,957)</td>
+                <td class="num neg">($12,957)</td>
+                <td class="num neg">($12,957)</td>
+                <td class="num neg">($12,957)</td>
+                <td class="num neg">($12,957)</td>
+              </tr>
+              <tr>
+                <td class="col-charges">Net bookings</td>
+                <td class="num">$172,143</td>
+                <td class="num">$172,143</td>
+                <td class="num">$172,143</td>
+                <td class="num">$172,143</td>
+                <td class="num">$172,143</td>
+              </tr>
+              <tr>
+                <td class="col-charges">Bill of materials</td>
+                <td class="num neg">($56,685)</td>
+                <td class="num neg">($56,685)</td>
+                <td class="num neg">($56,685)</td>
+                <td class="num neg">($56,685)</td>
+                <td class="num neg">($56,685)</td>
+              </tr>
+              <tr>
+                <td class="col-charges">Keystone services</td>
+                <td class="num neg">($38,437)</td>
+                <td class="num neg">($18,957)</td>
+                <td class="num neg">($18,957)</td>
+                <td class="num neg">($18,957)</td>
+                <td class="num neg">($18,957)</td>
+              </tr>
+              <tr>
+                <td class="col-charges">SLA credits</td>
+                <td class="num neg">($29,693)</td>
+                <td class="num neg">($29,693)</td>
+                <td class="num neg">($29,693)</td>
+                <td class="num neg">($29,693)</td>
+                <td class="num neg">($29,693)</td>
+              </tr>
+              <tr class="row-total">
+                <td class="col-charges">Total costs</td>
+                <td class="num neg" id="tc-y1">($125,815)</td>
+                <td class="num neg" id="tc-y2">($115,295)</td>
+                <td class="num neg" id="tc-y3">($115,295)</td>
+                <td class="num neg" id="tc-y4">($115,295)</td>
+                <td class="num neg" id="tc-y5">($115,295)</td>
+              </tr>
+              <tr class="row-highlight">
+                <td class="col-charges">Deal value</td>
+                <td class="num" id="dv-y1">$77,021</td>
+                <td class="num" id="dv-y2">$96,501</td>
+                <td class="num" id="dv-y3">$96,501</td>
+                <td class="num" id="dv-y4">$153,986</td>
+                <td class="num" id="dv-y5">$153,986</td>
+              </tr>
+              <tr>
+                <td class="col-charges">Gross margin with SLA</td>
+                <td class="num" id="gm-sla-y1">40%</td>
+                <td class="num" id="gm-sla-y2">39%</td>
+                <td class="num" id="gm-sla-y3">39%</td>
+                <td class="num" id="gm-sla-y4">72%</td>
+                <td class="num" id="gm-sla-y5">72%</td>
+              </tr>
+              <tr>
+                <td class="col-charges">Gross margin without SLA</td>
+                <td class="num" id="gm-nosla-y1">45%</td>
+                <td class="num" id="gm-nosla-y2">56%</td>
+                <td class="num" id="gm-nosla-y3">56%</td>
+                <td class="num" id="gm-nosla-y4">89%</td>
+                <td class="num" id="gm-nosla-y5">89%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer actions -->
+    <footer class="actions-footer">
+      <button type="button" class="btn btn-primary" onclick="window.location.href='../../index.html'">Approve quote</button>
+    </footer>
+  </div>
+
+  <script src="../../margin-analysis.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+/* SF Pro font fallback - using system fonts that closely match */
+@font-face {
+  font-family: 'SF_Pro';
+  src: local('SF Pro Text'), local('SF Pro Display'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI'), local('Roboto');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SF_Pro';
+  src: local('SF Pro Text Semibold'), local('SF Pro Display Semibold'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI Semibold'), local('Roboto Medium');
+  font-weight: 590;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SF_Pro';
+  src: local('SF Pro Text Medium'), local('SF Pro Display Medium'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI Medium'), local('Roboto Medium');
+  font-weight: 510;
+  font-style: normal;
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload quotes | Deal margin</title>
+  <link rel="stylesheet" href="./margin-analysis.css">
+  <link rel="stylesheet" href="./upload.css">
+</head>
+<body class="margin-analysis-page upload-page">
+  <!-- Progress steps: 6 steps — Apply feature request = step 3 -->
+  <div class="progress-strip">
+    <div class="progress-steps">
+      <a href="create-opportunity.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Create an opportunity</span>
+      </a>
+      <a href="sizing.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Create a quote</span>
+      </a>
+      <a href="deviations.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Apply feature request</span>
+      </a>
+      <a href="index.html" class="step active">
+        <span class="step-icon">4</span>
+        <span class="step-label">Deal approval</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">5</span>
+        <span class="step-label">Site readiness</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">6</span>
+        <span class="step-label">Activate subscription</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <h1 class="page-title">Upload quotes</h1>
+    <p class="page-subtitle">Upload both Subscription and Hardware quotes. Dashboard will show them as one related pair; then use one click to open deal margin.</p>
+
+    <!-- Upload cards -->
+    <div class="upload-cards">
+      <div class="card upload-card" id="card-subscription">
+        <h3 class="upload-card-title">
+          <span class="upload-card-icon" aria-hidden="true">📄</span>
+          Subscription quote
+        </h3>
+        <p class="upload-card-desc">Excel file (.xlsx, .xls) with booking amounts, partner incentives, SLA credits, and Keystone services by year.</p>
+        <div class="drop-zone" id="drop-subscription" data-type="subscription" role="button" tabindex="0">
+          <input type="file" id="input-subscription" accept=".xlsx,.xls" aria-label="Choose subscription quote file" hidden>
+          <span class="drop-zone-text" id="text-subscription">Drag and drop or click to browse</span>
+          <span class="drop-zone-file" id="file-subscription" aria-live="polite"></span>
+        </div>
+        <div class="upload-hint" id="hint-subscription"></div>
+      </div>
+
+      <div class="card upload-card" id="card-hardware">
+        <h3 class="upload-card-title">
+          <span class="upload-card-icon" aria-hidden="true">🖥️</span>
+          Hardware quote
+        </h3>
+        <p class="upload-card-desc">Excel file (.xlsx, .xls) with bill of materials, discount rate, and discount amount.</p>
+        <div class="drop-zone" id="drop-hardware" data-type="hardware" role="button" tabindex="0">
+          <input type="file" id="input-hardware" accept=".xlsx,.xls" aria-label="Choose hardware quote file" hidden>
+          <span class="drop-zone-text" id="text-hardware">Drag and drop or click to browse</span>
+          <span class="drop-zone-file" id="file-hardware" aria-live="polite"></span>
+        </div>
+        <div class="upload-hint" id="hint-hardware"></div>
+      </div>
+    </div>
+
+    <!-- Optional: use sample data -->
+    <div class="card sample-data-card">
+      <div class="sample-data-content">
+        <div>
+          <h3 class="sample-data-title">Try with sample data</h3>
+          <p class="sample-data-desc">Use pre-filled sample numbers to see the deal margin analysis without uploading files.</p>
+        </div>
+        <button type="button" class="btn btn-secondary" id="btn-sample-data">Use sample data</button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <footer class="actions-footer upload-actions">
+      <a href="./index.html" class="btn btn-secondary">Cancel</a>
+      <button type="button" class="btn btn-primary" id="btn-process" disabled>Save uploads to dashboard</button>
+    </footer>
+  </div>
+
+  <!-- Mapping / preview modal (optional, shown after parse) -->
+  <div class="modal-overlay" id="modal-mapping" aria-hidden="true">
+    <div class="modal card" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+      <div class="modal-header">
+        <h2 id="modal-title">Confirm mapping</h2>
+        <button type="button" class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-message">Data was extracted from your files. Click below to view the deal margin analysis.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="modal-cancel">Edit uploads</button>
+        <button type="button" class="btn btn-primary" id="modal-confirm">View deal margin</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="./upload.js"></script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature requests | Select or request new</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="margin-analysis.css">
+  <link rel="stylesheet" href="deviation-intake.css">
+  <link rel="stylesheet" href="deviation-request.css">
+  <link rel="stylesheet" href="deviations.css">
+</head>
+<body class="deviations-page">
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <a href="index.html" class="logo"><span class="logo-icon">N</span><span class="logo-text">Subscription Engine</span></a>
+    </div>
+    <div class="header-center">
+      <div class="search-bar"><input type="search" placeholder="Search..." aria-label="Search"></div>
+    </div>
+    <div class="header-right">
+      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Chris Collins (Sales)</span></div>
+      <button class="icon-btn" aria-label="Notifications">N</button>
+      <button class="icon-btn" aria-label="Help">?</button>
+      <div class="user-avatar">JD</div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <ul class="nav-list">
+      <li><a href="create-opportunity.html" class="nav-link">Opportunity</a></li>
+      <li><a href="sizing.html" class="nav-link">Sizing</a></li>
+      <li><a href="deviations.html" class="nav-link active">Feature requests</a></li>
+      <li><a href="sales-dashboard.html" class="nav-link">Sales dashboard</a></li>
+      <li><a href="index.html" class="nav-link">Deal dashboard</a></li>
+      <li><a href="margin-analysis.html" class="nav-link">Deal margin</a></li>
+      <li><a href="#" class="nav-link">Analytics</a></li>
+      <li><a href="#" class="nav-link">Projects</a></li>
+      <li><a href="#" class="nav-link">Settings</a></li>
+      <li><a href="#" class="nav-link">Billing</a></li>
+    </ul>
+  </nav>
+
+  <!-- Progress steps: 6 steps — Apply feature request = step 3 (feature requests tab) -->
+  <div class="progress-strip">
+    <div class="progress-steps">
+      <a href="create-opportunity.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Create an opportunity</span>
+      </a>
+      <a href="sizing.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Create a quote</span>
+      </a>
+      <a href="deviations.html" class="step active">
+        <span class="step-icon">3</span>
+        <span class="step-label">Apply feature request</span>
+      </a>
+      <a href="index.html" class="step">
+        <span class="step-icon">4</span>
+        <span class="step-label">Deal approval</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">5</span>
+        <span class="step-label">Site readiness</span>
+      </a>
+      <a href="#" class="step">
+        <span class="step-icon">6</span>
+        <span class="step-label">Activate subscription</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="layout-wrapper">
+    <main class="main-content deviations-main">
+      <p class="deviations-return-wrap" id="deviations-return-wrap" hidden><a href="#" id="deviations-return-link" class="deviations-return-link">← Return to quote</a></p>
+      <h1 class="deviations-page-title">Feature requests</h1>
+      <p class="deviations-intro">Select or request feature requests. Choose the <strong>type</strong> first, then select an existing feature request or submit a new request.</p>
+
+      <!-- Step 1: Feature request type -->
+      <div class="deviations-type-choice card" role="group" aria-label="Feature request type">
+        <h2 class="deviations-choice-title">What type of feature request?</h2>
+        <div class="deviations-type-options" id="deviations-type-options">
+          <label class="deviations-type-option">
+            <input type="radio" name="deviation-type" value="config" id="type-config" checked>
+            <span class="deviations-type-heading">Quote configuration</span>
+            <span class="deviations-type-desc">Customize term length, billing frequency, burst value, or other quote settings. Apply to a single quote or multiple quotes under one opportunity.</span>
+          </label>
+          <label class="deviations-type-option">
+            <input type="radio" name="deviation-type" value="margin" id="type-margin">
+            <span class="deviations-type-heading">Deal margin impact</span>
+            <span class="deviations-type-desc">e.g. 3 months free, 1 month free. These affect how deal margin is calculated.</span>
+          </label>
+          <label class="deviations-type-option">
+            <input type="radio" name="deviation-type" value="legal" id="type-legal">
+            <span class="deviations-type-heading">Legal language only</span>
+            <span class="deviations-type-desc">Add specific legal or compliance language to the quote. No configuration or pricing changes.</span>
+          </label>
+        </div>
+        <p class="deviations-type-hint" id="deviation-type-hint" aria-live="polite"></p>
+      </div>
+
+      <!-- Step 2: Choice — existing vs new -->
+      <div class="deviations-choice card" id="deviations-choice-wrap" role="group" aria-label="Request type">
+        <h2 class="deviations-choice-title">What would you like to do?</h2>
+        <div class="deviations-choice-options">
+          <label class="deviations-choice-option">
+            <input type="radio" name="deviations-type" value="existing" checked>
+            <span class="deviations-choice-heading">Select existing feature request</span>
+            <span class="deviations-choice-desc">I found my feature request in the list — I’ll choose from the dropdown and submit.</span>
+          </label>
+          <label class="deviations-choice-option">
+            <input type="radio" name="deviations-type" value="new">
+            <span class="deviations-choice-heading">Request new feature request</span>
+            <span class="deviations-choice-desc">My feature request isn’t listed — I need to submit a new request with deal details and documents.</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Panel 1: Select existing feature request -->
+      <div class="deviations-panel card" id="panel-existing" aria-labelledby="panel-existing-title">
+        <h2 class="deviations-panel-title" id="panel-existing-title">Select existing feature request</h2>
+        <p class="deviations-panel-desc">Choose your feature request type and provide request details.</p>
+        <form class="deviation-request-form" id="form-existing">
+          <div class="deviation-request-section deviations-opp-quotes-section">
+            <h3 class="deviation-request-section-title">Opportunity &amp; quotes</h3>
+            <p class="deviations-quotes-hint">One opportunity can have multiple quotes. This feature request can apply to one or more quotes under that opportunity.</p>
+            <div class="deviation-request-grid">
+              <div class="deviation-request-field">
+                <label for="existing-opportunity-id" class="deviation-request-label">Opportunity ID</label>
+                <input type="text" id="existing-opportunity-id" name="opportunity_id" class="deviation-request-input" placeholder="Enter opportunity ID">
+              </div>
+            </div>
+            <div class="deviations-quote-ids-wrap">
+              <label class="deviation-request-label">Quote ID(s)</label>
+              <div class="deviations-quote-ids-list" id="existing-quote-ids-list">
+                <div class="deviations-quote-id-row">
+                  <input type="text" name="quote_id" class="deviation-request-input" placeholder="Quote ID" aria-label="Quote ID">
+                  <button type="button" class="deviations-quote-remove" aria-label="Remove quote" title="Remove quote">×</button>
+                </div>
+              </div>
+              <button type="button" class="deviations-add-quote" id="btn-add-quote">+ Add quote</button>
+            </div>
+          </div>
+          <div class="deviation-request-section">
+            <div class="deviation-request-grid">
+              <div class="deviation-request-field">
+                <label for="requester-name" class="deviation-request-label">Requester name</label>
+                <input type="text" id="requester-name" name="requester_name" class="deviation-request-input" placeholder="Enter requester name">
+              </div>
+              <div class="deviation-request-field">
+                <label for="requested-subject" class="deviation-request-label">Requested subject</label>
+                <input type="text" id="requested-subject" name="requested_subject" class="deviation-request-input" placeholder="Enter subject">
+              </div>
+              <div class="deviation-request-field deviation-request-field-full" id="wrap-apply-to" aria-hidden="true">
+                <label class="deviation-request-label">Apply to</label>
+                <div class="deviation-request-radio-group" role="radiogroup" aria-label="Quote scope">
+                  <label class="deviation-request-radio"><input type="radio" name="apply_to" value="single" checked> This quote only</label>
+                  <label class="deviation-request-radio"><input type="radio" name="apply_to" value="multi"> Multiple quotes</label>
+                </div>
+              </div>
+              <div class="deviation-request-field deviation-request-field-full">
+                <label for="requested-deviation" class="deviation-request-label">Requested feature request</label>
+                <select id="requested-deviation" name="requested_deviation" class="deviation-request-select" aria-label="Select feature request">
+                  <option value="">— Select feature request —</option>
+                  <optgroup label="Quote configuration" data-type="config">
+                    <option value="burst-80" data-type="config">Burst capacity to 80%</option>
+                    <option value="custom-term" data-type="config">Custom term length</option>
+                    <option value="custom-billing" data-type="config">Custom billing frequency</option>
+                    <option value="payment-terms" data-type="config">Flexible payment terms</option>
+                  </optgroup>
+                  <optgroup label="Deal margin impact" data-type="margin">
+                    <option value="three-months-free" data-type="margin">Three months free</option>
+                    <option value="one-month-free" data-type="margin">One month free</option>
+                    <option value="discount-tier" data-type="margin">Discount tier exception</option>
+                  </optgroup>
+                  <optgroup label="Legal language only" data-type="legal">
+                    <option value="custom-sla" data-type="legal">Custom SLA terms</option>
+                    <option value="legal-compliance" data-type="legal">Legal / compliance clause</option>
+                    <option value="support-level" data-type="legal">Premium support level (legal)</option>
+                  </optgroup>
+                </select>
+                <p class="deviation-request-note deviation-request-note-margin" id="note-margin-impact" aria-hidden="true">This feature request will be reflected in deal margin calculations.</p>
+              </div>
+              <div class="deviation-request-field deviation-request-field-full">
+                <label for="request-comment" class="deviation-request-label">Comment</label>
+                <textarea id="request-comment" name="request_comment" class="deviation-request-textarea" rows="4" placeholder="Add any additional comments or notes"></textarea>
+              </div>
+              <div class="deviation-request-field">
+                <label for="request-id" class="deviation-request-label">Request ID</label>
+                <input type="text" id="request-id" name="request_id" class="deviation-request-input deviation-request-input-readonly" readonly placeholder="Auto-generated" aria-readonly="true">
+              </div>
+            </div>
+          </div>
+          <div class="deviation-request-actions">
+            <button type="submit" class="deviation-request-btn-primary" id="btn-submit-existing">Submit request</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Panel 2: Request new feature request (full intake form) -->
+      <div class="deviations-panel card deviations-panel-hidden" id="panel-new" aria-labelledby="panel-new-title" aria-hidden="true">
+        <h2 class="deviations-panel-title" id="panel-new-title">Request new feature request</h2>
+        <p class="deviations-panel-desc">Submit a full request with deal information and documents for evaluation. Use this when your feature request type is not in the list.</p>
+        <form class="deviation-form" id="form-new" action="#" method="post">
+          <div class="deviation-form-section">
+            <h3 class="deviation-section-title">Deal information</h3>
+            <div class="deviation-form-grid">
+              <div class="deviation-field">
+                <label for="keystone-version" class="deviation-label">Keystone Version</label>
+                <input type="text" id="keystone-version" name="keystone_version" class="deviation-input" placeholder="e.g. 3.0">
+              </div>
+              <div class="deviation-field">
+                <label for="end-user-name" class="deviation-label">End User Name</label>
+                <input type="text" id="end-user-name" name="end_user_name" class="deviation-input" placeholder="End user name">
+              </div>
+              <div class="deviation-field">
+                <label for="opportunity-id" class="deviation-label">Opportunity #</label>
+                <input type="text" id="opportunity-id" name="opportunity_id" class="deviation-input" placeholder="Opportunity number">
+              </div>
+              <div class="deviation-field">
+                <label for="hw-quote" class="deviation-label">HW Quote #</label>
+                <input type="text" id="hw-quote" name="hw_quote" class="deviation-input" placeholder="Hardware quote number">
+              </div>
+              <div class="deviation-field">
+                <label for="subscription-quote" class="deviation-label">Subscription Quote #</label>
+                <input type="text" id="subscription-quote" name="subscription_quote" class="deviation-input" placeholder="Subscription quote number">
+              </div>
+              <div class="deviation-field">
+                <label for="commingling-id" class="deviation-label">Commingling Decision ID</label>
+                <input type="text" id="commingling-id" name="commingling_decision_id" class="deviation-input" placeholder="Commingling decision ID">
+              </div>
+              <div class="deviation-field">
+                <label for="geo-leading" class="deviation-label">Geo Leading Opp</label>
+                <input type="text" id="geo-leading" name="geo_leading_opp" class="deviation-input" placeholder="Geo leading opportunity">
+              </div>
+              <div class="deviation-field">
+                <label for="additional-geos" class="deviation-label">Additional Geos</label>
+                <input type="text" id="additional-geos" name="additional_geos" class="deviation-input" placeholder="In what other geos will sites be located?">
+              </div>
+              <div class="deviation-field">
+                <label for="number-of-sites" class="deviation-label">Number of Sites</label>
+                <input type="number" id="number-of-sites" name="number_of_sites" class="deviation-input" min="1" placeholder="Number of sites">
+              </div>
+              <div class="deviation-field">
+                <label for="account-segmentation" class="deviation-label">Account Segmentation</label>
+                <select id="account-segmentation" name="account_segmentation" class="deviation-select">
+                  <option value="">Select</option>
+                  <option value="enterprise">Enterprise</option>
+                  <option value="midmarket">Mid-market</option>
+                  <option value="smb">SMB</option>
+                </select>
+              </div>
+              <div class="deviation-field">
+                <label for="sales-motion" class="deviation-label">Sales Motion</label>
+                <select id="sales-motion" name="sales_motion" class="deviation-select">
+                  <option value="">Select</option>
+                  <option value="direct">Direct</option>
+                  <option value="partner">Partner</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="deviation-form-section">
+            <h3 class="deviation-section-title">Requestor details</h3>
+            <div class="deviation-form-grid">
+              <div class="deviation-field deviation-field-full">
+                <label for="your-name" class="deviation-label">Your Name</label>
+                <input type="text" id="your-name" name="your_name" class="deviation-input" placeholder="Who is filling out this form?">
+              </div>
+              <div class="deviation-field deviation-field-full">
+                <label for="notification-emails" class="deviation-label">Notification Email Address(es)</label>
+                <input type="text" id="notification-emails" name="notification_emails" class="deviation-input" placeholder="Separate multiple emails with a comma">
+              </div>
+            </div>
+          </div>
+          <div class="deviation-form-section">
+            <h3 class="deviation-section-title">Requested feature request</h3>
+            <div class="deviation-field">
+              <label class="deviation-label">Requested feature request <span class="deviation-label-hint">Please select all that apply</span></label>
+              <div class="deviation-checkbox-group">
+                <label class="deviation-checkbox"><input type="checkbox" name="deviation" value="pricing"> Pricing / discount</label>
+                <label class="deviation-checkbox"><input type="checkbox" name="deviation" value="terms"> Contract terms</label>
+                <label class="deviation-checkbox"><input type="checkbox" name="deviation" value="sla"> SLA / support</label>
+                <label class="deviation-checkbox"><input type="checkbox" name="deviation" value="technical"> Technical / scope</label>
+                <label class="deviation-checkbox"><input type="checkbox" name="deviation" value="legal"> Legal / compliance</label>
+                <label class="deviation-checkbox"><input type="checkbox" name="deviation" value="other"> Other</label>
+              </div>
+            </div>
+            <div class="deviation-field deviation-field-full">
+              <label for="requestor-notes" class="deviation-label">Requestor Notes</label>
+              <textarea id="requestor-notes" name="requestor_notes" class="deviation-textarea" rows="4" placeholder="Tell us anything else that we need to know"></textarea>
+            </div>
+          </div>
+          <div class="deviation-form-section">
+            <h3 class="deviation-section-title">Deal Evaluation Documents</h3>
+            <p class="deviation-section-desc">Upload your Deal Review documents here</p>
+            <div class="deviation-drop-zone" id="deviation-drop-zone">
+              <input type="file" id="deviation-files" name="deal_documents" class="deviation-file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" aria-label="Upload Deal Review documents">
+              <span class="deviation-drop-text">Drop your files here or <button type="button" class="deviation-browse-btn" id="deviation-browse">Browse</button></span>
+              <span class="deviation-drop-files" id="deviation-file-names" aria-live="polite"></span>
+            </div>
+          </div>
+          <div class="deviation-form-actions">
+            <button type="submit" class="deviation-btn-primary">Submit new feature request</button>
+          </div>
+        </form>
+      </div>
+
+      <p class="deviations-footer-links">
+        <a href="https://www.smartsheet.com/legal/privacy" target="_blank" rel="noopener">Privacy Policy</a>
+      </p>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div>
+      <p class="footer-copy">© 2025 Subscription Engine. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="deviations.js"></script>
+  <script src="persona-switcher.js"></script>
+</body>
+</html>

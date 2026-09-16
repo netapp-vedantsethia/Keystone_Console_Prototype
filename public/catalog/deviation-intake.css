@@ -1,0 +1,303 @@
+/* Deviation intake — Keystone Deal Review Request (theme from Quote 123 screenshot) */
+
+.deviation-intake-page {
+  background: var(--ma-bg);
+  min-height: 100vh;
+}
+
+.deviation-intake-page .layout-wrapper {
+  display: block;
+}
+
+.deviation-intake-main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 32px 48px;
+}
+
+/* Flow breadcrumb on deviation page — use theme */
+.deviation-intake-main .flow-breadcrumb a {
+  color: var(--ma-primary);
+}
+.deviation-intake-main .flow-breadcrumb-current {
+  color: var(--ma-text);
+}
+.deviation-intake-main .flow-breadcrumb {
+  color: var(--ma-text-secondary);
+}
+
+.deviation-breadcrumb {
+  font-size: 13px;
+  color: var(--ma-text-secondary);
+  margin-bottom: 4px;
+}
+
+.deviation-breadcrumb a {
+  color: var(--ma-primary);
+  text-decoration: none;
+}
+
+.deviation-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.deviation-breadcrumb-sep {
+  margin: 0 6px;
+}
+
+.deviation-page-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviation-intro {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: var(--ma-text-secondary);
+  line-height: 1.5;
+}
+
+/* Form card — white, subtle shadow, same as screenshot */
+.deviation-form {
+  padding: var(--ma-space-lg);
+  margin-bottom: 24px;
+}
+
+.deviation-form-section {
+  margin-bottom: var(--ma-space-xl);
+  padding-bottom: var(--ma-space-xl);
+  border-bottom: 1px solid var(--ma-border);
+}
+
+.deviation-form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.deviation-section-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviation-section-desc {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--ma-text-secondary);
+}
+
+.deviation-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+}
+
+@media (max-width: 600px) {
+  .deviation-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.deviation-field {
+  min-width: 0;
+}
+
+.deviation-field-full {
+  grid-column: 1 / -1;
+}
+
+.deviation-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ma-text);
+  margin-bottom: 6px;
+}
+
+.deviation-label-hint {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ma-text-muted);
+  margin-top: 2px;
+}
+
+.deviation-input,
+.deviation-select,
+.deviation-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--ma-text);
+  background: var(--ma-card);
+  border: 1px solid var(--ma-border);
+  border-radius: var(--ma-radius-sm);
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.deviation-input:focus,
+.deviation-select:focus,
+.deviation-textarea:focus {
+  outline: none;
+  border-color: var(--ma-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ma-primary) 20%, transparent);
+}
+
+.deviation-input::placeholder,
+.deviation-textarea::placeholder {
+  color: var(--ma-text-muted);
+}
+
+.deviation-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.deviation-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Checkbox group */
+.deviation-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.deviation-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ma-text);
+  cursor: pointer;
+}
+
+.deviation-checkbox input {
+  accent-color: var(--ma-primary);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* File drop zone */
+.deviation-drop-zone {
+  border: 2px dashed var(--ma-border);
+  border-radius: var(--ma-radius-md);
+  padding: 32px 24px;
+  text-align: center;
+  background: var(--ma-table-row-alt);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.deviation-drop-zone:hover,
+.deviation-drop-zone.drag-over {
+  border-color: var(--ma-primary);
+  background: var(--ma-info-bg);
+}
+
+.deviation-file-input {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.deviation-drop-text {
+  font-size: 14px;
+  color: var(--ma-text-secondary);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.deviation-browse-btn {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ma-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.deviation-browse-btn:hover {
+  text-decoration: underline;
+}
+
+.deviation-drop-files {
+  font-size: 12px;
+  color: var(--ma-text-muted);
+  display: block;
+  word-break: break-all;
+}
+
+/* Form actions — centered, same as screenshot */
+.deviation-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: var(--ma-space-xl);
+  padding-top: var(--ma-space-lg);
+  border-top: 1px solid var(--ma-border);
+}
+
+.deviation-btn-primary {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ma-card);
+  background: var(--ma-primary);
+  border: none;
+  border-radius: var(--ma-radius-sm);
+  cursor: pointer;
+  box-shadow: var(--ma-shadow-btn);
+}
+
+.deviation-btn-primary:hover {
+  background: var(--ma-primary-hover);
+}
+
+.deviation-btn-secondary {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ma-text-secondary);
+  background: var(--ma-card);
+  border: 1px solid var(--ma-border);
+  border-radius: var(--ma-radius-sm);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.deviation-btn-secondary:hover {
+  background: var(--ma-bg);
+  color: var(--ma-text);
+}
+
+.deviation-footer-links {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ma-text-muted);
+}
+
+.deviation-footer-links a {
+  color: var(--ma-primary);
+  text-decoration: none;
+}
+
+.deviation-footer-links a:hover {
+  text-decoration: underline;
+}

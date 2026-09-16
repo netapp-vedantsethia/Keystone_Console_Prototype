@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!--
+  data-theme="light" pins Blueprint to its light theme regardless of the OS/browser
+  `prefers-color-scheme`. Blueprint's tokens.css auto-switches to dark tokens via a
+  `@media (prefers-color-scheme: dark)` query whenever the system is in dark mode; the
+  explicit `[data-theme="light"]` override (also excluded from that dark media query)
+  always wins, so this prototype never flips into dark mode. Do not remove.
+-->
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>NetApp Console</title>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
