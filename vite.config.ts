@@ -21,6 +21,8 @@ function figmaAssetPlugin(): Plugin {
 }
 
 export default defineConfig({
+  // GitHub Pages project site: https://netapp-vedantsethia.github.io/Keystone_Console_Prototype/
+  base: '/Keystone_Console_Prototype/',
   plugins: [
     figmaAssetPlugin(),
     react(),
