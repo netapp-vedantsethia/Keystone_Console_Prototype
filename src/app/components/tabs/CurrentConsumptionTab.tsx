@@ -6,10 +6,25 @@ import {
   Subscription,
   accruedBurstBillableTib,
   includedBurstHeadroomTib,
+  protocolEntitlementsForRow,
   usedTibFromBreakdownRow,
+  validateHybridWorkingSet,
   NETAPP_BURST_HEADROOM_PCT,
+  HYBRID_MIN_SSD_WORKING_SET_PCT,
+  PROTOCOL_FAMILY_META,
+  type ProtocolEntitlement,
 } from '../../data/mockData';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, AlertTriangle, Info } from 'lucide-react';
+import { StatusBadge } from '../ui/StatusBadge';
+
+/** Hover text for one protocol's dot — only "available" implies it can actually be turned on. */
+function protocolDotTitle(e: ProtocolEntitlement): string {
+  const meta = PROTOCOL_FAMILY_META[e.family];
+  if (e.status === 'active') return `${meta.label} (${meta.protocols}) — Active`;
+  if (e.status === 'available')
+    return `${meta.label} (${meta.protocols}) — Available to enable from existing committed capacity, no extra cost, no hardware change.`;
+  return `${meta.label} (${meta.protocols}) — Locked by hardware (ASA is block-only; cannot be enabled).`;
+}
 
 /** One-decimal TiB so committed − used never prints a float artifact like 56.19999999999999. */
 function roundTib(n: number): number {
@@ -37,8 +52,12 @@ export function CurrentConsumptionTab({ subscription }: CurrentConsumptionTabPro
       snapshot: item.snapshot,
       used,
       accruedBurst,
+      mediaSplit: item.mediaSplit,
+      entitlements: protocolEntitlementsForRow(item, subscription),
     };
   });
+
+  const hasHybridLevel = rows.some((r) => r.mediaSplit);
 
   const totalCommitted = roundTib(rows.reduce((s, r) => s + r.committed, 0));
   const totalUsed = roundTib(rows.reduce((s, r) => s + r.used, 0));
@@ -107,6 +126,20 @@ export function CurrentConsumptionTab({ subscription }: CurrentConsumptionTabPro
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Used</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Accrued burst</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Utilization vs committed</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                  <span
+                    className="inline-flex items-center gap-1"
+                    title="File / Block / Object. Green = active (currently provisioned). Grey = either available to enable (hardware supports it, turn it on anytime from existing committed capacity, no extra cost or hardware change) or locked by hardware (ASA is block-only) — hover a dot for which one applies."
+                  >
+                    Protocols
+                    <Info className="h-3.5 w-3.5 text-gray-400" />
+                  </span>
+                </th>
+                {hasHybridLevel && (
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                    SSD / HDD split (working set)
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
@@ -138,6 +171,60 @@ export function CurrentConsumptionTab({ subscription }: CurrentConsumptionTabPro
                         <span className={util > 100 ? 'text-red-600' : util > 90 ? 'text-amber-600' : 'text-gray-600'}>{util}%</span>
                       </div>
                     </td>
+                    <td className="px-4 py-3 text-sm">
+                      <div className="flex items-center gap-2.5">
+                        {r.entitlements.map((e) => (
+                          <span key={e.family} className="flex flex-col items-center gap-0.5" title={protocolDotTitle(e)}>
+                            <span className={`h-2.5 w-2.5 rounded-full ${e.status === 'active' ? 'bg-green-500' : 'bg-gray-300'}`} />
+                            <span className="text-[10px] uppercase leading-none text-gray-400">
+                              {PROTOCOL_FAMILY_META[e.family].label[0]}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    {hasHybridLevel && (
+                      <td className="px-4 py-3 text-sm">
+                        {r.mediaSplit ? (
+                          (() => {
+                            const validation = validateHybridWorkingSet(r.mediaSplit);
+                            return (
+                              <div className="min-w-[160px]">
+                                <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                                  <div
+                                    className={validation.compliant ? 'h-2 bg-blue-500' : 'h-2 bg-red-500'}
+                                    style={{ width: `${r.mediaSplit.ssdPct}%` }}
+                                    title={`SSD (working set): ${r.mediaSplit.ssdTib} TiB`}
+                                  />
+                                  <div
+                                    className="h-2 bg-gray-400"
+                                    style={{ width: `${r.mediaSplit.hddPct}%` }}
+                                    title={`HDD: ${r.mediaSplit.hddTib} TiB`}
+                                  />
+                                </div>
+                                <div className="mt-1 flex items-center gap-1.5 text-xs">
+                                  <span className="text-gray-600">
+                                    SSD {r.mediaSplit.ssdPct}% ({r.mediaSplit.ssdTib} TiB) · HDD {r.mediaSplit.hddPct}% ({r.mediaSplit.hddTib} TiB)
+                                  </span>
+                                </div>
+                                <div
+                                  className={`mt-1 flex items-center gap-1 text-xs font-medium ${
+                                    validation.compliant ? 'text-green-700' : 'text-red-600'
+                                  }`}
+                                >
+                                  {!validation.compliant && <AlertTriangle className="h-3 w-3 shrink-0" />}
+                                  {validation.compliant
+                                    ? `Working-set guardrail met (≥ ${HYBRID_MIN_SSD_WORKING_SET_PCT}% SSD)`
+                                    : `Not eligible for SLAs — SSD working set below ${HYBRID_MIN_SSD_WORKING_SET_PCT}% minimum`}
+                                </div>
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -201,6 +288,16 @@ export function CurrentConsumptionTab({ subscription }: CurrentConsumptionTabPro
             <li>
               <strong>Accrued burst</strong> — used capacity above your commitment; this is what drives extra burst charges on your bill.
             </li>
+            <li>
+              <strong>Protocols</strong> — one dot per File / Block / Object. Green = active today. Grey = either available to enable
+              (hover for details — no extra cost, no hardware change) or locked by hardware on an ASA (block-only) service level.
+            </li>
+            {hasHybridLevel && (
+              <li>
+                <strong>SSD / HDD split (working set)</strong> — Standard-Hybrid mixes SSD (the "working set") and HDD capacity within one
+                service level. Guardrail: at least {HYBRID_MIN_SSD_WORKING_SET_PCT}% of committed capacity must be SSD.
+              </li>
+            )}
           </ul>
         </div>
       </div>

@@ -44,6 +44,40 @@ export interface ServiceLevelBreakdown {
     data: number;
     snapshot: number;
   };
+  /** Block (SAN) vs Unified (NAS/file) vs Object — drives the Storage Efficiency SLA and other type-gated guardrails. Defaults to `'unified'` when omitted. */
+  storageType?: 'block' | 'unified' | 'object';
+  /**
+   * Underlying hardware for this row. `'asa'` = All-Flash SAN Array: a block-only platform with no
+   * NAS or native object support — a hardware lock, not just an unprovisioned protocol. Defaults to
+   * `'unified'` (AFF/FAS) when omitted, which can serve File + Block + Object from one system under
+   * a single Availability SLA. See `protocolEntitlementsForRow()`.
+   */
+  storageArchitecture?: 'unified' | 'asa';
+  /** Logical vs physical capacity metering at order time (see `ModificationFormDrawer`'s `${version}_logical` suffix). The Storage Efficiency SLA only applies to `'logical'` rows. Defaults to `'logical'`. */
+  meteringType?: 'logical' | 'physical';
+  /** Whether this workload is classified as data-reducible (dedup/compression-friendly) — required for the Storage Efficiency SLA. Verify with NetApp Active IQ Digital Advisor's storage-efficiency dashboard (see `STORAGE_EFFICIENCY_EXTERNAL_TOOL_URL`). */
+  dataReducible?: boolean;
+  /** Mock realized physical capacity (TiB) after array-side data reduction — used with `data`/`snapshot` (logical) to derive the realized reduction ratio for the Storage Efficiency SLA. */
+  physicalUsedTib?: number;
+  /**
+   * SSD ("working set") vs HDD capacity split — only present for the `Standard-Hybrid` performance
+   * service level (SLA: Standard-Hybrid, partial-SSD/partial-HDD). Guardrail: `ssdPct` must be >= 10%.
+   */
+  mediaSplit?: {
+    ssdPct: number;
+    hddPct: number;
+    ssdTib: number;
+    hddTib: number;
+  };
+  /**
+   * Negotiated $/TiB rate locked in at signing for this row — distinct from the generic catalog
+   * rate card (`billingCommittedRatePerTibUsd`) so the Capacity Add SLA's blended-rate calculator
+   * can demonstrate a real weighted-average change when the current list rate differs from it.
+   * When omitted, `originalRatePerTibUsd()` derives a stable, level-scoped discount off today's
+   * list rate instead of defaulting to the list rate itself (list prices only move up over a
+   * multi-year term, so a signed rate is never identical to today's rate card).
+   */
+  initialRatePerTibUsd?: number;
 }
 
 /** Why a subscription is no longer active — drives which badge/filter/tabs apply (see `ConsoleSubscriptionsList`, `ConsoleSubscriptionDetail`). */
@@ -173,6 +207,16 @@ export interface Subscription {
   mergedFrom?: SubscriptionMergeSource[];
   /** Present only for Keystone's sovereign offerings — see `SovereigntyTier` / `SOVEREIGNTY_META`. */
   sovereignty?: SovereigntyProfile;
+  /**
+   * Deal classification for the Capacity Add SLA: only `'standard'` and `'limited-discount'` deals
+   * (with no deviations) are eligible to add capacity at the original purchase rate. Defaults to
+   * `'standard'` when omitted.
+   */
+  dealType?: 'standard' | 'limited-discount' | 'non-standard';
+  /** True when the deal has requested/approved contract deviations — disqualifies Capacity Add SLA eligibility regardless of `dealType`. Defaults to `false`. */
+  hasDeviations?: boolean;
+  /** ISO date of the most recent Capacity Add SLA request — enforces the once-per-12-months cooldown. Absent = never used. */
+  lastCapacityAddDate?: string;
 }
 
 export function getSovereigntyMeta(sub: Pick<Subscription, 'sovereignty'>) {
@@ -207,6 +251,74 @@ export function usedTibFromBreakdownRow(b: Pick<ServiceLevelBreakdown, 'data' | 
 export function accruedBurstBillableTib(b: Pick<ServiceLevelBreakdown, 'committed' | 'data' | 'snapshot'>): number {
   const used = usedTibFromBreakdownRow(b);
   return Math.max(0, Math.round((used - b.committed) * 10) / 10);
+}
+
+// ---------------------------------------------------------------------------
+// SLA guardrail constants — shared across the 6 new Keystone SLA features
+// ---------------------------------------------------------------------------
+
+/** Minimum SSD ("working set") share of committed capacity for the Standard-Hybrid performance service level. */
+export const HYBRID_MIN_SSD_WORKING_SET_PCT = 10;
+
+/** Availability + Performance SLAs only pay out a breach credit when the level was actually in meaningful use. */
+export const SLA_CLAIM_MIN_UTILIZATION_PCT = 80;
+
+/** Storage Efficiency SLA guarantee — Block and Unified are both 2.5:1 realized (physical) reduction on logical capacity. */
+export const STORAGE_EFFICIENCY_TARGET_RATIO: Record<'block' | 'unified', number> = {
+  block: 2.5,
+  unified: 2.5,
+};
+
+/** External tool customers use to verify whether a workload's data is reducible (dedup/compression-friendly) before relying on the Storage Efficiency SLA. */
+export const STORAGE_EFFICIENCY_EXTERNAL_TOOL_URL = 'https://docs.netapp.com/us-en/active-iq/task_analyze_storage_efficiency.html';
+export const STORAGE_EFFICIENCY_EXTERNAL_TOOL_NAME = 'NetApp Workload Analyzer — Storage Efficiency dashboard';
+
+/** Capacity Add SLA guardrails (standard / limited-discount deals, no deviations, only). */
+export const CAPACITY_ADD_MAX_PCT_OF_COMMITTED = 100;
+export const CAPACITY_ADD_MIN_INCREMENT_TIB_FLOOR = 50;
+export const CAPACITY_ADD_COOLDOWN_MONTHS = 12;
+
+/**
+ * Standard legal disclaimer for any on-screen rate or cost estimate (Capacity Add SLA preview,
+ * Modification summary, submitted service-request detail, etc.). Estimates shown in the console are
+ * illustrative only; they are not a quote or an offer, and do not bind NetApp to any rate, fee, or
+ * effective date.
+ */
+export const PRICING_ESTIMATE_DISCLAIMER =
+  'Estimate for planning purposes only — not a quote or an offer. Final rates, fees, and effective dates are determined by NetApp during the formal quoting and contract-signing process and may differ from the amounts shown here.';
+
+/** Whole-percent utilization (used ÷ committed), floor/ceil-free so 79.6% never rounds up to the 80% claim threshold. */
+export function utilizationPct(committedTib: number, usedTib: number): number {
+  if (committedTib <= 0) return 0;
+  return Math.round((usedTib / committedTib) * 1000) / 10;
+}
+
+/** Availability/Performance SLA credit-claim eligibility: level must be used at >= `SLA_CLAIM_MIN_UTILIZATION_PCT` of committed capacity. */
+export function isEligibleForSlaClaim(committedTib: number, usedTib: number): boolean {
+  return utilizationPct(committedTib, usedTib) >= SLA_CLAIM_MIN_UTILIZATION_PCT;
+}
+
+export interface HybridWorkingSetValidation {
+  compliant: boolean;
+  ssdPct: number;
+  minSsdPct: number;
+  message: string;
+}
+
+/** Standard-Hybrid guardrail: at least 10% of committed capacity must be SSD (the "working set"). */
+export function validateHybridWorkingSet(
+  mediaSplit: Pick<NonNullable<ServiceLevelBreakdown['mediaSplit']>, 'ssdPct'> | undefined,
+): HybridWorkingSetValidation {
+  const ssdPct = mediaSplit?.ssdPct ?? 0;
+  const compliant = ssdPct >= HYBRID_MIN_SSD_WORKING_SET_PCT;
+  return {
+    compliant,
+    ssdPct,
+    minSsdPct: HYBRID_MIN_SSD_WORKING_SET_PCT,
+    message: compliant
+      ? `Working set meets the ${HYBRID_MIN_SSD_WORKING_SET_PCT}% minimum SSD guardrail.`
+      : `Working set is below the ${HYBRID_MIN_SSD_WORKING_SET_PCT}% minimum SSD guardrail — rebalance the SSD/HDD split to stay compliant.`,
+  };
 }
 
 /** Single source of truth: recompute headroom, rollups, and align `committed` / `usage` / `burst*` fields. */
@@ -316,8 +428,9 @@ const rawMockSubscriptions: Subscription[] = [
     account: 'Moonshot India',
     serviceLevels: ['Performance', 'Value'],
     serviceLevelBreakdown: [
-      { level: 'Performance', committed: 100, data: 90, snapshot: 20, burst: 10 },
-      { level: 'Value', committed: 50, data: 25, snapshot: 10, burst: 10 },
+      { level: 'Performance', committed: 100, data: 90, snapshot: 20, burst: 10, storageType: 'unified', meteringType: 'logical', dataReducible: true, physicalUsedTib: 38 },
+      // Encrypted backup workload — not data-reducible, so the Storage Efficiency SLA is n/a here (verify via NetApp Active IQ Digital Advisor).
+      { level: 'Value', committed: 50, data: 25, snapshot: 10, burst: 10, storageType: 'block', meteringType: 'logical', dataReducible: false },
     ],
     region: 'APAC',
     version: 'v3',
@@ -431,6 +544,9 @@ const rawMockSubscriptions: Subscription[] = [
     billingStatus: 'Overdue',
     healthStatus: 'critical',
     slaStatus: 'breached',
+    // Non-standard deal with approved deviations — ineligible for the Capacity Add SLA regardless of term timing.
+    dealType: 'non-standard',
+    hasDeviations: true,
   },
   {
     id: '1789858604',
@@ -521,6 +637,8 @@ const rawMockSubscriptions: Subscription[] = [
     billingStatus: 'Current',
     healthStatus: 'warning',
     slaStatus: 'at-risk',
+    // Used the Capacity Add SLA recently — still inside the 12-month cooldown window.
+    lastCapacityAddDate: '2025-11-01',
   },
   {
     id: '1789858607',
@@ -528,10 +646,23 @@ const rawMockSubscriptions: Subscription[] = [
     trackingId: 'MST-8001',
     customer: 'AUMOVIO Germany GmbH',
     account: 'Moonshot Pacific',
-    serviceLevels: ['Extreme', 'Premium'],
+    serviceLevels: ['Extreme', 'Premium', 'Standard-Hybrid'],
     serviceLevelBreakdown: [
       { level: 'Extreme', committed: 300, data: 53, snapshot: 60, burst: 30 },
       { level: 'Premium', committed: 120, data: 60, snapshot: 20, burst: 10 },
+      // Standard-Hybrid working-set guardrail violated: only 6% SSD (< 10% minimum) — flagged non-compliant in Current Consumption.
+      {
+        level: 'Standard-Hybrid',
+        committed: 60,
+        data: 30,
+        snapshot: 10,
+        burst: 0,
+        storageType: 'unified',
+        meteringType: 'logical',
+        dataReducible: true,
+        physicalUsedTib: 15,
+        mediaSplit: { ssdPct: 6, hddPct: 94, ssdTib: 3.6, hddTib: 56.4 },
+      },
     ],
     region: 'US-West',
     version: 'v3',
@@ -560,8 +691,9 @@ const rawMockSubscriptions: Subscription[] = [
     account: 'Moonshot Asia Pacific',
     serviceLevels: ['Performance', 'Standard'],
     serviceLevelBreakdown: [
-      { level: 'Performance', committed: 200, data: 100, snapshot: 40, burst: 20 },
-      { level: 'Standard', committed: 80, data: 40, snapshot: 10, burst: 10 },
+      { level: 'Performance', committed: 200, data: 100, snapshot: 40, burst: 20, storageType: 'unified', meteringType: 'logical', dataReducible: true, physicalUsedTib: 50 },
+      // Physically-metered order — Storage Efficiency SLA (logical metering only) does not apply to this row.
+      { level: 'Standard', committed: 80, data: 40, snapshot: 10, burst: 10, storageType: 'unified', meteringType: 'physical' },
     ],
     region: 'APAC',
     version: 'v2',
@@ -682,7 +814,8 @@ const rawMockSubscriptions: Subscription[] = [
     account: 'Moonshot Northeast',
     serviceLevels: ['Premium', 'Standard'],
     serviceLevelBreakdown: [
-      { level: 'Premium', committed: 150, data: 75, snapshot: 30, burst: 15 },
+      // Negotiated an early, below-list rate ($55/TiB vs today's $88/TiB list) — good example for the Capacity Add SLA's blended-rate calculator.
+      { level: 'Premium', committed: 150, data: 75, snapshot: 30, burst: 15, initialRatePerTibUsd: 55 },
       { level: 'Standard', committed: 70, data: 35, snapshot: 10, burst: 10 },
     ],
     region: 'US-East',
@@ -703,6 +836,137 @@ const rawMockSubscriptions: Subscription[] = [
     billingStatus: 'Current',
     healthStatus: 'healthy',
     slaStatus: 'compliant',
+  },
+  {
+    // Showcase subscription for the six new Keystone SLAs: Standard-Hybrid (compliant working set),
+    // Multiprotocol bundle, a Storage Efficiency breach with automatic disk-ship remediation on the
+    // hybrid row, and a fully Capacity-Add-eligible profile (standard deal, mid-term, never used).
+    id: '1789858614',
+    number: '1789858614',
+    trackingId: 'MST-15001',
+    customer: 'AUMOVIO Germany GmbH',
+    account: 'Moonshot Nordic',
+    serviceLevels: ['Extreme', 'Standard-Hybrid'],
+    serviceLevelBreakdown: [
+      {
+        level: 'Extreme',
+        committed: 100,
+        data: 70,
+        snapshot: 10,
+        burst: 0,
+        storageType: 'unified',
+        meteringType: 'logical',
+        dataReducible: true,
+        physicalUsedTib: 28, // 80 TiB logical ÷ 28 TiB physical = 2.86:1 — compliant (target 2.5:1)
+        initialRatePerTibUsd: 65,
+      },
+      {
+        // Standard-Hybrid: 20% SSD working set — the correct/compliant ratio (min 10%); breached on
+        // Storage Efficiency (80 logical ÷ 40 physical = 2.0:1 < 2.5:1) — NetApp auto-ships disks, no
+        // claim needed. Also breaches Availability/Performance SLOs at ~100% utilization — claim-eligible.
+        level: 'Standard-Hybrid',
+        committed: 80,
+        data: 65,
+        snapshot: 15,
+        burst: 0,
+        storageType: 'unified',
+        meteringType: 'logical',
+        dataReducible: true,
+        physicalUsedTib: 40,
+        mediaSplit: { ssdPct: 20, hddPct: 80, ssdTib: 16, hddTib: 64 },
+      },
+    ],
+    region: 'EU-North',
+    version: 'v3',
+    accountType: 'Direct',
+    addOns: ['Backup', 'Multiprotocol (NFS+SMB)'],
+    startDate: '2024-09-01',
+    endDate: '2028-09-01',
+    committed: 180,
+    usage: 160,
+    burst: 0,
+    committedCapacity: 180,
+    currentUsage: 160,
+    burstUsage: 0,
+    health: 'Good',
+    sla: 'At Risk',
+    collectorStatus: 'Online',
+    billingStatus: 'Current',
+    healthStatus: 'healthy',
+    slaStatus: 'at-risk',
+    dealType: 'standard',
+    hasDeviations: false,
+  },
+  {
+    // Dedicated example for the Multi-Protocol Support SLA (SLA #3): NFS + SMB served from the same
+    // Standard/Value storage via an extra data LIF. Cosmetic/informational only — no other SLA
+    // guardrail is deliberately exercised here, so the addon is easy to demo in isolation.
+    id: '1789858615',
+    number: '1789858615',
+    trackingId: 'MST-16001',
+    customer: 'AUMOVIO Germany GmbH',
+    account: 'Moonshot Baltic',
+    serviceLevels: ['Standard', 'Value'],
+    serviceLevelBreakdown: [
+      { level: 'Standard', committed: 90, data: 45, snapshot: 15, burst: 10 },
+      { level: 'Value', committed: 60, data: 20, snapshot: 5, burst: 5 },
+    ],
+    region: 'EU-Central',
+    version: 'v3',
+    accountType: 'Direct',
+    addOns: ['Backup', 'Multiprotocol (NFS+SMB)'],
+    startDate: '2024-11-01',
+    endDate: '2027-11-01',
+    committed: 150,
+    usage: 85,
+    burst: 15,
+    committedCapacity: 900,
+    currentUsage: 820,
+    burstUsage: 14,
+    health: 'Good',
+    sla: 'Compliant',
+    collectorStatus: 'Online',
+    billingStatus: 'Current',
+    healthStatus: 'healthy',
+    slaStatus: 'compliant',
+    dealType: 'standard',
+    hasDeviations: false,
+  },
+  {
+    // Dedicated example for the Protocol Entitlement Viewer's ASA (All-Flash SAN Array) hardware
+    // lock: the Extreme row runs on ASA — block-only, File/Object are system-locked, not just
+    // unprovisioned. The Standard row sits on ordinary unified (AFF/FAS) hardware for contrast —
+    // same subscription, two different hardware architectures, as confirmed with the user.
+    id: '1789858616',
+    number: '1789858616',
+    trackingId: 'MST-17001',
+    customer: 'AUMOVIO Germany GmbH',
+    account: 'Moonshot Cascade',
+    serviceLevels: ['Extreme', 'Standard'],
+    serviceLevelBreakdown: [
+      { level: 'Extreme', committed: 120, data: 100, snapshot: 10, burst: 0, storageType: 'block', storageArchitecture: 'asa' },
+      { level: 'Standard', committed: 60, data: 30, snapshot: 10, burst: 5 },
+    ],
+    region: 'US-West',
+    version: 'v3',
+    accountType: 'Direct',
+    addOns: ['Backup'],
+    startDate: '2024-10-01',
+    endDate: '2027-10-01',
+    committed: 180,
+    usage: 150,
+    burst: 5,
+    committedCapacity: 180,
+    currentUsage: 150,
+    burstUsage: 5,
+    health: 'Good',
+    sla: 'Compliant',
+    collectorStatus: 'Online',
+    billingStatus: 'Current',
+    healthStatus: 'healthy',
+    slaStatus: 'compliant',
+    dealType: 'standard',
+    hasDeviations: false,
   },
 ];
 
@@ -734,6 +998,116 @@ export function formatConsoleLastUpdated(date: Date = new Date()): string {
 /** Resolve a subscription by internal id (used across volumes, console ops, alerts). */
 export function getSubscriptionById(id: string): Subscription | undefined {
   return mockSubscriptions.find((s) => s.id === id);
+}
+
+export interface CapacityAddEligibility {
+  eligible: boolean;
+  reasons: string[];
+  /** Earliest date the subscription becomes eligible again if currently blocked by term timing or cooldown, else undefined. */
+  nextEligibleDate?: string;
+}
+
+/**
+ * Capacity Add SLA guardrails: standard/limited-discount deals with no deviations, not in the
+ * first or last year of the term, and used at most once every 12 months. Available by default
+ * for every subscription unless one of these explicitly fails.
+ */
+export function capacityAddEligibility(subscription: Subscription, asOfIso?: string): CapacityAddEligibility {
+  const asOf = asOfIso ?? PLATFORM_REFERENCE_DATE.toISOString().slice(0, 10);
+  const reasons: string[] = [];
+  let nextEligibleDate: string | undefined;
+
+  const dealType = subscription.dealType ?? 'standard';
+  if (dealType === 'non-standard') {
+    reasons.push('Non-standard deal — Capacity Add SLA only covers standard or limited-discount deals.');
+  }
+  if (subscription.hasDeviations) {
+    reasons.push('Contract has approved deviations — Capacity Add SLA requires a deal with no deviations.');
+  }
+
+  const firstYearEnd = addMonthsIso(subscription.startDate, 12);
+  const lastYearStart = addMonthsIso(subscription.endDate, -12);
+  if (asOf < firstYearEnd) {
+    reasons.push(`Within the first year of the subscription term — eligible starting ${firstYearEnd}.`);
+    nextEligibleDate = !nextEligibleDate || firstYearEnd > nextEligibleDate ? firstYearEnd : nextEligibleDate;
+  } else if (asOf >= lastYearStart) {
+    reasons.push(`Within the last year of the subscription term (term ends ${subscription.endDate}) — not eligible for the remainder of this term.`);
+  }
+
+  if (subscription.lastCapacityAddDate) {
+    const cooldownEnd = addMonthsIso(subscription.lastCapacityAddDate, CAPACITY_ADD_COOLDOWN_MONTHS);
+    if (asOf < cooldownEnd) {
+      reasons.push(`Capacity Add was already used on ${subscription.lastCapacityAddDate} — next use available ${cooldownEnd} (once every ${CAPACITY_ADD_COOLDOWN_MONTHS} months).`);
+      nextEligibleDate = !nextEligibleDate || cooldownEnd > nextEligibleDate ? cooldownEnd : nextEligibleDate;
+    }
+  }
+
+  return { eligible: reasons.length === 0, reasons, nextEligibleDate };
+}
+
+export interface CapacityAddCalculation {
+  currentCommittedTib: number;
+  currentRatePerTibUsd: number;
+  minIncrementTib: number;
+  maxAddTib: number;
+  addTib: number;
+  addRatePerTibUsd: number;
+  newCommittedTib: number;
+  blendedRatePerTibUsd: number;
+  currentMonthlyCommittedCostUsd: number;
+  newMonthlyCommittedCostUsd: number;
+}
+
+/**
+ * The rate a row is actually paying today for its existing commitment. Uses the explicit,
+ * negotiated `initialRatePerTibUsd` when the row has one; otherwise derives a stable, level- and
+ * commitment-scoped discount (8-20%) off today's list rate. Never returns today's list rate
+ * outright — a subscription's original signed rate should never coincide exactly with the
+ * current rate card, so the Capacity Add SLA's blended-vs-original math always has two genuinely
+ * different numbers to blend rather than silently collapsing to a single flat rate.
+ */
+export function originalRatePerTibUsd(
+  row: Pick<ServiceLevelBreakdown, 'level' | 'committed' | 'initialRatePerTibUsd'>,
+): number {
+  if (row.initialRatePerTibUsd != null) return row.initialRatePerTibUsd;
+  const listRate = billingRateForLevel(row.level);
+  const discountPct = 8 + seededFraction(`${row.level}-${row.committed}-original-rate`) * 12;
+  return Math.round(listRate * (1 - discountPct / 100));
+}
+
+/**
+ * Blended-rate math for one service-level row: the existing commitment keeps its original rate,
+ * the newly added capacity bills at today's list rate, and the row's effective rate becomes the
+ * TiB-weighted average of the two — e.g. 100 TiB@$10 + 100 TiB@$100 add → 200 TiB@$55.
+ */
+export function calculateCapacityAdd(
+  row: Pick<ServiceLevelBreakdown, 'level' | 'committed' | 'initialRatePerTibUsd'>,
+  addTibRequested: number,
+  currentListRatePerTibUsd: number = billingRateForLevel(row.level),
+): CapacityAddCalculation {
+  const currentCommittedTib = row.committed;
+  const currentRatePerTibUsd = originalRatePerTibUsd(row);
+  const burstHeadroomTib = includedBurstHeadroomTib(currentCommittedTib);
+  const minIncrementTib = Math.max(CAPACITY_ADD_MIN_INCREMENT_TIB_FLOOR, burstHeadroomTib);
+  const maxAddTib = currentCommittedTib * (CAPACITY_ADD_MAX_PCT_OF_COMMITTED / 100);
+  const addTib = Math.min(Math.max(0, addTibRequested), maxAddTib);
+  const newCommittedTib = currentCommittedTib + addTib;
+  const blendedRatePerTibUsd =
+    newCommittedTib > 0
+      ? (currentCommittedTib * currentRatePerTibUsd + addTib * currentListRatePerTibUsd) / newCommittedTib
+      : currentRatePerTibUsd;
+  return {
+    currentCommittedTib,
+    currentRatePerTibUsd,
+    minIncrementTib,
+    maxAddTib,
+    addTib,
+    addRatePerTibUsd: currentListRatePerTibUsd,
+    newCommittedTib,
+    blendedRatePerTibUsd: Math.round(blendedRatePerTibUsd * 100) / 100,
+    currentMonthlyCommittedCostUsd: Math.round(currentCommittedTib * currentRatePerTibUsd),
+    newMonthlyCommittedCostUsd: Math.round(newCommittedTib * blendedRatePerTibUsd),
+  };
 }
 
 /**
@@ -989,10 +1363,99 @@ export const KEYSTONE_ADDON_CATALOG = [
   { id: 'ransomware', name: 'Anti-Ransomware' },
   { id: 'snapmirror-cloud', name: 'SnapMirror Cloud' },
   { id: 'monitoring-advanced', name: 'Advanced Monitoring' },
+  { id: 'multiprotocol', name: 'Multiprotocol (NFS+SMB)' },
 ] as const;
 
+/**
+ * Bundle name used for the Multi-Protocol Support SLA (SLA #3) — informational/cosmetic only, no
+ * billing impact. Elected at signing only: it ships with the initial order and, unlike the other
+ * catalog add-ons, can never be added as a mid-term modification — see `getAvailableAddOnNamesForSubscription`.
+ */
+export const MULTIPROTOCOL_ADDON_NAME = 'Multiprotocol (NFS+SMB)';
+
+export function hasMultiProtocol(sub: Pick<Subscription, 'addOns'>): boolean {
+  return sub.addOns.includes(MULTIPROTOCOL_ADDON_NAME);
+}
+
+/**
+ * Whether a service-level row can receive the Multi-Protocol add-on's benefits (simultaneous
+ * File access, and — see `protocolEntitlementsForRow()` — unlocking Block/LUN too). This is a
+ * hardware question, not a "what's currently provisioned" one: any row on unified (AFF/FAS)
+ * hardware qualifies regardless of its current `storageType`; ASA (block-only) rows never do,
+ * since there's no File to multiprotocol in the first place.
+ */
+export function isMultiProtocolEligibleRow(row: Pick<ServiceLevelBreakdown, 'storageArchitecture'>): boolean {
+  return (row.storageArchitecture ?? 'unified') !== 'asa';
+}
+
+/** One of the three NetApp Keystone protocol families surfaced by the Protocol Support Matrix. */
+export type ProtocolFamily = 'file' | 'block' | 'object';
+
+/**
+ * Entitlement state for a protocol family on a given service-level row:
+ * - `active` — currently provisioned and in use.
+ * - `available` — not provisioned yet, but the hardware supports it; can be enabled at any time
+ *   from the subscription's existing committed capacity, with no additional subscription cost and
+ *   no hardware change.
+ * - `locked` — not possible on this row's hardware, full stop (see ASA below).
+ */
+export type ProtocolEntitlementStatus = 'active' | 'available' | 'locked';
+
+export interface ProtocolEntitlement {
+  family: ProtocolFamily;
+  status: ProtocolEntitlementStatus;
+}
+
+export const PROTOCOL_FAMILY_META: Record<ProtocolFamily, { label: string; protocols: string }> = {
+  file: { label: 'File', protocols: 'NFS / SMB' },
+  block: { label: 'Block', protocols: 'FC / iSCSI (LUN)' },
+  object: { label: 'Object', protocols: 'S3' },
+};
+
+/**
+ * Derives the Active / Available-to-enable / Locked status of each protocol family for one
+ * service-level row. ASA (All-Flash SAN Array) hardware is a hard lock: Block is the only family
+ * it can ever serve, so File and Object are `locked`, never merely unprovisioned. On unified
+ * (AFF/FAS) hardware — the default — all three families are physically possible from one system
+ * under a single Availability SLA; which ones are `active` vs `available` depends on what's
+ * currently provisioned (`storageType`) for File/Object, and on `storageType === 'block'` *or* the
+ * Multi-Protocol add-on for Block — the add-on provisions a LUN alongside the row's existing
+ * access, unlocking Block without requiring a separate block-only row.
+ */
+export function protocolEntitlementsForRow(
+  row: Pick<ServiceLevelBreakdown, 'storageType' | 'storageArchitecture'>,
+  subscription: Pick<Subscription, 'addOns'>,
+): ProtocolEntitlement[] {
+  if ((row.storageArchitecture ?? 'unified') === 'asa') {
+    return [
+      { family: 'file', status: 'locked' },
+      { family: 'block', status: 'active' },
+      { family: 'object', status: 'locked' },
+    ];
+  }
+  const storageType = row.storageType ?? 'unified';
+  const blockUnlockedByAddon = storageType !== 'block' && hasMultiProtocol(subscription);
+  return [
+    { family: 'file', status: storageType === 'unified' ? 'active' : 'available' },
+    { family: 'block', status: storageType === 'block' || blockUnlockedByAddon ? 'active' : 'available' },
+    { family: 'object', status: storageType === 'object' ? 'active' : 'available' },
+  ];
+}
+
+/** Whether any service-level row on this subscription runs on ASA (block-only) hardware. */
+export function hasAsaRow(subscription: Pick<Subscription, 'serviceLevelBreakdown'>): boolean {
+  return subscription.serviceLevelBreakdown.some((row) => (row.storageArchitecture ?? 'unified') === 'asa');
+}
+
+/**
+ * Catalog add-ons still requestable as a mid-term modification. Multi-Protocol is excluded
+ * unconditionally — it's only ever elected at signing (part of the initial order), never addable
+ * (or removable) once the subscription is active, regardless of whether this subscription has it.
+ */
 export function getAvailableAddOnNamesForSubscription(sub: Subscription): string[] {
-  return KEYSTONE_ADDON_CATALOG.filter((a) => !sub.addOns.includes(a.name)).map((a) => a.name);
+  return KEYSTONE_ADDON_CATALOG.filter((a) => !sub.addOns.includes(a.name) && a.name !== MULTIPROTOCOL_ADDON_NAME).map(
+    (a) => a.name,
+  );
 }
 
 export function overviewAddOnSlotTotals(
@@ -1804,6 +2267,22 @@ const sustainabilityPowerTemplatesByKey: Record<string, SustainabilityServiceLev
     currentWPerTib: 4.92,
     history: shiftPowerHistory(valuePowerHistory),
   },
+  'standard-hybrid': {
+    levelKey: 'standard-hybrid',
+    displayName: 'Standard-Hybrid',
+    compliance: 'compliant',
+    committedTib: 80,
+    minTib: 160,
+    deployedTib: 80,
+    deployedPctLabel: '100% of committed',
+    allocatedPowerW: 260,
+    powerPctOfTotal: 25.0,
+    slaLimitWPerTib: 6.5,
+    varianceWPerTib: -0.7,
+    variancePct: -10.8,
+    currentWPerTib: 5.8,
+    history: shiftPowerHistory(standardPowerHistory),
+  },
 };
 
 function applySubscriptionBreakdownToSustainabilityTemplate(
@@ -1866,6 +2345,10 @@ export interface PerformanceServiceLevelLatency {
   compliance: 'compliant' | 'breached' | 'n/a';
   currentP90Ms: number;
   breachDayCount: number;
+  /** Used ÷ committed for this level (%) — the Performance SLA credit-claim gate (see `SLA_CLAIM_MIN_UTILIZATION_PCT`). */
+  utilizationPct: number;
+  /** True when utilization meets the minimum threshold to be eligible to claim a breach credit. */
+  eligibleForClaim: boolean;
 }
 
 const extremeLatencyHistory: PerformanceLatencyPoint[] = [
@@ -1947,6 +2430,26 @@ const valueLatencyHistory: PerformanceLatencyPoint[] = [
   { label: 'Apr 4', p90Ms: 12.6 },
 ];
 
+const standardHybridLatencyHistory: PerformanceLatencyPoint[] = [
+  { label: 'Mar 1', p90Ms: 6.1 },
+  { label: 'Mar 6', p90Ms: 6.4 },
+  { label: 'Mar 11', p90Ms: 6.8 },
+  { label: 'Mar 16', p90Ms: 7.2 },
+  {
+    label: 'Mar 21',
+    p90Ms: 8.6,
+    validationDetail: 'P90 exceeded Standard-Hybrid target (< 8 ms) — working-set (SSD) cache miss rate spiked during a large sequential scan against HDD-backed capacity.',
+  },
+  { label: 'Mar 24', p90Ms: 7.1 },
+  {
+    label: 'Mar 28',
+    p90Ms: 8.9,
+    validationDetail: 'Second breach in window; correlated with backup fan-in hitting the HDD tier.',
+  },
+  { label: 'Apr 1', p90Ms: 7.0 },
+  { label: 'Apr 4', p90Ms: 7.3 },
+];
+
 type PerformanceLatencyTemplate = {
   levelKey: string;
   platform: 'ONTAP' | 'StorageGRID';
@@ -1970,6 +2473,12 @@ const performanceLatencyTemplatesByKey: Record<string, PerformanceLatencyTemplat
   },
   standard: { levelKey: 'standard', platform: 'ONTAP', slaP90Ms: 4, history: shiftLatencyHistory(standardLatencyHistory) },
   value: { levelKey: 'value', platform: 'ONTAP', slaP90Ms: 17, history: shiftLatencyHistory(valueLatencyHistory) },
+  'standard-hybrid': {
+    levelKey: 'standard-hybrid',
+    platform: 'ONTAP',
+    slaP90Ms: 8,
+    history: shiftLatencyHistory(standardHybridLatencyHistory),
+  },
   object: { levelKey: 'object', platform: 'StorageGRID', slaP90Ms: null, history: [] },
   s3: { levelKey: 'object', platform: 'StorageGRID', slaP90Ms: null, history: [] },
 };
@@ -1977,7 +2486,13 @@ const performanceLatencyTemplatesByKey: Record<string, PerformanceLatencyTemplat
 function finalizePerformanceLatencyRow(
   template: PerformanceLatencyTemplate,
   displayName: string,
+  breakdown: ServiceLevelBreakdown | undefined,
 ): PerformanceServiceLevelLatency {
+  const committed = breakdown?.committed ?? 0;
+  const used = breakdown ? usedTibFromBreakdownRow(breakdown) : 0;
+  const utilization = utilizationPct(committed, used);
+  const eligibleForClaim = isEligibleForSlaClaim(committed, used);
+
   if (template.slaP90Ms == null) {
     return {
       levelKey: template.levelKey,
@@ -1988,6 +2503,8 @@ function finalizePerformanceLatencyRow(
       compliance: 'n/a',
       currentP90Ms: 0,
       breachDayCount: 0,
+      utilizationPct: utilization,
+      eligibleForClaim: false,
     };
   }
   const sla = template.slaP90Ms;
@@ -2002,6 +2519,8 @@ function finalizePerformanceLatencyRow(
     breachDayCount,
     currentP90Ms: last?.p90Ms ?? 0,
     compliance: breachDayCount > 0 ? 'breached' : 'compliant',
+    utilizationPct: utilization,
+    eligibleForClaim,
   };
 }
 
@@ -2012,13 +2531,20 @@ export function buildPerformanceLatencyForSubscription(subscription: Subscriptio
     const key = levelName.toLowerCase();
     const template = performanceLatencyTemplatesByKey[key];
     if (!template) continue;
-    list.push(finalizePerformanceLatencyRow(template, levelName));
+    const breakdown = subscription.serviceLevelBreakdown.find((b) => b.level === levelName);
+    list.push(finalizePerformanceLatencyRow(template, levelName, breakdown));
   }
   return list;
 }
 
 /** ONTAP File & Block STaaS availability SLO (five nines), monthly basis */
-export const ONTAP_AVAILABILITY_SLO_PCT = 99.999;
+/**
+ * Availability SLA (SLA #2): 99.9999% (six nines) monthly uptime, guaranteed across Extreme,
+ * Premium, Performance, Standard, Value, and Standard-Hybrid — block and file only (Object /
+ * StorageGRID is out of scope, see `availabilityObjectPlaceholder`). Was previously five nines
+ * (99.999%); bumped for the new SLA.
+ */
+export const ONTAP_AVAILABILITY_SLO_PCT = 99.9999;
 
 /** One calendar day: average storage-array uptime % (prototype — monitoring tool aggregation) */
 export interface AvailabilityDayPoint {
@@ -2057,6 +2583,10 @@ export interface AvailabilityServiceLevel {
   compliance: 'compliant' | 'breached' | 'n/a';
   daysWithDowntime: number;
   incidents: AvailabilityDowntimeIncident[];
+  /** Used ÷ committed for this level (%) — the Availability SLA credit-claim gate (see `SLA_CLAIM_MIN_UTILIZATION_PCT`). */
+  utilizationPct: number;
+  /** True when utilization meets the minimum threshold to be eligible to claim a breach credit. */
+  eligibleForClaim: boolean;
 }
 
 /** Short month name of the current SLA tracking month (always `PLATFORM_REFERENCE_DATE`'s month). */
@@ -2185,18 +2715,35 @@ const availabilityOntapTemplatesByKey: Record<string, AvailabilityTemplateCore> 
     ],
     incidents: [],
   },
+  'standard-hybrid': {
+    levelKey: 'standard-hybrid',
+    downtimePerDay30: [
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    incidents: [
+      {
+        occurredAt: toCurrentAvailabilityMonthTimestamp('2026-04-21 02:47 UTC'),
+        durationMinutes: 1,
+        summary: 'HA pair both controllers unavailable during HDD-tier rebuild — monitoring tool; auto-failover completed.',
+        excluded: false,
+      },
+    ],
+  },
 };
 
 function finalizeAvailabilityRow(
   core: AvailabilityTemplateCore,
   displayName: string,
   storageArrayCount: number,
+  breakdown: ServiceLevelBreakdown | undefined,
 ): AvailabilityServiceLevel {
   const slo = ONTAP_AVAILABILITY_SLO_PCT;
   const daily = buildAvailabilityMonthDays(core.downtimePerDay30);
   const secondsInMonth = 30 * 86400;
   const maxDowntimeSecondsAllowed = secondsInMonth * (1 - slo / 100);
   const rolled = rollupAvailabilityMonth(daily, secondsInMonth, slo);
+  const committed = breakdown?.committed ?? 0;
+  const used = breakdown ? usedTibFromBreakdownRow(breakdown) : 0;
   return {
     levelKey: core.levelKey,
     displayName,
@@ -2212,6 +2759,8 @@ function finalizeAvailabilityRow(
     compliance: rolled.compliance,
     daysWithDowntime: rolled.daysWithDowntime,
     incidents: core.incidents,
+    utilizationPct: utilizationPct(committed, used),
+    eligibleForClaim: isEligibleForSlaClaim(committed, used),
   };
 }
 
@@ -2230,6 +2779,8 @@ const availabilityObjectPlaceholder: AvailabilityServiceLevel = {
   compliance: 'n/a',
   daysWithDowntime: 0,
   incidents: [],
+  utilizationPct: 0,
+  eligibleForClaim: false,
 };
 
 /** Availability SLO + daily heatmap rows for subscription service levels */
@@ -2246,7 +2797,85 @@ export function buildAvailabilityForSubscription(subscription: Subscription): Av
     const breakdown = subscription.serviceLevelBreakdown.find((b) => b.level === levelName);
     const committed = breakdown?.committed ?? 100;
     const storageArrayCount = Math.max(2, Math.min(8, Math.round(committed / 45 + 1)));
-    list.push(finalizeAvailabilityRow(core, levelName, storageArrayCount));
+    list.push(finalizeAvailabilityRow(core, levelName, storageArrayCount, breakdown));
+  }
+  return list;
+}
+
+// ---------------------------------------------------------------------------
+// Storage Efficiency SLA (SLA #4) — logical-metering, data-reducible workloads only.
+// Block and Unified are both guaranteed 2.5:1 realized (logical:physical) reduction; if the
+// array doesn't realize it, NetApp automatically ships additional disks — no customer claim
+// needed (contrast with Availability/Performance, which require a manual credit claim).
+// ---------------------------------------------------------------------------
+
+export interface StorageEfficiencyServiceLevel {
+  levelKey: string;
+  displayName: string;
+  storageType: 'block' | 'unified' | 'object';
+  meteringType: 'logical' | 'physical';
+  dataReducible: boolean;
+  /** Whether this row is even in scope for the guarantee (logical metering + data-reducible + not object). */
+  applicable: boolean;
+  /** Reason the row is out of scope, when `applicable` is false. */
+  notApplicableReason?: string;
+  targetRatio: number;
+  logicalUsedTib: number;
+  physicalUsedTib: number;
+  realizedRatio: number;
+  compliance: 'compliant' | 'breached' | 'n/a';
+  /** True once NetApp has auto-initiated disk remediation for a breached row (no customer action required). */
+  remediationInProgress: boolean;
+}
+
+/** Per-level Storage Efficiency SLA view (order matches `subscription.serviceLevels`). Object/StorageGRID, physical-metered, and non-data-reducible rows are marked `n/a`. */
+export function buildStorageEfficiencyForSubscription(subscription: Subscription): StorageEfficiencyServiceLevel[] {
+  const list: StorageEfficiencyServiceLevel[] = [];
+  for (const levelName of subscription.serviceLevels) {
+    const key = levelName.toLowerCase();
+    if (key === 'object' || key === 's3') continue; // Object storage is out of scope for this SLA.
+    const breakdown = subscription.serviceLevelBreakdown.find((b) => b.level === levelName);
+    if (!breakdown) continue;
+
+    const storageType = breakdown.storageType ?? 'unified';
+    const meteringType = breakdown.meteringType ?? 'logical';
+    const dataReducible = breakdown.dataReducible ?? true;
+    const logicalUsedTib = usedTibFromBreakdownRow(breakdown);
+    const targetRatio = STORAGE_EFFICIENCY_TARGET_RATIO[storageType === 'block' ? 'block' : 'unified'];
+
+    let applicable = true;
+    let notApplicableReason: string | undefined;
+    if (meteringType !== 'logical') {
+      applicable = false;
+      notApplicableReason = 'Physically-metered capacity — the Storage Efficiency SLA only applies to logical-metering subscriptions.';
+    } else if (!dataReducible) {
+      applicable = false;
+      notApplicableReason = 'Workload is not classified as data-reducible — verify with ' + STORAGE_EFFICIENCY_EXTERNAL_TOOL_NAME + ' before relying on this guarantee.';
+    }
+
+    const physicalUsedTib = breakdown.physicalUsedTib ?? Math.round((logicalUsedTib / targetRatio) * 10) / 10;
+    const realizedRatio = physicalUsedTib > 0 ? Math.round((logicalUsedTib / physicalUsedTib) * 100) / 100 : targetRatio;
+    const compliance: StorageEfficiencyServiceLevel['compliance'] = !applicable
+      ? 'n/a'
+      : realizedRatio >= targetRatio
+        ? 'compliant'
+        : 'breached';
+
+    list.push({
+      levelKey: key,
+      displayName: levelName,
+      storageType,
+      meteringType,
+      dataReducible,
+      applicable,
+      notApplicableReason,
+      targetRatio,
+      logicalUsedTib,
+      physicalUsedTib,
+      realizedRatio,
+      compliance,
+      remediationInProgress: compliance === 'breached',
+    });
   }
   return list;
 }
@@ -2376,6 +3005,8 @@ export const ADDON_MONTHLY_RATE_USD: Record<string, number> = {
   'Anti-Ransomware': 2500,
   'SnapMirror Cloud': 3500,
   'Advanced Monitoring': 1500,
+  // Multiprotocol (NFS+SMB) is cosmetic/informational — bundled at no extra charge.
+  [MULTIPROTOCOL_ADDON_NAME]: 0,
 };
 
 /** Sum of subscribed add-on rates (from `KEYSTONE_ADDON_CATALOG` / `subscription.addOns`). */
@@ -2426,6 +3057,7 @@ export const billingCommittedRatePerTibUsd: Record<string, number> = {
   premium: 88,
   performance: 82,
   standard: 72,
+  'standard-hybrid': 68,
   value: 62,
   object: 48,
   s3: 48,

@@ -426,7 +426,11 @@ export function ConsoleSupportOperations({
                           ? `${request.currentServiceLevel} → ${request.requestedServiceLevel}`
                           : request.type === 'New Subscription'
                             ? `${request.siteLocation} · ${request.serviceLevel} · ${request.committedCapacity}`
-                            : `${request.modification} · ${request.implementationDate}`;
+                            : request.type === 'SLA Credit Claim'
+                              ? `${request.slaCategory} SLA · ${request.serviceLevel} · ${request.estimatedCreditAmount}`
+                              : request.type === 'Capacity Add (SLA)'
+                                ? `${request.currentCommittedTib} → ${request.newCommittedTib} · $${request.blendedRatePerTibUsd}/TiB`
+                                : `${request.modification} · ${request.implementationDate}`;
                   return (
                     <div
                       key={request.id}

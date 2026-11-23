@@ -37,6 +37,7 @@ import { InactiveSubscriptionsModal } from "./InactiveSubscriptionsModal";
 import { NewSubscriptionDrawer } from "./NewSubscriptionDrawer";
 import { ServiceRequestDrawer } from "./ServiceRequestDrawer";
 import type { ConsoleServiceRequest } from "../../data/consoleOperationsMock";
+import { markSubscriptionActivated } from "../../data/activatedSubscriptionsStore";
 import {
   DataTable,
   DataTableHeader,
@@ -314,7 +315,10 @@ export function ConsoleSubscriptionsList({
 
                 <div className="flex flex-wrap gap-1 shrink-0">
                   {activationInProgressSub.serviceLevels.map((level, i) => (
-                    <span key={i} className="rounded bg-[#e0e0e0] px-2 py-0.5 text-[12px] font-normal text-[#1c1c1c]">
+                    <span
+                      key={i}
+                      className="whitespace-nowrap rounded bg-[#e0e0e0] px-2 py-0.5 text-[12px] font-normal text-[#1c1c1c]"
+                    >
                       {level}
                     </span>
                   ))}
@@ -441,13 +445,13 @@ export function ConsoleSubscriptionsList({
                         .map((level, i) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 bg-[#e0e0e0] text-[#1c1c1c] rounded text-[12px]"
+                            className="whitespace-nowrap px-2 py-0.5 bg-[#e0e0e0] text-[#1c1c1c] rounded text-[12px]"
                           >
                             {level}
                           </span>
                         ))}
                       {sub.serviceLevels.length > 2 && (
-                        <span className="px-2 py-0.5 bg-[#e0e0e0] text-[#1c1c1c] rounded text-[12px]">
+                        <span className="whitespace-nowrap px-2 py-0.5 bg-[#e0e0e0] text-[#1c1c1c] rounded text-[12px]">
                           +{sub.serviceLevels.length - 2}
                         </span>
                       )}
@@ -561,10 +565,12 @@ export function ConsoleSubscriptionsList({
           const activated = getSubscriptionById(SOVEREIGN_SUBSCRIPTION_ID);
           if (!activated) return;
           if (completed?.type === "New Subscription") {
-            applyOrderedConfigToSubscription(SOVEREIGN_SUBSCRIPTION_ID, {
+            const orderedConfig = {
               serviceLevel: consoleServiceLevelFromPlanName(completed.serviceLevel),
               committedTib: parseFloat(completed.committedCapacity),
-            });
+            };
+            applyOrderedConfigToSubscription(SOVEREIGN_SUBSCRIPTION_ID, orderedConfig);
+            markSubscriptionActivated({ id: SOVEREIGN_SUBSCRIPTION_ID, ...orderedConfig });
           }
           setMode("console-local");
           onSelectSubscription(activated, { justActivated: true });

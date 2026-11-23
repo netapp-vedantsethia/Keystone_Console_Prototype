@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, Circle, Clock, FileText, Package, RefreshCw, TrendingUp, Sliders } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, FileText, Package, RefreshCw, TrendingUp, Sliders, ShieldCheck, PlusCircle } from 'lucide-react';
 import {
   Sheet,
   SheetBody,
@@ -8,7 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '../ui/sheet';
-import { getSubscriptionById, formatSubscriptionIdentity, formatServiceLevels } from '../../data/mockData';
+import { getSubscriptionById, formatSubscriptionIdentity, formatServiceLevels, PRICING_ESTIMATE_DISCLAIMER } from '../../data/mockData';
 import {
   serviceRequestHasTracker,
   type ConsoleServiceRequest,
@@ -32,6 +32,8 @@ const TYPE_ICON: Record<ConsoleServiceRequest['type'], typeof FileText> = {
   'Capacity Increase': TrendingUp,
   'Service Level Change': Sliders,
   'New Subscription': Package,
+  'SLA Credit Claim': ShieldCheck,
+  'Capacity Add (SLA)': PlusCircle,
 };
 
 function getStatusTone(status: string): StatusTone {
@@ -315,6 +317,7 @@ export function ServiceRequestDrawer({ isOpen, onClose, request }: ServiceReques
                   <span className="text-gray-600">Estimated cost</span>
                   <span className="font-[590] text-[#1c1c1c]">{request.estimatedCost}</span>
                 </div>
+                <p className="text-[12px] italic text-gray-500 font-['SF_Pro',sans-serif]">{PRICING_ESTIMATE_DISCLAIMER}</p>
                 <div>
                   <div className="mb-1 text-[12px] font-[590] text-gray-600 font-['SF_Pro',sans-serif]">Rollback plan</div>
                   <p className="text-[14px] text-gray-700 font-['SF_Pro',sans-serif]">{request.rollbackPlan}</p>
@@ -373,6 +376,65 @@ export function ServiceRequestDrawer({ isOpen, onClose, request }: ServiceReques
                   <div className="mb-1 text-[12px] font-[590] text-gray-600 font-['SF_Pro',sans-serif]">Business justification</div>
                   <p className="text-[14px] text-gray-700 font-['SF_Pro',sans-serif]">{request.businessJustification}</p>
                 </div>
+              </div>
+            )}
+
+            {request.type === 'SLA Credit Claim' && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-md bg-white border border-gray-200 p-3">
+                    <div className="text-[12px] text-gray-500 font-['SF_Pro',sans-serif]">SLA category</div>
+                    <div className="text-[14px] font-[590] text-[#1c1c1c] font-['SF_Pro',sans-serif]">{request.slaCategory} SLA</div>
+                  </div>
+                  <div className="rounded-md bg-white border border-blue-200 p-3">
+                    <div className="text-[12px] text-gray-500 font-['SF_Pro',sans-serif]">Service level</div>
+                    <div className="text-[14px] font-[590] text-blue-700 font-['SF_Pro',sans-serif]">{request.serviceLevel}</div>
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-1 text-[12px] font-[590] text-gray-600 font-['SF_Pro',sans-serif]">Breach summary</div>
+                  <p className="text-[14px] text-gray-700 font-['SF_Pro',sans-serif]">{request.breachSummary}</p>
+                </div>
+                <div className="flex justify-between text-[14px] font-['SF_Pro',sans-serif]">
+                  <span className="text-gray-600">Downloaded report</span>
+                  <span className="font-[590] text-[#1c1c1c]">{request.reportFileName}</span>
+                </div>
+                <div className="flex justify-between text-[14px] font-['SF_Pro',sans-serif]">
+                  <span className="text-gray-600">Estimated credit</span>
+                  <span className="font-[590] text-green-700">{request.estimatedCreditAmount}</span>
+                </div>
+              </div>
+            )}
+
+            {request.type === 'Capacity Add (SLA)' && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-md bg-white border border-gray-200 p-3">
+                    <div className="text-[12px] text-gray-500 font-['SF_Pro',sans-serif]">Current committed</div>
+                    <div className="text-[14px] font-[590] text-[#1c1c1c] font-['SF_Pro',sans-serif]">{request.currentCommittedTib}</div>
+                  </div>
+                  <div className="rounded-md bg-white border border-blue-200 p-3">
+                    <div className="text-[12px] text-gray-500 font-['SF_Pro',sans-serif]">New committed</div>
+                    <div className="text-[14px] font-[590] text-blue-700 font-['SF_Pro',sans-serif]">{request.newCommittedTib}</div>
+                  </div>
+                </div>
+                <div className="flex justify-between text-[14px] font-['SF_Pro',sans-serif]">
+                  <span className="text-gray-600">Service level</span>
+                  <span className="font-[590] text-[#1c1c1c]">{request.serviceLevel}</span>
+                </div>
+                <div className="flex justify-between text-[14px] font-['SF_Pro',sans-serif]">
+                  <span className="text-gray-600">Capacity added</span>
+                  <span className="font-[590] text-[#1c1c1c]">{request.addedTib}</span>
+                </div>
+                <div className="flex justify-between text-[14px] font-['SF_Pro',sans-serif]">
+                  <span className="text-gray-600">Blended rate ($/TiB)</span>
+                  <span className="font-[590] text-[#1c1c1c]">{request.blendedRatePerTibUsd}</span>
+                </div>
+                <div className="flex justify-between text-[14px] font-['SF_Pro',sans-serif]">
+                  <span className="text-gray-600">Estimated incremental cost</span>
+                  <span className="font-[590] text-[#1c1c1c]">{request.estimatedCost}</span>
+                </div>
+                <p className="text-[12px] italic text-gray-500 font-['SF_Pro',sans-serif]">{PRICING_ESTIMATE_DISCLAIMER}</p>
               </div>
             )}
           </div>

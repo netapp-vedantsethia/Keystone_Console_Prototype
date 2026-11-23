@@ -58,6 +58,24 @@ export const SERVICE_LEVEL_CHANGE_TRACKER_STAGE_NAMES = [
   'Completed',
 ] as const;
 
+/** SLA Credit Claim (Availability + Performance SLAs) — manual claim initiated by the customer after downloading the breach report. */
+export const SLA_CREDIT_CLAIM_TRACKER_STAGE_NAMES = [
+  'Claim Submitted',
+  'Evidence Review',
+  'Credit Approval',
+  'Credit Applied',
+  'Completed',
+] as const;
+
+/** Capacity Add SLA — self-service capacity increase at the original purchase rate (blended). */
+export const CAPACITY_ADD_TRACKER_STAGE_NAMES = [
+  'Request Submitted',
+  'Eligibility Verification',
+  'Approval',
+  'Capacity Provisioned',
+  'Completed',
+] as const;
+
 export const NEW_SUBSCRIPTION_TRACKER_STAGE_NAMES = [
   'Request Submitted',
   'Sizing & Validation',
@@ -104,6 +122,22 @@ const SERVICE_LEVEL_CHANGE_STAGE_DETAILS: Record<string, string> = {
   Approval: 'Service level change approved; scheduling implementation.',
   Implementation: 'Volumes being migrated to the new service level.',
   Completed: 'Service level change completed and volumes updated.',
+};
+
+const SLA_CREDIT_CLAIM_STAGE_DETAILS: Record<string, string> = {
+  'Claim Submitted': 'Breach report downloaded and credit claim submitted to your NetApp account team.',
+  'Evidence Review': 'NetApp reviewing the downloaded breach report against the monitored SLA data.',
+  'Credit Approval': 'Breach confirmed; credit amount approved per your subscription agreement.',
+  'Credit Applied': 'Approved credit is being applied to your next invoice.',
+  Completed: 'SLA credit claim completed.',
+};
+
+const CAPACITY_ADD_STAGE_DETAILS: Record<string, string> = {
+  'Request Submitted': 'Capacity Add SLA request submitted at the calculated blended rate.',
+  'Eligibility Verification': 'NetApp verifying deal type, term timing, and 12-month cooldown eligibility.',
+  Approval: 'Capacity Add request approved; scheduling provisioning.',
+  'Capacity Provisioned': 'Additional committed capacity being provisioned at the blended rate.',
+  Completed: 'Capacity Add completed; new committed capacity and blended rate are active.',
 };
 
 function parseIsoDateLocal(dateIso: string): Date {
@@ -195,6 +229,30 @@ export function buildServiceLevelChangeTrackerStages(
     activeIndex,
     requestDateIso,
     SERVICE_LEVEL_CHANGE_STAGE_DETAILS,
+  );
+}
+
+export function buildSlaCreditClaimTrackerStages(
+  activeIndex: number,
+  requestDateIso: string,
+): RequestTrackerStage[] {
+  return buildRequestTrackerStages(
+    SLA_CREDIT_CLAIM_TRACKER_STAGE_NAMES,
+    activeIndex,
+    requestDateIso,
+    SLA_CREDIT_CLAIM_STAGE_DETAILS,
+  );
+}
+
+export function buildCapacityAddTrackerStages(
+  activeIndex: number,
+  requestDateIso: string,
+): RequestTrackerStage[] {
+  return buildRequestTrackerStages(
+    CAPACITY_ADD_TRACKER_STAGE_NAMES,
+    activeIndex,
+    requestDateIso,
+    CAPACITY_ADD_STAGE_DETAILS,
   );
 }
 
@@ -292,6 +350,42 @@ export type ConsoleServiceRequest =
       estimatedCost: string;
       implementationDate: string;
       rollbackPlan: string;
+      stages?: RequestTrackerStage[];
+    }
+  | {
+      id: string;
+      subscriptionId: string;
+      type: 'SLA Credit Claim';
+      requestedBy: string;
+      requestDate: string;
+      status: string;
+      priority: string;
+      assignedTo: string;
+      lastUpdated: string;
+      /** Which SLA pillar the breach was reported against. */
+      slaCategory: 'Availability' | 'Performance';
+      serviceLevel: string;
+      breachSummary: string;
+      reportFileName: string;
+      estimatedCreditAmount: string;
+      stages?: RequestTrackerStage[];
+    }
+  | {
+      id: string;
+      subscriptionId: string;
+      type: 'Capacity Add (SLA)';
+      requestedBy: string;
+      requestDate: string;
+      status: string;
+      priority: string;
+      assignedTo: string;
+      lastUpdated: string;
+      serviceLevel: string;
+      currentCommittedTib: string;
+      addedTib: string;
+      newCommittedTib: string;
+      blendedRatePerTibUsd: string;
+      estimatedCost: string;
       stages?: RequestTrackerStage[];
     };
 

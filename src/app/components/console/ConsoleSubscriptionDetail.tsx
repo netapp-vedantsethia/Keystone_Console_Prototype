@@ -26,6 +26,7 @@ import { RenewalFormDrawer } from './RenewalFormDrawer';
 import { ModificationFormDrawer } from './ModificationFormDrawer';
 import { OpenSupportCaseModal } from './OpenSupportCaseModal';
 import { ServiceRequestDrawer } from './ServiceRequestDrawer';
+import { useIsSubscriptionActivated } from '../../data/activatedSubscriptionsStore';
 import { downloadSubscriptionsListCsv } from '../../utils/subscriptionsCsv';
 import { serviceRequestHasTracker, type ConsoleServiceRequest } from '../../data/consoleOperationsMock';
 import { useServiceRequests } from '../../data/serviceRequestsStore';
@@ -86,6 +87,9 @@ export function ConsoleSubscriptionDetail({
   const isMergedAway = subscription.lifecycleStatus === 'merged' && Boolean(subscription.mergedInto);
   const mergeTarget = subscription.mergedInto ? getSubscriptionById(subscription.mergedInto.subscriptionId) : undefined;
   const sovereigntyMeta = getSovereigntyMeta(subscription);
+  /* Activation is permanent, so the banner shows on every later visit, not just the hand-off. */
+  const wasActivated = useIsSubscriptionActivated(subscription.id);
+  const showActivatedBanner = justActivated || wasActivated;
   const isPrivateSovereign = isDarkSite(subscription);
 
   const tabs = useMemo(() => {
@@ -194,7 +198,7 @@ export function ConsoleSubscriptionDetail({
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
-      {justActivated && (
+      {showActivatedBanner && (
         <div className="border-b border-green-200 bg-green-50 px-5 py-4">
           <div className="flex items-start gap-3">
             <span className="relative mt-0.5 flex h-3 w-3 shrink-0">

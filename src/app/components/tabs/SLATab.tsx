@@ -10,20 +10,43 @@ import {
   ReferenceLine,
   ReferenceArea,
 } from 'recharts';
-import { Activity, AlertTriangle, CheckCircle, Info, LayoutGrid, Zap } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Download,
+  ExternalLink,
+  Info,
+  LayoutGrid,
+  ShieldCheck,
+  Truck,
+  Zap,
+} from 'lucide-react';
 import {
   buildAvailabilityForSubscription,
   buildPerformanceLatencyForSubscription,
+  buildStorageEfficiencyForSubscription,
   buildSustainabilityPowerForSubscription,
   mockSubscriptions,
   ONTAP_AVAILABILITY_SLO_PCT,
+  SLA_CLAIM_MIN_UTILIZATION_PCT,
+  STORAGE_EFFICIENCY_EXTERNAL_TOOL_NAME,
+  STORAGE_EFFICIENCY_EXTERNAL_TOOL_URL,
   type AvailabilityServiceLevel,
   type Subscription,
   type PerformanceLatencyPoint,
   type PerformanceServiceLevelLatency,
+  type StorageEfficiencyServiceLevel,
   type SustainabilityPowerPoint,
   type SustainabilityServiceLevelPower,
 } from '../../data/mockData';
+import {
+  buildSlaCreditClaimTrackerStages,
+  nextServiceRequestId,
+  type ConsoleServiceRequest,
+} from '../../data/consoleOperationsMock';
+import { addServiceRequest, getServiceRequests } from '../../data/serviceRequestsStore';
+import { downloadCsv } from '../../utils/csv';
 import { BpTooltip, BpTabGroup } from '@netapp/blueprint/react';
 import { StatusBadge, type StatusTone } from '../ui/StatusBadge';
 
@@ -445,6 +468,215 @@ function AvailabilityDayHeatmap({ level }: { level: AvailabilityServiceLevel }) 
   );
 }
 
+interface BreachClaimPanelProps {
+  subscription: Subscription;
+  slaCategory: 'Availability' | 'Performance';
+  levelDisplayName: string;
+  compliance: 'compliant' | 'breached' | 'n/a';
+  utilizationPct: number;
+  eligibleForClaim: boolean;
+  metricLabel: string;
+  measuredValueLabel: string;
+  targetValueLabel: string;
+}
+
+/**
+ * Shared breach + credit-claim panel for the Availability and Performance SLAs. MVP1 claims are
+ * manual (per plan): the customer downloads a breach report and sends it to NetApp, or submits a
+ * trackable claim from here which notifies the account team the same way.
+ */
+function BreachClaimPanel({
+  subscription,
+  slaCategory,
+  levelDisplayName,
+  compliance,
+  utilizationPct,
+  eligibleForClaim,
+  metricLabel,
+  measuredValueLabel,
+  targetValueLabel,
+}: BreachClaimPanelProps) {
+  const [submittedRequest, setSubmittedRequest] = useState<ConsoleServiceRequest | null>(null);
+
+  useEffect(() => {
+    setSubmittedRequest(null);
+  }, [subscription.id, slaCategory, levelDisplayName]);
+
+  if (compliance !== 'breached') return null;
+
+  const reportFileName = `${subscription.number}-${slaCategory.toLowerCase()}-breach-report.csv`;
+
+  const handleDownload = () => {
+    downloadCsv(
+      ['Field', 'Value'],
+      [
+        ['Subscription', `${subscription.number} — ${subscription.account}`],
+        ['Service level', levelDisplayName],
+        ['SLA category', `${slaCategory} SLA`],
+        [metricLabel, measuredValueLabel],
+        ['Target', targetValueLabel],
+        ['Utilization vs committed capacity', `${utilizationPct}%`],
+        [`Claim eligible (>= ${SLA_CLAIM_MIN_UTILIZATION_PCT}% utilization)`, eligibleForClaim ? 'Yes' : 'No'],
+      ],
+      reportFileName,
+    );
+  };
+
+  const handleSubmitClaim = () => {
+    const requestDate = new Date().toISOString().slice(0, 10);
+    const request: ConsoleServiceRequest = {
+      id: nextServiceRequestId(getServiceRequests()),
+      subscriptionId: subscription.id,
+      type: 'SLA Credit Claim',
+      requestedBy: subscription.account,
+      requestDate,
+      status: 'In Review',
+      priority: 'Medium',
+      assignedTo: 'NetApp Account Team',
+      lastUpdated: 'Just now',
+      slaCategory,
+      serviceLevel: levelDisplayName,
+      breachSummary: `${metricLabel}: ${measuredValueLabel} vs target ${targetValueLabel}`,
+      reportFileName,
+      estimatedCreditAmount: 'Pending NetApp review',
+      stages: buildSlaCreditClaimTrackerStages(0, requestDate),
+    };
+    addServiceRequest(request);
+    setSubmittedRequest(request);
+  };
+
+  if (!eligibleForClaim) {
+    return (
+      <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/80 p-4">
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+        <div>
+          <div className="text-sm font-semibold text-gray-900">Breach detected — not eligible to claim credits</div>
+          <p className="mt-1 text-sm text-gray-700">
+            {levelDisplayName} is utilized at <strong>{utilizationPct}%</strong> of committed capacity, below the{' '}
+            <strong>{SLA_CLAIM_MIN_UTILIZATION_PCT}%</strong> minimum required to be eligible for a {slaCategory} SLA breach credit
+            claim.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-red-200 bg-red-50/60 p-5">
+      <div className="flex items-start gap-3">
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+        <div className="flex-1">
+          <div className="text-sm font-semibold text-gray-900">{slaCategory} SLA breach — eligible to claim credits</div>
+          <p className="mt-1 text-sm text-gray-700">
+            {levelDisplayName} is utilized at <strong>{utilizationPct}%</strong> of committed capacity (≥{' '}
+            {SLA_CLAIM_MIN_UTILIZATION_PCT}% required) and breached the <strong>{targetValueLabel}</strong> target this period (
+            {measuredValueLabel}). MVP1 claims are manual: download the breach report and send it to your NetApp account team.
+          </p>
+
+          <ol className="mt-4 space-y-1.5 text-sm text-gray-700">
+            <li className="flex gap-2">
+              <span className="font-semibold text-gray-900">1.</span> Download the breach report for {levelDisplayName}.
+            </li>
+            <li className="flex gap-2">
+              <span className="font-semibold text-gray-900">2.</span> Send the report to your NetApp account team, or submit the
+              claim below to notify them automatically.
+            </li>
+            <li className="flex gap-2">
+              <span className="font-semibold text-gray-900">3.</span> NetApp reviews the reported breach against monitored SLA
+              data.
+            </li>
+            <li className="flex gap-2">
+              <span className="font-semibold text-gray-900">4.</span> Approved credit is applied to your next invoice.
+            </li>
+          </ol>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              <Download className="h-4 w-4" />
+              Download breach report (CSV)
+            </button>
+            {submittedRequest ? (
+              <StatusBadge tone="green" label={`Claim submitted · ${submittedRequest.id}`} />
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmitClaim}
+                className="inline-flex items-center gap-2 rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Submit credit claim
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StorageEfficiencyCard({ level }: { level: StorageEfficiencyServiceLevel }) {
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-5">
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <h4 className="text-base font-semibold text-gray-900">{level.displayName}</h4>
+        <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-600">
+          {level.storageType}
+        </span>
+      </div>
+      {!level.applicable ? (
+        <div className="flex items-start gap-2 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+          <span>{level.notApplicableReason ?? 'Not in scope for the Storage Efficiency SLA.'}</span>
+        </div>
+      ) : (
+        <>
+          <p className="text-sm text-gray-600">
+            Guaranteed ratio: <strong>{level.targetRatio.toFixed(1)}:1</strong> ({level.meteringType} metering)
+          </p>
+          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <dt className="text-xs text-gray-500">Logical used</dt>
+              <dd className="font-medium text-gray-900">{level.logicalUsedTib} TiB</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-gray-500">Physical used</dt>
+              <dd className="font-medium text-gray-900">{level.physicalUsedTib} TiB</dd>
+            </div>
+          </dl>
+          <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-wide text-gray-500">Realized ratio</div>
+                <div
+                  className={`mt-1 text-2xl font-semibold tabular-nums ${
+                    level.compliance === 'breached' ? 'text-red-600' : 'text-green-600'
+                  }`}
+                >
+                  {level.realizedRatio.toFixed(2)}:1
+                </div>
+              </div>
+              <StatusBadge
+                tone={complianceTone(level.compliance)}
+                label={level.compliance === 'breached' ? 'Breached' : 'Compliant'}
+              />
+            </div>
+          </div>
+          {level.remediationInProgress && (
+            <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-blue-700">
+              <Truck className="h-3.5 w-3.5 shrink-0" />
+              Additional disks auto-shipped to restore ratio
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 export function SLATab({ subscription }: { subscription?: Subscription } = {}) {
   const [activeSubTab, setActiveSubTab] = useState('availability');
   const [sustainabilityLevelIndex, setSustainabilityLevelIndex] = useState(0);
@@ -466,6 +698,22 @@ export function SLATab({ subscription }: { subscription?: Subscription } = {}) {
     () => buildAvailabilityForSubscription(sustainabilitySub),
     [sustainabilitySub],
   );
+
+  const storageEfficiencyLevels = useMemo(
+    () => buildStorageEfficiencyForSubscription(sustainabilitySub),
+    [sustainabilitySub],
+  );
+
+  const storageEfficiencySummary = useMemo(() => {
+    const applicable = storageEfficiencyLevels.filter((l) => l.applicable);
+    const breached = applicable.filter((l) => l.compliance === 'breached');
+    return {
+      applicableCount: applicable.length,
+      breachedCount: breached.length,
+      allCompliant: applicable.length > 0 && breached.length === 0,
+      remediationCount: storageEfficiencyLevels.filter((l) => l.remediationInProgress).length,
+    };
+  }, [storageEfficiencyLevels]);
 
   const availabilitySummary = useMemo(() => {
     const ontap = availabilityLevels.filter((l) => l.sloUptimePct != null);
@@ -549,6 +797,11 @@ export function SLATab({ subscription }: { subscription?: Subscription } = {}) {
   const subTabs = [
     { id: 'availability', label: 'Availability', description: 'Monthly uptime, downtime budget, heatmap, and counted incidents.' },
     { id: 'performance', label: 'Performance', description: 'P90 latency trends in milliseconds across the last 30 days.' },
+    {
+      id: 'storage-efficiency',
+      label: 'Storage Efficiency',
+      description: 'Realized (physical) vs logical capacity ratio for logical-metering, data-reducible service levels.',
+    },
     { id: 'sustainability', label: 'Sustainability', description: 'Power efficiency by service level, measured as watts per TiB.' },
   ];
 
@@ -682,6 +935,14 @@ export function SLATab({ subscription }: { subscription?: Subscription } = {}) {
                           Latest P90:{' '}
                           <span className="font-semibold tabular-nums">{level.currentP90Ms.toFixed(2)} ms</span>
                         </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          Utilization: <span className="font-medium text-gray-700">{level.utilizationPct}%</span> of committed
+                          {level.compliance === 'breached' && (
+                            <span className={level.eligibleForClaim ? 'ml-1 text-red-600' : 'ml-1 text-amber-600'}>
+                              · {level.eligibleForClaim ? 'claim eligible' : 'below claim threshold'}
+                            </span>
+                          )}
+                        </p>
                         <div className="mt-3 flex items-center justify-between">
                           <StatusBadge
                             tone={complianceTone(level.compliance)}
@@ -703,6 +964,20 @@ export function SLATab({ subscription }: { subscription?: Subscription } = {}) {
               <div className="rounded-lg border border-gray-200 bg-white p-6">
                 <PerformanceLatencyZoomChart level={performanceLevels[performanceLevelIndex]} />
               </div>
+
+              {performanceLevels[performanceLevelIndex]?.slaP90Ms != null && (
+                <BreachClaimPanel
+                  subscription={sustainabilitySub}
+                  slaCategory="Performance"
+                  levelDisplayName={performanceLevels[performanceLevelIndex].displayName}
+                  compliance={performanceLevels[performanceLevelIndex].compliance}
+                  utilizationPct={performanceLevels[performanceLevelIndex].utilizationPct}
+                  eligibleForClaim={performanceLevels[performanceLevelIndex].eligibleForClaim}
+                  metricLabel="Measured P90 latency"
+                  measuredValueLabel={`${performanceLevels[performanceLevelIndex].currentP90Ms.toFixed(2)} ms`}
+                  targetValueLabel={`< ${performanceLevels[performanceLevelIndex].slaP90Ms} ms`}
+                />
+              )}
 
               {performanceBreachEvents.length > 0 && (
                 <div className="rounded-lg border border-gray-200 bg-white p-6">
@@ -856,6 +1131,14 @@ export function SLATab({ subscription }: { subscription?: Subscription } = {}) {
                           <span className="tabular-nums">{Math.round(level.maxDowntimeSecondsAllowed)}s</span> max ·{' '}
                           {level.storageArrayCount} array(s) (model)
                         </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          Utilization: <span className="font-medium text-gray-700">{level.utilizationPct}%</span> of committed
+                          {level.compliance === 'breached' && (
+                            <span className={level.eligibleForClaim ? 'ml-1 text-red-600' : 'ml-1 text-amber-600'}>
+                              · {level.eligibleForClaim ? 'claim eligible' : 'below claim threshold'}
+                            </span>
+                          )}
+                        </p>
                         <div className="mt-3 flex items-center justify-between">
                           <StatusBadge
                             tone={complianceTone(level.compliance)}
@@ -907,6 +1190,20 @@ export function SLATab({ subscription }: { subscription?: Subscription } = {}) {
                     </div>
                   )}
 
+                  {availabilityLevels[availabilityLevelIndex].sloUptimePct != null && (
+                    <BreachClaimPanel
+                      subscription={sustainabilitySub}
+                      slaCategory="Availability"
+                      levelDisplayName={availabilityLevels[availabilityLevelIndex].displayName}
+                      compliance={availabilityLevels[availabilityLevelIndex].compliance}
+                      utilizationPct={availabilityLevels[availabilityLevelIndex].utilizationPct}
+                      eligibleForClaim={availabilityLevels[availabilityLevelIndex].eligibleForClaim}
+                      metricLabel="Measured order uptime"
+                      measuredValueLabel={`${availabilityLevels[availabilityLevelIndex].orderUptimePct.toFixed(5)}%`}
+                      targetValueLabel={`≥ ${ONTAP_AVAILABILITY_SLO_PCT}%`}
+                    />
+                  )}
+
                   {availabilityLevels[availabilityLevelIndex].incidents.length > 0 && (
                     <div className="rounded-lg border border-gray-200 bg-white p-6">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">Downtime-related incidents</h3>
@@ -954,6 +1251,130 @@ export function SLATab({ subscription }: { subscription?: Subscription } = {}) {
                   </p>
                 </div>
               </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Storage Efficiency SLA Tab — realized (physical) vs logical ratio for logical-metering, data-reducible levels */}
+      {activeSubTab === 'storage-efficiency' && (
+        <div className="space-y-6">
+          {storageEfficiencyLevels.length === 0 ? (
+            <div className="rounded-lg border border-gray-200 bg-white px-4 py-8 text-center text-sm text-gray-600">
+              No Storage Efficiency SLA rows apply to this subscription&apos;s service levels (Object storage is out of scope).
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div
+                  className={`rounded-lg border p-5 ${
+                    storageEfficiencySummary.applicableCount === 0
+                      ? 'border-gray-200 bg-white'
+                      : storageEfficiencySummary.allCompliant
+                        ? 'border-green-200 bg-green-50/50'
+                        : 'border-amber-200 bg-amber-50/60'
+                  }`}
+                >
+                  <div className="mb-2 flex items-center gap-3">
+                    {storageEfficiencySummary.applicableCount === 0 ? (
+                      <Info className="h-5 w-5 text-gray-400" />
+                    ) : storageEfficiencySummary.allCompliant ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <AlertTriangle className="h-5 w-5 text-amber-600" />
+                    )}
+                    <div className="flex items-center gap-1.5 text-sm text-gray-700">
+                      <span>Realized efficiency ratio</span>
+                      <InfoTooltip label="How is this guaranteed?">
+                        For logical-metering, data-reducible service levels, NetApp guarantees a realized (physical) reduction ratio of
+                        2.5:1 for Block and 2.5:1 for Unified. If the realized ratio falls short, NetApp automatically ships additional
+                        disks — no manual claim required.
+                      </InfoTooltip>
+                    </div>
+                  </div>
+                  <div
+                    className={`text-2xl font-semibold ${
+                      storageEfficiencySummary.applicableCount === 0
+                        ? 'text-gray-500'
+                        : storageEfficiencySummary.allCompliant
+                          ? 'text-green-700'
+                          : 'text-amber-800'
+                    }`}
+                  >
+                    {storageEfficiencySummary.applicableCount === 0
+                      ? 'Not applicable'
+                      : storageEfficiencySummary.allCompliant
+                        ? 'All in-scope levels compliant'
+                        : `${storageEfficiencySummary.breachedCount} level(s) below ratio`}
+                  </div>
+                  <p className="mt-2 text-xs text-gray-600">
+                    {storageEfficiencySummary.applicableCount} of {storageEfficiencyLevels.length} level(s) in scope (logical metering +
+                    data-reducible)
+                  </p>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-white p-5">
+                  <div className="mb-2 flex items-center gap-3">
+                    <Truck className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm text-gray-600">Automatic remediation</span>
+                  </div>
+                  <div
+                    className={`text-2xl font-semibold tabular-nums ${
+                      storageEfficiencySummary.remediationCount > 0 ? 'text-blue-700' : 'text-gray-900'
+                    }`}
+                  >
+                    {storageEfficiencySummary.remediationCount}
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Level(s) with additional disks auto-initiated — no manual claim needed for this SLA.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-white p-5">
+                  <div className="mb-2 flex items-center gap-3">
+                    <Info className="h-5 w-5 text-gray-600" />
+                    <span className="text-sm text-gray-600">Verify data reducibility</span>
+                  </div>
+                  <a
+                    href={STORAGE_EFFICIENCY_EXTERNAL_TOOL_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-[#0067c5] hover:underline"
+                  >
+                    {STORAGE_EFFICIENCY_EXTERNAL_TOOL_NAME}
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Use this tool to confirm whether a workload qualifies as data-reducible before relying on this guarantee.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className={`grid grid-cols-1 gap-4 ${
+                  storageEfficiencyLevels.length === 1
+                    ? ''
+                    : storageEfficiencyLevels.length === 2
+                      ? 'lg:grid-cols-2'
+                      : 'lg:grid-cols-2 xl:grid-cols-3'
+                }`}
+              >
+                {storageEfficiencyLevels.map((level) => (
+                  <StorageEfficiencyCard key={level.levelKey} level={level} />
+                ))}
+              </div>
+
+              {storageEfficiencySummary.remediationCount > 0 && (
+                <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50/70 p-4">
+                  <Truck className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">Automatic remediation in progress</div>
+                    <p className="mt-1 text-sm text-gray-700">
+                      NetApp has detected the realized efficiency shortfall shown above and automatically initiated shipment of
+                      additional disks to restore the guaranteed ratio. No action is required from you — unlike Availability/Performance
+                      breaches, this SLA does not use a manual credit-claim process.
+                    </p>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
