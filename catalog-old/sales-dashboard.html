@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Dashboard | Quotes</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="margin-analysis.css">
+  <link rel="stylesheet" href="quotes.css">
+</head>
+<body class="quotes-page sales-dashboard-page">
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <a href="index.html" class="logo"><span class="logo-icon">N</span><span class="logo-text">Subscription Engine</span></a>
+    </div>
+    <div class="header-center">
+      <div class="search-bar"><input type="search" placeholder="Search..." aria-label="Search"></div>
+    </div>
+    <div class="header-right">
+      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Chris Collins (Sales)</span></div>
+      <button class="icon-btn" aria-label="Notifications">N</button>
+      <button class="icon-btn" aria-label="Help">?</button>
+      <div class="user-avatar">JD</div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <ul class="nav-list">
+      <li><a href="create-opportunity.html" class="nav-link">Opportunity</a></li>
+      <li><a href="sizing.html" class="nav-link">Sizing</a></li>
+      <li><a href="deviations.html" class="nav-link">Feature requests</a></li>
+      <li><a href="sales-dashboard.html" class="nav-link active">Sales dashboard</a></li>
+      <li><a href="index.html" class="nav-link">Deal dashboard</a></li>
+      <li><a href="margin-analysis.html" class="nav-link">Deal margin</a></li>
+    </ul>
+  </nav>
+
+  <div class="progress-strip">
+    <div class="progress-steps">
+      <a href="create-opportunity.html" class="step completed"><span class="step-icon">✓</span><span class="step-label">Create an opportunity</span></a>
+      <a href="sizing.html" class="step completed"><span class="step-icon">✓</span><span class="step-label">Create a quote</span></a>
+      <a href="deviations.html" class="step completed"><span class="step-icon">✓</span><span class="step-label">Apply feature request</span></a>
+      <a href="sales-dashboard.html" class="step active"><span class="step-icon">4</span><span class="step-label">Track quote status</span></a>
+      <a href="#" class="step"><span class="step-icon">5</span><span class="step-label">Site readiness</span></a>
+      <a href="#" class="step"><span class="step-icon">6</span><span class="step-label">Activate subscription</span></a>
+    </div>
+  </div>
+
+  <div class="layout-wrapper">
+    <main class="main-content quotes-main">
+      <div class="content-header quotes-header"><h1>My Quotes</h1></div>
+
+      <div class="quotes-cards">
+        <article class="quotes-card"><span class="quotes-card-icon">D</span><span class="quotes-card-value-wrap"><span class="quotes-card-value" id="stat-draft">0</span><span class="quotes-card-label">Draft</span></span></article>
+        <article class="quotes-card quotes-card--highlight"><span class="quotes-card-icon" style="background:#0069b1;color:#fff;">CR</span><span class="quotes-card-value-wrap"><span class="quotes-card-value" id="stat-customer-submitted">0</span><span class="quotes-card-label">Customer requests</span></span></article>
+        <article class="quotes-card"><span class="quotes-card-icon">IR</span><span class="quotes-card-value-wrap"><span class="quotes-card-value" id="stat-in-review">0</span><span class="quotes-card-label">In review</span></span></article>
+        <article class="quotes-card"><span class="quotes-card-icon">PU</span><span class="quotes-card-value-wrap"><span class="quotes-card-value" id="stat-pending-updates">0</span><span class="quotes-card-label">Pending updates</span></span></article>
+        <article class="quotes-card"><span class="quotes-card-icon">AP</span><span class="quotes-card-value-wrap"><span class="quotes-card-value" id="stat-approved">0</span><span class="quotes-card-label">Approved</span></span></article>
+        <article class="quotes-card"><span class="quotes-card-icon">RJ</span><span class="quotes-card-value-wrap"><span class="quotes-card-value" id="stat-rejected">0</span><span class="quotes-card-label">Rejected</span></span></article>
+      </div>
+
+      <div class="quotes-tabs" role="tablist" aria-label="Quote view">
+        <button type="button" class="quotes-tab active" data-tab="all" aria-selected="true">All</button>
+        <button type="button" class="quotes-tab" data-tab="customer-submitted" aria-selected="false">Customer requests</button>
+        <button type="button" class="quotes-tab" data-tab="draft" aria-selected="false">Draft</button>
+        <button type="button" class="quotes-tab" data-tab="in-review" aria-selected="false">In review</button>
+        <button type="button" class="quotes-tab" data-tab="pending-updates" aria-selected="false">Pending updates</button>
+        <button type="button" class="quotes-tab" data-tab="approved" aria-selected="false">Approved</button>
+        <button type="button" class="quotes-tab" data-tab="rejected" aria-selected="false">Rejected</button>
+      </div>
+
+      <section class="quotes-table-section">
+        <div class="quotes-table-header">
+          <h2 class="quotes-table-title">Quotes <span class="quotes-table-count" id="quotes-count">(0)</span></h2>
+        </div>
+        <div class="quotes-table-wrapper">
+          <table class="quotes-table">
+            <thead id="quotes-thead"></thead>
+            <tbody id="quotes-tbody"></tbody>
+          </table>
+        </div>
+        <div class="quotes-empty-state" id="quotes-empty-uploaded" hidden><p>No quotes available in this view yet.</p></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="quotes-email-modal-overlay" id="sales-email-modal" hidden>
+    <div class="quotes-email-modal" role="dialog" aria-modal="true" aria-labelledby="sales-email-modal-title">
+      <div class="quotes-email-modal-header">
+        <h2 id="sales-email-modal-title">Send quote to customer</h2>
+        <button type="button" class="quotes-email-modal-close" id="sales-email-close" aria-label="Close email dialog">×</button>
+      </div>
+      <form class="quotes-email-form" id="sales-email-form">
+        <div class="quotes-email-row">
+          <label for="sales-email-to">To</label>
+          <input type="email" id="sales-email-to" required>
+        </div>
+        <div class="quotes-email-row">
+          <label for="sales-email-subject">Subject</label>
+          <input type="text" id="sales-email-subject" required>
+        </div>
+        <div class="quotes-email-row quotes-email-row-body">
+          <label for="sales-email-body">Message</label>
+          <textarea id="sales-email-body" rows="12" required></textarea>
+        </div>
+        <div class="quotes-email-status" id="sales-email-status" hidden>Sending quote...</div>
+        <div class="quotes-email-actions">
+          <button type="button" class="quotes-inline-btn" id="sales-email-cancel">Cancel</button>
+          <button type="submit" class="quotes-inline-btn quotes-email-send-btn" id="sales-email-send">Send quote</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div>
+      <p class="footer-copy">© 2025 Subscription Engine. All rights reserved.</p>
+    </div>
+  </footer>
+
+    <!-- Optional: run Vite React Console (npm run console:dev from Gartner updated repo) and uncomment to redirect/email that URL instead of static /console/
+    <script>window.NETAPP_CONSOLE_URL = 'http://127.0.0.1:8080/';</script> -->
+    <script src="persona-switcher.js"></script>
+  <script src="sales-quotes.js?v=20260416"></script>
+</body>
+</html>

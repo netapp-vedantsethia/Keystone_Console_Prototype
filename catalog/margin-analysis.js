@@ -463,10 +463,45 @@
       gmNoSla.push(clampPct(revNoSla ? Math.round((100 * dv) / revNoSla) : 0));
     }
 
+    var featureRequests = [];
+    if (sizingState.contractLengthValue === 'custom' && sizingState.customContractData) {
+      featureRequests.push({ label: 'Contract', value: sizingState.customContractData.display || 'Custom' });
+    }
+    if (sizingState.billingValue === 'custom' && sizingState.customBilling) {
+      var cb = sizingState.customBilling;
+      featureRequests.push({ label: 'Billing', value: 'Custom (every ' + (cb.interval || '') + ' ' + (cb.unit || '') + ')' });
+    }
+    var standardBurst = ['20', '40', '60'];
+    if (sizingState.workloadConfigs && typeof sizingState.workloadConfigs === 'object') {
+      Object.keys(sizingState.workloadConfigs).forEach(function (wid) {
+        var wc = sizingState.workloadConfigs[wid];
+        if (wc && wc.burst && standardBurst.indexOf(String(wc.burst)) === -1) {
+          featureRequests.push({ label: 'Burst (' + (wc.selectedPlan || wid) + ')', value: wc.burst + '%' });
+        }
+      });
+    }
+    if (sizingState.burstByPlan && typeof sizingState.burstByPlan === 'object') {
+      Object.keys(sizingState.burstByPlan).forEach(function (planId) {
+        var bp = sizingState.burstByPlan[planId];
+        if (bp && bp.value != null && standardBurst.indexOf(String(bp.value)) === -1) {
+          var duplicate = featureRequests.some(function (fr) {
+            return fr.label.indexOf('Burst') === 0 && fr.value === bp.value + '%';
+          });
+          if (!duplicate) featureRequests.push({ label: 'Burst', value: bp.display || (bp.value + '%') });
+        }
+      });
+    }
+    if (Array.isArray(sizingState.requestedDeviations)) {
+      sizingState.requestedDeviations.forEach(function (d) {
+        if (d && d.label) featureRequests.push(d);
+      });
+    }
+
     return {
       quoteId: quoteId || sizingState.quoteId || '123',
       opportunityId: sizingState.opportunityId || 'OPP-001',
       quoteDiscountPct: discountPct,
+      featureRequests: featureRequests,
       annualData: {
         bookingsLocal: bookingsLocal,
         bookingsUsd: bookingsUsd,
@@ -532,6 +567,23 @@
     } catch (e) {
       return null;
     }
+  }
+
+  /**
+   * Flags a sovereign quote next to the page title so deal desk sees the deployment constraint
+   * before approving. Matches the tag the Console and the sizing page use.
+   */
+  function updateSovereignTag(quoteId) {
+    var tag = document.getElementById('margin-sovereign-tag');
+    if (!tag) return;
+    var state = getSizingStateByQuoteId(quoteId);
+    var siteValue = state ? String(state.deploymentLocation || '') : '';
+    var isSovereign = !!state &&
+      (state.subscriptionType === 'Sovereign' || /^(EU-Sovereign|Dark-Site)/i.test(siteValue));
+    tag.hidden = !isSovereign;
+    if (!isSovereign) return;
+    var siteLabel = state.deploymentLocationLabel || siteValue;
+    tag.textContent = siteLabel ? 'Sovereign \u00b7 ' + siteLabel : 'Sovereign';
   }
 
   function findBestSizingStateCandidate() {
@@ -695,13 +747,14 @@
           var elPageTitle = document.querySelector('.page-title');
           if (elPartner) elPartner.textContent = 'Not applicable';
           if (elDistributor) elDistributor.textContent = 'Not applicable';
-          if (elCustomer) elCustomer.textContent = 'Mega Hostings Inc.';
+          if (elCustomer) elCustomer.textContent = 'AUMOVIO Germany GmbH';
           if (elOppName) elOppName.textContent = 'Enterprise Multi-Area';
           if (elSalesMotion) elSalesMotion.textContent = 'Direct';
           if (elOppId) elOppId.textContent = '3876523';
           var displayQuoteNum = quoteId || '42001';
           if (elQuoteNum) elQuoteNum.textContent = displayQuoteNum;
           if (elPageTitle) elPageTitle.textContent = 'Quote ' + displayQuoteNum;
+          updateSovereignTag(displayQuoteNum);
         }
       } catch (e3) {}
       if (stored.defaults) {
@@ -734,10 +787,13 @@
 
   function renderFeatureRequestsFromStored(stored) {
     var listEl = document.getElementById('deviations-list');
-    if (!listEl || !stored) return;
-    var requests = stored.featureRequests;
-    if (!Array.isArray(requests) || !requests.length) return;
+    if (!listEl) return;
     listEl.innerHTML = '';
+    var requests = stored && Array.isArray(stored.featureRequests) ? stored.featureRequests : [];
+    if (!requests.length) {
+      listEl.innerHTML = '<p class="tab-content-note" style="color:#6b7280;font-style:italic;">No feature requests were specified in the Sizing tab for this deal.</p>';
+      return;
+    }
     requests.forEach(function (req) {
       var label = req && req.label ? String(req.label) : 'Feature request';
       var value = req && req.value ? String(req.value) : '';
@@ -1669,7 +1725,7 @@
         '#meta-opportunity-id':     urlOpp,
         '#meta-opportunity-name':   'Enterprise Multi-Area',
         '#meta-sales-motion':       'Direct',
-        '#meta-customer-name':      'Mega Hostings Inc.',
+        '#meta-customer-name':      'AUMOVIO Germany GmbH',
         '#meta-partner-name':       'Not applicable',
         '#meta-distributor-name':   'Not applicable',
         '#deal-economics-opportunity-id': urlOpp
@@ -1678,8 +1734,10 @@
         var el = document.querySelector(sel);
         if (el) el.textContent = fields[sel];
       });
+      updateSovereignTag(urlQuote);
     }());
     var hadStored = loadUploadedDealData();
+    if (!hadStored) renderFeatureRequestsFromStored(null);
     if (hadStored) applyStoredDefaultsToSliders();
     (function updateJustificationBookings() {
       var el = document.getElementById('justification-proposed-bookings');

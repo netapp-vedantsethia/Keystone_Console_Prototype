@@ -171,7 +171,7 @@
         quoteId: quoteId,
         quoteName: 'Quote ' + quoteId,
         opportunityId: oppId || '3876523',
-        customerName: 'Mega Hostings Inc.',
+        customerName: 'AUMOVIO Germany GmbH',
         subscriptionUploaded: !!state.subscriptionData,
         hardwareUploaded: !!state.hardwareData,
         subscriptionCodeName: state.subscriptionFile ? state.subscriptionFile.name : (state.usedSample ? 'Sample subscription code' : ''),
@@ -179,7 +179,7 @@
         data: data,
         uploadedAt: new Date().toISOString(),
         assignedFor: 'sally',
-        assignedTo: 'Chris Collins',
+        assignedTo: 'Derek Keller',
         status: 'Pending review',
         marginAnalysisCompleted: false
       };
@@ -189,7 +189,7 @@
         map['P-2001'] = {
           quoteId: 'P-2001',
           opportunityId: oppId || '3876523',
-          customerName: 'Mega Hostings Inc.',
+          customerName: 'AUMOVIO Germany GmbH',
           quoteName: 'Prototype Quote A',
           subscriptionUploaded: true,
           hardwareUploaded: true,
@@ -198,13 +198,13 @@
           data: data,
           uploadedAt: new Date().toISOString(),
           assignedFor: 'sally',
-          assignedTo: 'Chris Collins',
+          assignedTo: 'Derek Keller',
           status: 'Pending review'
         };
         map['P-2002'] = {
           quoteId: 'P-2002',
           opportunityId: oppId || '3876523',
-          customerName: 'Mega Hostings Inc.',
+          customerName: 'AUMOVIO Germany GmbH',
           quoteName: 'Prototype Quote B',
           subscriptionUploaded: true,
           hardwareUploaded: true,
@@ -213,7 +213,7 @@
           data: data,
           uploadedAt: new Date().toISOString(),
           assignedFor: 'sally',
-          assignedTo: 'Chris Collins',
+          assignedTo: 'Derek Keller',
           status: 'Pending review'
         };
       }

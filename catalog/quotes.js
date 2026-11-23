@@ -220,8 +220,8 @@
         '<td>' + escapeHtml(submitted) + '</td>' +
         '<td><span class="quotes-status ' + escapeHtml(statusMeta.cls) + '">' + escapeHtml(statusLabel) + '</span></td>' +
         '<td data-value="' + totalBookings + '">' + valueDisplay + '</td>' +
-        '<td>' + escapeHtml(u.assignedTo || 'Chris Collins') + '</td>' +
-        '<td>' + escapeHtml(u.customerName || 'Mega Hostings Inc.') + '</td>' +
+        '<td>' + escapeHtml(u.assignedTo || 'Derek Keller') + '</td>' +
+        '<td>' + escapeHtml(u.customerName || 'AUMOVIO Germany GmbH') + '</td>' +
         '<td>' + escapeHtml(oppId) + '</td>';
       tbody.appendChild(row);
     });
@@ -576,7 +576,7 @@
         data: data,
         uploadedAt: new Date().toISOString(),
         assignedFor: 'sally',
-        assignedTo: 'Chris Collins',
+        assignedTo: 'Derek Keller',
         status: 'Pending review',
         marginAnalysisCompleted: false
       };
@@ -594,7 +594,7 @@
           data: data,
           uploadedAt: new Date().toISOString(),
           assignedFor: 'sally',
-          assignedTo: 'Chris Collins',
+          assignedTo: 'Derek Keller',
           status: 'Pending review'
         };
         map['P-2002'] = {
@@ -608,7 +608,7 @@
           data: data,
           uploadedAt: new Date().toISOString(),
           assignedFor: 'sally',
-          assignedTo: 'Chris Collins',
+          assignedTo: 'Derek Keller',
           status: 'Pending review'
         };
       }

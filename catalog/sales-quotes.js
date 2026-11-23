@@ -11,8 +11,8 @@
   };
 
   /**
-   * Static: …/console/index.html (Vite build synced via npm run sync-console).
-   * Optional: set window.NETAPP_CONSOLE_URL = 'http://127.0.0.1:8080/' while running npm run console:dev (Vite React dev server).
+   * The live Console sits one directory above /catalog/.
+   * Deployments can override it by setting window.NETAPP_CONSOLE_URL.
    */
   function getConsoleEntryUrl() {
     try {
@@ -21,9 +21,9 @@
         var u = String(custom).trim();
         return u.endsWith('/') ? u : u + '/';
       }
-      return new URL('console/index.html', window.location.href).href;
+      return new URL('../', window.location.href).href;
     } catch (e1) {
-      return window.location.origin + '/console/index.html';
+      return window.location.origin + '/';
     }
   }
 
@@ -184,8 +184,8 @@
         value: totalBookings,
         dealDeskComment: u.dealDeskComment || '',
         subscriptionNumber: u.subscriptionNumber || '',
-        assignedTo: u.assignedTo || 'Chris Collins',
-        customer: u.customerName || 'Mega Hostings Inc.',
+        assignedTo: u.assignedTo || 'Derek Keller',
+        customer: u.customerName || 'AUMOVIO Germany GmbH',
         opportunityId: u.opportunityId || '3876523',
         customerSubmitted: !!(u.customerSubmitted)
       };
@@ -244,24 +244,69 @@
     });
   }
 
-  function getEmailTemplateBody(opportunityId) {
+  function getHardwareDetailsForQuote(quoteId) {
+    var fallback = 'AFF A-Series';
+    try {
+      var uploads = getUploadMap();
+      var upload = uploads && uploads[quoteId];
+      if (!upload) return fallback;
+      var hwSet = {};
+      if (upload.data && Array.isArray(upload.data.quoteItemsDetailed)) {
+        upload.data.quoteItemsDetailed.forEach(function (item) {
+          if (item && item.hardwareSeries) hwSet[item.hardwareSeries] = true;
+        });
+      }
+      var sizingRaw = sessionStorage.getItem('sizingQuoteState_' + quoteId) || localStorage.getItem('sizingQuoteState_' + quoteId);
+      if (sizingRaw) {
+        var sizingState = JSON.parse(sizingRaw);
+        if (sizingState && sizingState.workloadConfigs) {
+          var planMap = {
+            'Standard': 'AFF C-Series',
+            'Premium': 'AFF A-Series',
+            'Unified extreme': 'AFF A-Series (high-end)',
+            'Block optimized premium': 'ASA A-Series',
+            'Block optimized extreme': 'ASA A-Series (high-end)',
+            'Value': 'FAS',
+            'Object standard': 'SGF6112',
+            'Object value': 'SG6160'
+          };
+          Object.keys(sizingState.workloadConfigs).forEach(function (wid) {
+            var wc = sizingState.workloadConfigs[wid];
+            if (wc && wc.selectedPlan && planMap[wc.selectedPlan]) {
+              hwSet[planMap[wc.selectedPlan]] = true;
+            }
+          });
+        }
+      }
+      var hwList = Object.keys(hwSet);
+      return hwList.length ? hwList.join(', ') : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function getEmailTemplateBody(quoteId, opportunityId) {
     var consoleLink = getConsoleEntryUrl();
+    var hwDetails = getHardwareDetailsForQuote(quoteId);
     var lines = [
       'Hi Steve,',
       '',
-      'We\u2019re pleased to inform you that your quote for the Keystone subscription is now ready.',
+      'We\u2019re pleased to inform you that your quote (Quote #' + (quoteId || '') + ') for the Keystone subscription is now ready.',
       'Please log in to the console using the link below to review your quote:',
-      consoleLink
+      consoleLink,
+      ''
     ];
     if (opportunityId) lines.push('Opportunity ID: ' + opportunityId);
     lines.push(
+      '',
+      'Your new NetApp system (' + hwDetails + ') is ready to be built as soon as we receive your PO. We are currently targeting a build time of 5 days and can set an installation appointment within 10 days.',
       '',
       'Once you approve the quote, please upload the Purchase Order (PO) in the console so we can proceed with closing the deal.',
       '',
       'If you have any questions or need assistance during the process, feel free to reach out\u2014we\u2019re happy to help.',
       '',
       'Best regards,',
-      'Chris Collins',
+      'Derek Keller',
       'Sales Specialist',
       'NetApp Keystone'
     );
@@ -312,8 +357,8 @@
     emailModalState.quoteName = quoteName;
     emailModalState.opportunityId = opportunityId || '';
     to.value = 'steve.myers@megaholdings.com';
-    subject.value = 'Your Keystone Subscription Quote Is Ready';
-    body.value = getEmailTemplateBody(emailModalState.opportunityId);
+    subject.value = 'Quote #' + (quoteId || '') + ': Your NetApp System Quote is Ready';
+    body.value = getEmailTemplateBody(quoteId, emailModalState.opportunityId);
     setEmailModalSending(false, '', false);
     modal.hidden = false;
     window.setTimeout(function () { to.focus(); }, 0);
@@ -439,7 +484,20 @@
     bindTabs();
     bindSendToCustomer();
     bindEmailModal();
-    filterRows('all');
+    var params = new URLSearchParams(window.location.search || '');
+    var startTab = params.get('tab') || 'all';
+    var matchingTab = document.querySelector('.quotes-tab[data-tab="' + startTab + '"]');
+    if (matchingTab) {
+      document.querySelectorAll('.quotes-tab').forEach(function (t) {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      matchingTab.classList.add('active');
+      matchingTab.setAttribute('aria-selected', 'true');
+    } else {
+      startTab = 'all';
+    }
+    filterRows(startTab);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

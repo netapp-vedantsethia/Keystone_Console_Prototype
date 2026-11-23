@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Quote 123 | Sizing</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="margin-analysis.css">
-  <link rel="stylesheet" href="sizing.css">
+  <link rel="stylesheet" href="margin-analysis.css?v=20260421b">
+  <link rel="stylesheet" href="sizing.css?v=20260915c">
 </head>
 <body class="sizing-page quote-prototype">
   <header class="header">
@@ -15,10 +18,9 @@
       <a href="index.html" class="logo"><span class="logo-icon">N</span><span class="logo-text">Subscription Engine</span></a>
     </div>
     <div class="header-center">
-      <div class="search-bar"><input type="search" placeholder="Search..." aria-label="Search"></div>
     </div>
     <div class="header-right">
-      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Chris Collins (Sales)</span></div>
+      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Derek Keller (Sales)</span></div>
       <button class="icon-btn" aria-label="Notifications">N</button>
       <button class="icon-btn" aria-label="Help">?</button>
       <div class="user-avatar">JD</div>
@@ -28,9 +30,10 @@
   <nav class="nav-bar">
     <ul class="nav-list">
       <li><a href="create-opportunity.html" class="nav-link">Opportunity</a></li>
-      <li><a href="sizing.html" class="nav-link active">Sizing</a></li>
-      <li><a href="deviations.html" class="nav-link">Feature requests</a></li>
       <li><a href="sales-dashboard.html" class="nav-link">Sales dashboard</a></li>
+      <li><a href="sizing.html" class="nav-link active">Sizing</a></li>
+      <li><a href="staas-tco-npv.html" class="nav-link" style="color:#0067c5;font-weight:600;">STaaS TCO &amp; NPV</a></li>
+      <li><a href="deviations.html" class="nav-link">Feature requests</a></li>
       <li><a href="index.html" class="nav-link">Deal dashboard</a></li>
       <li><a href="margin-analysis.html" class="nav-link">Deal margin</a></li>
       <li><a href="#" class="nav-link">Analytics</a></li>
@@ -47,24 +50,28 @@
         <span class="step-icon">✓</span>
         <span class="step-label">Create an opportunity</span>
       </a>
+      <a href="sales-dashboard.html" class="step completed">
+        <span class="step-icon">✓</span>
+        <span class="step-label">Sales dashboard</span>
+      </a>
       <a href="sizing.html" class="step active">
-        <span class="step-icon">2</span>
+        <span class="step-icon">3</span>
         <span class="step-label">Create a quote</span>
       </a>
       <a href="deviations.html" class="step">
-        <span class="step-icon">3</span>
+        <span class="step-icon">4</span>
         <span class="step-label">Apply feature request</span>
       </a>
       <a href="index.html" class="step">
-        <span class="step-icon">4</span>
+        <span class="step-icon">5</span>
         <span class="step-label">Deal approval</span>
       </a>
       <a href="#" class="step">
-        <span class="step-icon">5</span>
+        <span class="step-icon">6</span>
         <span class="step-label">Site readiness</span>
       </a>
       <a href="#" class="step">
-        <span class="step-icon">6</span>
+        <span class="step-icon">7</span>
         <span class="step-label">Activate subscription</span>
       </a>
     </div>
@@ -74,7 +81,10 @@
     <main class="main-content quote-prototype-main">
       <div class="sizing-top-section">
         <div class="sizing-title-row">
-          <h1 class="page-title">Quote 123</h1>
+          <div class="sizing-title-group">
+            <h1 class="page-title">Quote 123</h1>
+            <span class="sovereign-tag" id="sizing-sovereign-tag" hidden>Sovereign</span>
+          </div>
           <div class="sizing-title-actions">
             <button type="button" class="sizing-reset-link" id="btn-edit-submitted-quote" aria-label="Edit submitted quote" hidden>Edit</button>
             <button type="button" class="sizing-reset-link" id="btn-reset-sizing" aria-label="Reset sizing to original state">Reset sizing</button>
@@ -103,8 +113,17 @@
           </div>
           <div class="meta-col">
             <span class="meta-label">Customer</span>
-            <span class="meta-value"><a href="#" id="meta-customer-name">Mega Hostings Inc.</a></span>
-            <a href="#" class="meta-link">View contact details</a>
+            <span class="meta-value"><a href="#" id="meta-customer-name">AUMOVIO Germany GmbH</a></span>
+            <span class="meta-link-tooltip-wrap">
+              <a href="#" class="meta-link" onclick="return false">View contact details</a>
+              <div class="meta-tooltip">
+                <p><strong>James Whitfield</strong></p>
+                <p>VP of Infrastructure</p>
+                <p>james.whitfield@megahostings.com</p>
+                <p>+1 (214) 555-0193</p>
+                <p>4200 Commerce St, Dallas, TX 75226</p>
+              </div>
+            </span>
           </div>
           <div class="meta-col">
             <span class="meta-label">Sales motion</span>
@@ -113,12 +132,30 @@
           <div class="meta-col">
             <span class="meta-label">Partner</span>
             <span class="meta-value"><a href="#" id="meta-partner-name">Not applicable</a></span>
-            <a href="#" class="meta-link">View contact details</a>
+            <span class="meta-link-tooltip-wrap">
+              <a href="#" class="meta-link" onclick="return false">View contact details</a>
+              <div class="meta-tooltip">
+                <p><strong>Sarah Chen</strong></p>
+                <p>Channel Account Manager</p>
+                <p>s.chen@arrowtechsolutions.com</p>
+                <p>+1 (408) 555-0247</p>
+                <p>1100 Innovation Way, San Jose, CA 95134</p>
+              </div>
+            </span>
           </div>
           <div class="meta-col">
             <span class="meta-label">Distributor</span>
             <span class="meta-value"><a href="#" id="meta-distributor-name">Not applicable</a></span>
-            <a href="#" class="meta-link">View contact details</a>
+            <span class="meta-link-tooltip-wrap">
+              <a href="#" class="meta-link" onclick="return false">View contact details</a>
+              <div class="meta-tooltip">
+                <p><strong>Michael Torres</strong></p>
+                <p>Distribution Sales Lead</p>
+                <p>m.torres@techdata-dist.com</p>
+                <p>+1 (305) 555-0381</p>
+                <p>8700 NW 36th St, Miami, FL 33178</p>
+              </div>
+            </span>
           </div>
           <div class="meta-col meta-col-version">
             <span class="meta-label">Keystone version</span>
@@ -255,12 +292,26 @@
             </div>
           </section>
 
-          <!-- 2) Add workloads card (tiles, max 5) — example workloads from service table; expand for more -->
+          <!-- 2) Add workloads — contract-terms style -->
           <section class="quote-card card add-workloads-card">
-            <h2 class="quote-card-title">Add workloads <span class="quote-card-count" id="workload-count">(1/5 selected)</span></h2>
-            <p class="quote-card-desc">Select up to 5 workloads per quote. Options match service-level example workloads.</p>
-            <div class="quote-field-group">
-              <span class="quote-field-label">Workloads</span>
+            <h2 class="contract-terms-title">Add workloads <span class="quote-card-count" id="workload-count">(1/5 selected)</span></h2>
+            <p class="contract-terms-subtitle">Select one or more workloads to size your subscription</p>
+            <div class="contract-terms-divider"></div>
+
+            <div class="wl-workload-group" id="wl-panel-general">
+              <span class="contract-terms-group-label">General workloads</span>
+              <div class="quote-workload-tiles quote-workload-tiles-general">
+                <label class="quote-workload-tile" data-workload="mission-critical"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Mission critical (&lt; 1 ms)</span></label>
+                <label class="quote-workload-tile" data-workload="general-purpose"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">General purpose (2-4 ms)</span></label>
+                <label class="quote-workload-tile" data-workload="secondary"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Secondary (&gt; 5 ms)</span></label>
+              </div>
+            </div>
+
+            <div class="wl-workload-group" id="wl-panel-detailed">
+              <button type="button" class="wl-group-toggle" id="wl-app-toggle" aria-expanded="true" aria-controls="workload-tiles-wrap">
+                <span class="contract-terms-group-label">Application workloads</span>
+                <svg class="wl-group-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
               <div class="quote-workload-tiles-wrap" id="workload-tiles-wrap">
                 <div class="quote-workload-tiles" id="workload-specific">
                   <label class="quote-workload-tile" data-workload="ai-ml"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">AI / ML</span></label>
@@ -279,15 +330,16 @@
                   <label class="quote-workload-tile workload-tile-more" data-workload="backup"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Backup</span></label>
                   <label class="quote-workload-tile workload-tile-more" data-workload="archive"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Archive</span></label>
                 </div>
-                <button type="button" class="workload-expand-btn" id="workload-expand-btn" aria-expanded="false">Show more (<span id="workload-more-count">7</span>)</button>
+                <button type="button" class="workload-expand-btn" id="workload-expand-btn" aria-expanded="false">Show more (<span id="workload-more-count">3</span>)</button>
               </div>
             </div>
-            <div class="quote-field-group quote-field-group-general">
-              <span class="quote-field-label">General</span>
-              <div class="quote-workload-tiles quote-workload-tiles-general">
-                <label class="quote-workload-tile" data-workload="mission-critical"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Mission critical (&lt; 1 ms)</span></label>
-                <label class="quote-workload-tile" data-workload="general-purpose"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">General purpose (2-4 ms)</span></label>
-                <label class="quote-workload-tile" data-workload="secondary"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Secondary (&gt; 5 ms)</span></label>
+
+            <div class="wl-tab-panel" id="wl-panel-techrefresh" data-wl-panel="techrefresh" role="tabpanel" hidden>
+              <div class="tco-placeholder">
+                <svg class="tco-placeholder-icon" width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 14.3-4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M20 12a8 8 0 0 1-14.3 4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M16 7l2.3-.8.7-2.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 17l-2.3.8-.7 2.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <h3 class="tco-placeholder-title">Existing Configuration / Tech Refresh</h3>
+                <p class="tco-placeholder-desc">This feature is coming soon. Import an existing deployment configuration or plan a technology refresh with updated hardware and service levels.</p>
+                <span class="tco-placeholder-badge">Coming soon</span>
               </div>
             </div>
           </section>
@@ -299,14 +351,209 @@
               <a href="#" id="rate-card-open-link">Rate card</a>
               <span aria-hidden="true">|</span>
               <a href="#" id="keystone-performance-levels-open-link">Keystone performance levels</a>
+              <span aria-hidden="true">|</span>
+              <a href="staas-tco-npv.html?view=new-workload" id="npv-viewer-open-link">NPV Viewer</a>
             </div>
-            <div id="configure-workload-cards" class="config-workload-cards-container"></div>
-            <div id="configure-workload-empty" class="config-workload-empty">
-              <p>Select one or more workloads above to configure them here.</p>
+            <div id="configure-workload-body">
+              <div id="configure-workload-cards" class="config-workload-cards-container"></div>
+              <div id="configure-workload-empty" class="config-workload-empty">
+                <p>Select one or more workloads above to configure them here.</p>
+              </div>
             </div>
-          </section>
 
-          <!-- Performance plan configuration is captured in each workload card before recommendations. -->
+          <!-- Inline forecasting panel (flips with workload config) -->
+          <div class="sizing-output-panel" id="sizing-output-panel" hidden>
+            <a href="#" id="back-to-config-link" class="forecasting-back-link">← Back to configuration</a>
+            <h2 class="quote-card-title">Forecasting</h2>
+            <p class="quote-card-desc">Capacity forecast and recommended Keystone sizing based on your workload configuration</p>
+
+            <div class="sizing-output-body">
+              <h3 class="sizing-output-section-label">Forecast capacity by year</h3>
+              <div class="sizing-output-table-wrap">
+                <table class="sizing-output-table" id="sizing-output-forecast-table">
+                  <thead>
+                    <tr>
+                      <th>Year</th>
+                      <th>Usable TiB</th>
+                      <th>Effective TiB</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sizing-output-forecast-body"></tbody>
+                </table>
+              </div>
+
+              <h3 class="sizing-output-section-label" style="margin-top:16px;">Recommended sizing</h3>
+              <div class="sizing-output-cards">
+                <div class="sizing-output-card sizing-output-card--keystone" id="sizing-out-card-usable" data-billing="usable">
+                  <div class="sizing-output-card-label">Keystone Usable</div>
+                  <div class="sizing-output-card-value" id="sizing-out-usable-min">—</div>
+                  <div class="sizing-output-card-hint">Recommended min billing</div>
+                  <div class="sizing-output-card-meta">
+                    <span>Burst: <strong id="sizing-out-usable-burst">—</strong></span>
+                    <span>Full capacity: <strong id="sizing-out-usable-full">—</strong></span>
+                  </div>
+                </div>
+                <div class="sizing-output-card sizing-output-card--keystone" id="sizing-out-card-effective" data-billing="effective">
+                  <div class="sizing-output-card-label">Keystone Effective</div>
+                  <div class="sizing-output-card-value" id="sizing-out-eff-min">—</div>
+                  <div class="sizing-output-card-hint">Recommended min billing</div>
+                  <div class="sizing-output-card-meta">
+                    <span>Burst: <strong id="sizing-out-eff-burst">—</strong></span>
+                    <span>Full capacity: <strong id="sizing-out-eff-full">—</strong></span>
+                  </div>
+                </div>
+                <div class="sizing-output-card sizing-output-card--eg1" id="sizing-out-card-eg1">
+                  <div class="sizing-output-card-label">Pure EG1 Effective</div>
+                  <div class="sizing-output-card-value" id="sizing-out-eg1-min">—</div>
+                  <div class="sizing-output-card-hint">Recommended min billing</div>
+                  <div class="sizing-output-card-meta">
+                    <span>Burst: <strong id="sizing-out-eg1-burst">—</strong></span>
+                    <span>Full capacity: <strong id="sizing-out-eg1-full">—</strong></span>
+                  </div>
+                </div>
+                <div class="sizing-output-card sizing-output-card--capex" id="sizing-out-card-capex">
+                  <div class="sizing-output-card-label">CAPEX Capacity</div>
+                  <div class="sizing-output-card-value" id="sizing-out-capex-min">—</div>
+                  <div class="sizing-output-card-hint">End-of-term usable demand</div>
+                  <div class="sizing-output-card-meta">
+                    <span>Usable TiB at end of contract</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Confirm bar removed: suggested capacity is now auto-populated -->
+
+              <div class="sizing-output-chart-section" style="margin-top:20px;">
+                <div class="sizing-output-chart-head">
+                  <h3 class="sizing-output-section-label" style="margin:0;">Forecast vs commit capacity</h3>
+                  <label class="sizing-output-chart-toggle">
+                    <input type="checkbox" id="sizingOutputChartToggle">
+                    <span>Show chart</span>
+                  </label>
+                </div>
+                <div id="sizingOutputChartBody" class="sizing-output-chart-body" style="display:none;">
+                  <p class="sizing-output-chart-hint">Year-end demand (bars) vs minimum billed commit (lines), in TiB.</p>
+                  <div class="sizing-output-chart-mode-btns" role="group" aria-label="Chart view mode">
+                    <button type="button" class="sizing-chart-mode-btn is-active" data-chart-mode="both">Both</button>
+                    <button type="button" class="sizing-chart-mode-btn" data-chart-mode="usable">Usable</button>
+                    <button type="button" class="sizing-chart-mode-btn" data-chart-mode="effective">Effective</button>
+                  </div>
+                  <div class="sizing-output-chart-wrap">
+                    <canvas id="sizingOutputCapChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <h3 class="sizing-output-section-label" style="margin-top:16px;">Capacity threshold timing</h3>
+              <div class="sizing-output-table-wrap">
+                <table class="sizing-output-table" id="sizing-output-timing-table">
+                  <thead>
+                    <tr>
+                      <th>Metric</th>
+                      <th>Usable</th>
+                      <th>Effective</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Month demand exceeds min billing</td>
+                      <td id="sizing-out-month-min-usable">—</td>
+                      <td id="sizing-out-month-min-eff">—</td>
+                    </tr>
+                    <tr>
+                      <td>Month demand exceeds burst capacity</td>
+                      <td id="sizing-out-month-burst-usable">—</td>
+                      <td id="sizing-out-month-burst-eff">—</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="sizing-output-deeplink">
+                <a href="staas-tco-npv.html?view=new-workload" id="sizing-output-deeplink">Open full NPV &amp; TCO analysis →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- CAPEX comparison panel (flips with workload config, like forecast panel) -->
+          <div class="capex-financial-panel" id="capex-financial-panel" hidden>
+            <a href="#" id="back-from-capex-link" class="forecasting-back-link">← Back to configuration</a>
+            <h2 class="quote-card-title">Compare to CAPEX</h2>
+            <p class="quote-card-desc">CAPEX vs Keystone financial comparison based on your workload forecast</p>
+
+            <div class="capex-fin-body">
+
+              <div class="capex-fin-inputs-row">
+                <div class="capex-fin-input-group">
+                  <span class="capex-fin-input-label">CAPEX capacity</span>
+                  <span class="capex-fin-input-value" id="capex-fin-capacity">—</span>
+                </div>
+                <div class="capex-fin-input-group">
+                  <span class="capex-fin-input-label">Hardware / license</span>
+                  <span class="capex-fin-input-value" id="capex-fin-hw">—</span>
+                </div>
+                <div class="capex-fin-input-group">
+                  <span class="capex-fin-input-label">Term</span>
+                  <span class="capex-fin-input-value" id="capex-fin-term">—</span>
+                </div>
+              </div>
+
+              <div class="capex-fin-section-label">NPV comparison</div>
+              <div class="capex-fin-summary-grid">
+                <div class="capex-fin-summary-box capex-fin-box--capex">
+                  <div class="capex-fin-box-label">CAPEX NPV</div>
+                  <div class="capex-fin-box-value" id="capex-fin-npv-capex">—</div>
+                </div>
+                <div class="capex-fin-summary-box capex-fin-box--keystone">
+                  <div class="capex-fin-box-label">Keystone NPV</div>
+                  <div class="capex-fin-box-value" id="capex-fin-npv-keystone">—</div>
+                </div>
+              </div>
+
+              <div class="capex-fin-verdict" id="capex-fin-verdict">
+                <span id="capex-fin-verdict-icon">—</span>
+                <span id="capex-fin-verdict-text">Computing comparison…</span>
+              </div>
+
+              <div class="capex-fin-outcome-card">
+                <div class="capex-fin-outcome-title">Exec Summary</div>
+                <div class="capex-fin-outcome-summary" id="capex-fin-exec-summary">Run comparison to generate executive outcome.</div>
+                <div class="capex-fin-outcome-detail" id="capex-fin-exec-detail">Key KPIs will appear here: CAPEX total, Keystone total, threshold months, and winner by NPV.</div>
+              </div>
+
+              <div class="capex-fin-section-label">Cash flow and NPV charts</div>
+              <div class="capex-fin-chart-row">
+                <div class="capex-fin-chart-box">
+                  <h3>Cash flow by year</h3>
+                  <div class="capex-fin-chart-wrap">
+                    <canvas id="capexFinCashflowChart"></canvas>
+                  </div>
+                </div>
+                <div class="capex-fin-chart-box">
+                  <h3>NPV comparison</h3>
+                  <div class="capex-fin-chart-wrap">
+                    <canvas id="capexFinNpvChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <div class="capex-fin-costs-view">
+                <div class="capex-fin-section-label">Expected yearly costs</div>
+                <p class="capex-fin-costs-hint">CAPEX Year 0 includes hardware, installation, tax, and pre-paid maintenance. Years 1+ show datacenter only. Keystone shows annual subscription cost.</p>
+                <div class="capex-fin-table-wrap">
+                  <table class="capex-fin-data-table" id="capex-fin-yearly-table">
+                    <thead><tr><th>Year</th><th class="num">CAPEX</th><th class="num">Keystone</th></tr></thead>
+                    <tbody id="capex-fin-yearly-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="sizing-output-deeplink" style="margin-top:16px;">
+                <a href="staas-tco-npv.html?view=new-workload" id="capex-fin-deeplink">Open full NPV &amp; TCO analysis →</a>
+              </div>
+            </div>
+          </div>
+          </section>
 
           <!-- 4) Subscription add-ons (quote-level) — card experience -->
           <section class="quote-card card subscription-addons-section">
@@ -342,7 +589,7 @@
                   </span>
                   <span class="addon-card-label">Data infrastructure insights</span>
                   <span class="addon-card-desc">Blurb about product</span>
-                  <span class="addon-card-cost" id="dii-card-rate">$0.36 – $4.00 / TiB / month</span>
+                  <span class="addon-card-cost" id="dii-card-rate">$0.18 – $2.00 / TiB / month</span>
                   <span class="addon-card-action">Add to quote</span>
                 </label>
               </div>
@@ -356,7 +603,7 @@
                     <svg viewBox="0 0 24 24"><path d="M7 7h6v6H7V7zm4 4h6v6h-6v-6z"/></svg>
                   </span>
                   <span class="addon-card-label">Cluster Join</span>
-                  <span class="addon-card-cost">$14,400 — one-time charge</span>
+                  <span class="addon-card-cost">$7,200 — one-time charge</span>
                   <span class="addon-card-action">Add to quote</span>
                 </label>
               </div>
@@ -371,6 +618,8 @@
                 <span class="quote-field-label">Site location</span>
                 <select class="quote-select-sm" name="deployment_location" aria-label="Deployment location">
                   <option value="">— Select —</option>
+                  <option value="EU-Sovereign-Berlin">EU Sovereign — Berlin</option>
+                  <option value="Dark-Site-Frankfurt">Dark Site — Frankfurt</option>
                   <option value="Site-Santa Clara">Site-Santa Clara</option>
                   <option value="Dallas_FW">Dallas_FW</option>
                   <option value="BRL">BRL</option>
@@ -382,6 +631,7 @@
                 <select class="quote-select-sm" id="subscription-type" aria-label="Subscription type">
                   <option value="USPS" selected>USPS</option>
                   <option value="Non USPS">Non USPS</option>
+                  <option value="Sovereign">Sovereign</option>
                 </select>
               </div>
               <div class="quote-field-group">
@@ -403,6 +653,39 @@
             <h2 class="quote-sidebar-title">
               <span class="quote-sidebar-title-main"><span class="quote-sidebar-icon" aria-hidden="true">Q</span> Quote</span>
             </h2>
+
+            <div class="quote-sidebar-compare-wrap">
+              <!-- CAPEX column — auto-computed from forecast CAPEX capacity -->
+              <div class="quote-sidebar-capex-col" id="sidebar-capex-col">
+                <h3 class="quote-sidebar-col-heading">CAPEX (Buy)</h3>
+
+                <div class="capex-section">
+                  <h4 class="capex-section-title">Inputs (auto-derived)</h4>
+                  <div class="capex-row"><span class="capex-label">CAPEX capacity</span><span class="capex-value" id="capex-capacity">—</span></div>
+                  <div class="capex-row"><span class="capex-label">Hardware / license</span><span class="capex-value" id="capex-hw-cost">—</span></div>
+                  <div class="capex-row"><span class="capex-label">Tax rate</span><span class="capex-value" id="capex-tax-rate">10%</span></div>
+                  <div class="capex-row"><span class="capex-label">Installation / PS</span><span class="capex-value" id="capex-installation">$25,000</span></div>
+                  <div class="capex-row"><span class="capex-label">Upfront setup</span><span class="capex-value" id="capex-setup">$5,000</span></div>
+                  <div class="capex-row"><span class="capex-label">Maintenance / yr</span><span class="capex-value" id="capex-maintenance">$75,000</span></div>
+                  <div class="capex-row"><span class="capex-label">Datacenter / yr</span><span class="capex-value" id="capex-datacenter">$40,000</span></div>
+                  <div class="capex-row"><span class="capex-label">Success manager / yr</span><span class="capex-value" id="capex-success-mgr">$15,000</span></div>
+                </div>
+
+                <div class="capex-section capex-section--summary">
+                  <h4 class="capex-section-title">Financials</h4>
+                  <div class="capex-row"><span class="capex-label">Upfront (Year 0)</span><span class="capex-value" id="capex-year0">—</span></div>
+                  <div class="capex-row"><span class="capex-label">Annual ongoing</span><span class="capex-value" id="capex-annual-ongoing">—</span></div>
+                  <div class="capex-row capex-row--total"><span class="capex-label">CAPEX NPV</span><span class="capex-value" id="capex-npv">—</span></div>
+                  <div class="capex-row capex-row--total"><span class="capex-label">Keystone NPV</span><span class="capex-value" id="capex-keystone-npv">—</span></div>
+                </div>
+
+                <div class="capex-section">
+                  <div class="capex-verdict" id="capex-verdict"></div>
+                </div>
+              </div>
+
+              <!-- Keystone column (existing quote content) -->
+              <div class="quote-sidebar-keystone-col">
 
             <div class="quote-sidebar-section quote-sidebar-hardware-view" id="sidebar-hardware-view" hidden>
               <h3 class="quote-sidebar-section-title">Hardware details</h3>
@@ -454,7 +737,7 @@
             </div>
 
             <div class="quote-sidebar-section">
-              <h3 class="quote-sidebar-section-title">Discount rate</h3>
+              <h3 class="quote-sidebar-section-title">Pricing</h3>
               <div class="quote-input-row quote-discount-rate-row">
                 <label class="quote-field-label" for="sidebar-discount-rate">Discount rate</label>
                 <div class="quote-inline-group">
@@ -477,7 +760,7 @@
                 <div class="quote-summary-row" id="sidebar-row-adp" hidden><span class="quote-meta-label">Add-on: Adv. data protection</span><span class="quote-summary-value" id="sidebar-adp-value">$0</span></div>
                 <div class="quote-summary-row" id="sidebar-row-dt" hidden><span class="quote-meta-label">Add-on: Data tiering</span><span class="quote-summary-value" id="sidebar-dt-value">$0</span></div>
                 <div class="quote-summary-row" id="sidebar-row-dii" hidden><span class="quote-meta-label">Add-on: Data infra. insights</span><span class="quote-summary-value" id="sidebar-dii-value">$0</span></div>
-                <div class="quote-summary-row" id="sidebar-row-cj" hidden><span class="quote-meta-label">Add-on: Cluster Join (one-time)</span><span class="quote-summary-value" id="sidebar-cj-value">$14,400</span></div>
+                <div class="quote-summary-row" id="sidebar-row-cj" hidden><span class="quote-meta-label">Add-on: Cluster Join (one-time)</span><span class="quote-summary-value" id="sidebar-cj-value">$7,200</span></div>
                 <div class="quote-summary-row"><span class="quote-meta-label">Monthly cost</span><span class="quote-summary-value" id="sidebar-monthly-cost">$0</span></div>
                 <div class="quote-summary-row"><span class="quote-meta-label">Per TiB / month</span><span class="quote-summary-value" id="sidebar-per-tib-month">$0</span></div>
                 <div class="quote-summary-row"><span class="quote-meta-label">Yearly cost</span><span class="quote-summary-value" id="sidebar-total-year">$0</span></div>
@@ -497,6 +780,9 @@
               <button type="button" class="quote-btn-secondary" id="btn-copy-quote" aria-label="Duplicate quote (copy all configurations to a new quote)">Duplicate quote</button>
               <button type="button" class="quote-btn-primary" id="btn-submit" disabled>Send for approval</button>
             </div>
+
+              </div><!-- /quote-sidebar-keystone-col -->
+            </div><!-- /quote-sidebar-compare-wrap -->
           </div>
         </aside>
       </div>
@@ -860,11 +1146,11 @@
           <table style="width:100%;font-size:12px;border-collapse:collapse;">
             <thead><tr><th style="text-align:left;padding:2px 6px;color:#888;">Capacity</th><th style="text-align:right;padding:2px 6px;color:#888;">Rate</th></tr></thead>
             <tbody>
-              <tr><td style="padding:2px 6px;">1 – 99 TiB</td><td style="text-align:right;padding:2px 6px;">$33.79 / TiB / mo</td></tr>
-              <tr><td style="padding:2px 6px;">100 – 249 TiB</td><td style="text-align:right;padding:2px 6px;">$29.74 / TiB / mo</td></tr>
-              <tr><td style="padding:2px 6px;">250 – 499 TiB</td><td style="text-align:right;padding:2px 6px;">$21.96 / TiB / mo</td></tr>
-              <tr><td style="padding:2px 6px;">500 – 999 TiB</td><td style="text-align:right;padding:2px 6px;">$18.92 / TiB / mo</td></tr>
-              <tr><td style="padding:2px 6px;">1,000+ TiB</td><td style="text-align:right;padding:2px 6px;">$16.90 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">1 – 99 TiB</td><td style="text-align:right;padding:2px 6px;">$16.89 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">100 – 249 TiB</td><td style="text-align:right;padding:2px 6px;">$14.87 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">250 – 499 TiB</td><td style="text-align:right;padding:2px 6px;">$10.98 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">500 – 999 TiB</td><td style="text-align:right;padding:2px 6px;">$9.46 / TiB / mo</td></tr>
+              <tr><td style="padding:2px 6px;">1,000+ TiB</td><td style="text-align:right;padding:2px 6px;">$8.45 / TiB / mo</td></tr>
             </tbody>
           </table>
         </div>
@@ -904,6 +1190,546 @@
   </div>
 
   <script src="persona-switcher.js"></script>
-  <script src="sizing.js?v=20260415"></script>
+  <script>
+  /* Offline Chart.js subset (canvas) — shared with TCO/NPV page */
+  (function () {
+    function moneyTick(v) {
+      if (typeof v !== 'number' || !Number.isFinite(v)) return String(v);
+      if (Math.abs(v) >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
+      if (Math.abs(v) >= 1e3) return '$' + (v / 1e3).toFixed(0) + 'K';
+      return '$' + Math.round(v);
+    }
+    function pickColor(spec, i) {
+      if (Array.isArray(spec)) return spec[i % spec.length] || '#888';
+      return spec || '#888';
+    }
+    function SimpleChart(canvas, config) {
+      this.canvas = typeof canvas === 'string' ? document.getElementById(canvas) : canvas;
+      this.ctx = this.canvas && this.canvas.getContext ? this.canvas.getContext('2d') : null;
+      this.config = config || {};
+      this.destroyed = false;
+      this._resizeTimer = null;
+      this._bound = this._onResize.bind(this);
+      if (this.config.options && this.config.options.responsive !== false) {
+        window.addEventListener('resize', this._bound);
+      }
+      this._draw();
+    }
+    SimpleChart.prototype._onResize = function () {
+      if (this._resizeTimer) clearTimeout(this._resizeTimer);
+      this._resizeTimer = setTimeout(function () { if (!this.destroyed) this._draw(); }.bind(this), 60);
+    };
+    SimpleChart.prototype.destroy = function () {
+      this.destroyed = true;
+      window.removeEventListener('resize', this._bound);
+      if (this.ctx && this.canvas) {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+    };
+    SimpleChart.prototype.toBase64Image = function (type, quality) {
+      if (!this.destroyed) this._draw();
+      return this.canvas.toDataURL(type || 'image/png', quality);
+    };
+    SimpleChart.prototype._draw = function () {
+      if (this.destroyed || !this.ctx || !this.canvas) return;
+      var cfg = this.config;
+      var fixed = cfg.options && cfg.options.responsive === false;
+      var dpr = Math.max(1, window.devicePixelRatio || 1);
+      var cssW, cssH;
+      if (fixed) {
+        cssW = this.canvas.width || 520;
+        cssH = this.canvas.height || 280;
+        dpr = 1;
+      } else {
+        cssW = this.canvas.clientWidth || (this.canvas.parentElement && this.canvas.parentElement.clientWidth) || 700;
+        cssH = this.canvas.clientHeight || 280;
+      }
+      if (cssW < 80) cssW = 700;
+      if (cssH < 40) cssH = 280;
+      if (!fixed) {
+        this.canvas.width = Math.floor(cssW * dpr);
+        this.canvas.height = Math.floor(cssH * dpr);
+      }
+      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.fillRect(0, 0, cssW, cssH);
+      var pls = cfg.plugins;
+      if (Array.isArray(pls)) {
+        var fake = { ctx: this.ctx, width: cssW, height: cssH };
+        pls.forEach(function (p) {
+          if (p && typeof p.beforeDraw === 'function') { try { p.beforeDraw(fake); } catch (e) {} }
+        });
+      }
+      this._drawVBar(cssW, cssH, cfg);
+    };
+    SimpleChart.prototype._drawVBar = function (cssW, cssH, cfg) {
+      var ctx = this.ctx;
+      var labels = cfg.data.labels || [];
+      var datasets = cfg.data.datasets || [];
+      var barDs = datasets.filter(function (d) { return d.type !== 'line'; });
+      var lineDs = datasets.filter(function (d) { return d.type === 'line'; });
+      var unifiedY = !!(cfg.options && cfg.options.unifiedY);
+      var padL = 52, padR = 10, padT = 16, padB = 44;
+      var plotW = cssW - padL - padR;
+      var plotH = cssH - padT - padB;
+      var maxY = 1;
+      barDs.forEach(function (ds) {
+        (ds.data || []).forEach(function (v) {
+          var n0 = Number(v);
+          if (Number.isFinite(n0)) maxY = Math.max(maxY, Math.abs(n0));
+        });
+      });
+      if (unifiedY && lineDs.length) {
+        lineDs.forEach(function (ds) {
+          (ds.data || []).forEach(function (v) {
+            if (v == null || v === '') return;
+            var n0 = Number(v);
+            if (Number.isFinite(n0)) maxY = Math.max(maxY, Math.abs(n0));
+          });
+        });
+      }
+      var maxCap = unifiedY ? maxY : 1;
+      if (!unifiedY && lineDs.length) {
+        lineDs.forEach(function (ds) {
+          (ds.data || []).forEach(function (v) {
+            if (v == null || v === '') return;
+            var n0 = Number(v);
+            if (Number.isFinite(n0)) maxCap = Math.max(maxCap, Math.abs(n0));
+          });
+        });
+      }
+      var lineScale = unifiedY ? maxY : maxCap;
+      var yTick = cfg.options && cfg.options.scales && cfg.options.scales.y && cfg.options.scales.y.ticks && cfg.options.scales.y.ticks.callback;
+      ctx.strokeStyle = 'rgba(48, 54, 61, 0.18)';
+      ctx.lineWidth = 1;
+      for (var g = 0; g <= 4; g++) {
+        var yy = padT + (plotH * g) / 4;
+        ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(padL + plotW, yy); ctx.stroke();
+      }
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px system-ui,sans-serif';
+      ctx.textAlign = 'right';
+      for (var g2 = 0; g2 <= 4; g2++) {
+        var yy2 = padT + (plotH * g2) / 4;
+        var val = maxY * (1 - g2 / 4);
+        var t = yTick ? yTick(val) : String(Math.round(val));
+        ctx.fillText(String(t), padL - 4, yy2 + 3);
+      }
+      var n = Math.max(1, labels.length);
+      var slotW = plotW / n;
+      var grp = barDs.length ? slotW * 0.8 : slotW;
+      var gap = barDs.length > 1 ? 2 : 0;
+      var barW = barDs.length ? (grp - gap * (barDs.length - 1)) / barDs.length : 6;
+      barDs.forEach(function (ds, j) {
+        for (var i = 0; i < n; i++) {
+          var v = Number(ds.data[i]) || 0;
+          var h = (v / maxY) * plotH;
+          var x0 = padL + i * slotW + (slotW - grp) / 2 + j * (barW + gap);
+          var y0 = padT + plotH - h;
+          ctx.fillStyle = pickColor(ds.backgroundColor, i);
+          ctx.strokeStyle = pickColor(ds.borderColor, i);
+          ctx.fillRect(x0, y0, Math.max(1, barW), h);
+          ctx.strokeRect(x0, y0, Math.max(1, barW), h);
+        }
+      });
+      lineDs.forEach(function (ds) {
+        ctx.strokeStyle = ds.borderColor || '#2e7d32';
+        ctx.lineWidth = ds.borderWidth || 2;
+        if (Array.isArray(ds.borderDash) && ds.borderDash.length) ctx.setLineDash(ds.borderDash);
+        else ctx.setLineDash([]);
+        ctx.beginPath();
+        var started = false;
+        for (var i = 0; i < n; i++) {
+          var raw = ds.data[i];
+          if (raw == null || raw === '') continue;
+          var v = Number(raw);
+          if (!Number.isFinite(v)) continue;
+          var x = padL + i * slotW + slotW / 2;
+          var y = padT + plotH - (v / lineScale) * plotH;
+          if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+        }
+        if (started) ctx.stroke();
+        ctx.setLineDash([]);
+        for (var i2 = 0; i2 < n; i2++) {
+          var raw2 = ds.data[i2];
+          if (raw2 == null || raw2 === '') continue;
+          var v2 = Number(raw2);
+          if (!Number.isFinite(v2)) continue;
+          var x2 = padL + i2 * slotW + slotW / 2;
+          var y2 = padT + plotH - (v2 / lineScale) * plotH;
+          ctx.fillStyle = ds.backgroundColor || ds.borderColor || '#2e7d32';
+          ctx.beginPath();
+          ctx.arc(x2, y2, ds.pointRadius || 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px system-ui,sans-serif';
+      ctx.textAlign = 'center';
+      for (var li = 0; li < n; li++) {
+        var lx = padL + li * slotW + slotW / 2;
+        var lab = String(labels[li] || '');
+        ctx.fillText(lab.length > 12 ? lab.slice(0, 11) + '…' : lab, lx, cssH - 12);
+      }
+      // Legend
+      var legendY = cssH - 30;
+      ctx.font = '10px system-ui,sans-serif';
+      ctx.textAlign = 'left';
+      var lx2 = padL;
+      datasets.forEach(function (ds) {
+        ctx.fillStyle = ds.borderColor || ds.backgroundColor || '#888';
+        if (ds.type === 'line') {
+          ctx.beginPath(); ctx.moveTo(lx2, legendY); ctx.lineTo(lx2 + 16, legendY);
+          ctx.strokeStyle = ds.borderColor || '#888'; ctx.lineWidth = 2;
+          if (Array.isArray(ds.borderDash) && ds.borderDash.length) ctx.setLineDash(ds.borderDash);
+          else ctx.setLineDash([]);
+          ctx.stroke(); ctx.setLineDash([]);
+        } else {
+          ctx.fillRect(lx2, legendY - 5, 12, 10);
+        }
+        lx2 += 18;
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(ds.label || '', lx2, legendY + 3);
+        lx2 += ctx.measureText(ds.label || '').width + 14;
+      });
+    };
+    window.Chart = function Chart(canvas, config) {
+      return new SimpleChart(canvas, config);
+    };
+  })();
+  </script>
+  <script src="sizing.js?v=20260915c"></script>
+  <script>
+  (function () {
+    var link = document.getElementById('npv-viewer-open-link');
+    if (!link) return;
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var params = new URLSearchParams();
+      params.set('view', 'new-workload');
+
+      // Contract length
+      var clEl = document.querySelector('input[name="contract-length"]:checked');
+      if (clEl && clEl.value !== 'custom') params.set('term', clEl.value);
+
+      // First selected workload config
+      var firstCard = document.querySelector('.config-workload-card');
+      if (firstCard) {
+        var wid = firstCard.dataset.workloadId;
+
+        // Used capacity
+        var capEl = document.getElementById('capacity-' + wid);
+        if (capEl && capEl.value) params.set('capacity', capEl.value);
+
+        // Storage efficiency ratio
+        var seEl = document.getElementById('storage-efficiency-' + wid);
+        if (seEl && seEl.value) params.set('se', seEl.value);
+
+        // Annual growth rate
+        var growthEl = document.getElementById('annual-growth-' + wid);
+        if (growthEl && growthEl.value) params.set('growth', growthEl.value);
+
+        // Burst
+        var burstEl = firstCard.querySelector('[data-workload-input="burst"]');
+        if (burstEl && burstEl.value && burstEl.value !== 'custom') params.set('burst', burstEl.value);
+
+        // Selected plan → service level + service type
+        var planCard = firstCard.querySelector('.config-plan-card.selected');
+        if (planCard) {
+          var planName = (planCard.dataset.planName || '').toLowerCase();
+          if (planName.indexOf('extreme') !== -1 || planName.indexOf('premium') !== -1) {
+            params.set('level', 'premium');
+          } else if (planName.indexOf('standard') !== -1) {
+            params.set('level', 'standard');
+          } else if (planName.indexOf('value') !== -1) {
+            params.set('level', 'value');
+          }
+          if (planName.indexOf('block') !== -1) {
+            params.set('stype', 'block');
+          } else if (planName.indexOf('object') !== -1) {
+            params.set('stype', 'object');
+          } else {
+            params.set('stype', 'unified');
+          }
+        }
+      }
+
+      if (typeof window._sizingSaveBeforeNpv === 'function') window._sizingSaveBeforeNpv();
+      window.location.href = 'staas-tco-npv.html?' + params.toString();
+    });
+  })();
+
+  // Save state before navigating to NPV via any deep link
+  (function () {
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest('a[href*="staas-tco-npv"]');
+      if (!link) return;
+      if (typeof window._sizingSaveBeforeNpv === 'function') window._sizingSaveBeforeNpv();
+    });
+  })();
+
+  // Forecasting flip toggle
+  (function () {
+    var backLink = document.getElementById('back-to-config-link');
+    var configBody = document.getElementById('configure-workload-body');
+    var linksRow = document.querySelector('.config-workload-links-row');
+    var forecastPanel = document.getElementById('sizing-output-panel');
+    if (!backLink || !configBody || !forecastPanel) return;
+
+    var sf = window._sizingForecast;
+
+    document.addEventListener('click', function (e) {
+      var viewBtn = e.target.closest('.config-view-forecasting');
+      if (viewBtn) {
+        e.preventDefault();
+        if (sf) {
+          sf.setConfirmed(false);
+          sf.setPendingBilling(null);
+          sf.render();
+        }
+        configBody.hidden = true;
+        if (linksRow) linksRow.hidden = true;
+        forecastPanel.hidden = false;
+      }
+    });
+
+    backLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      forecastPanel.hidden = true;
+      configBody.hidden = false;
+      if (linksRow) linksRow.hidden = false;
+    });
+
+    // Confirm button removed — suggested capacity is now auto-populated on the config page
+  })();
+
+  // CAPEX comparison panel flip toggle + render
+  (function () {
+    var backLink = document.getElementById('back-from-capex-link');
+    var configBody = document.getElementById('configure-workload-body');
+    var linksRow = document.querySelector('.config-workload-links-row');
+    var capexPanel = document.getElementById('capex-financial-panel');
+    var forecastPanel = document.getElementById('sizing-output-panel');
+    if (!backLink || !configBody || !capexPanel) return;
+
+    var capexCashflowChart = null;
+    var capexNpvBarChart = null;
+
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('.config-plan-compare-capex-btn') || e.target.closest('.config-capex-verdict-cta');
+      if (!btn) return;
+      e.preventDefault();
+      configBody.hidden = true;
+      if (linksRow) linksRow.hidden = true;
+      if (forecastPanel) forecastPanel.hidden = true;
+      capexPanel.hidden = false;
+      renderCapexFinancialPanel();
+    });
+
+    backLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      capexPanel.hidden = true;
+      configBody.hidden = false;
+      if (linksRow) linksRow.hidden = false;
+    });
+
+    function fmt(n) {
+      if (n == null || isNaN(n)) return '—';
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function renderCapexFinancialPanel() {
+      var api = window._capexFinApi;
+      if (!api) return;
+      var result = api.compute();
+      if (!result) {
+        clearCapexPanel();
+        return;
+      }
+
+      var d = result.defaults;
+      var termYears = result.termYears;
+      var hwLicense = result.hwLicense;
+      var capexCapTiB = result.capexCapTiB;
+      var planName = result.planName || '—';
+      var keystoneYearly = result.keystoneYearlyCost;
+
+      // Inputs row
+      var elCap = document.getElementById('capex-fin-capacity');
+      var elHw = document.getElementById('capex-fin-hw');
+      var elTerm = document.getElementById('capex-fin-term');
+      if (elCap) elCap.textContent = capexCapTiB + ' TiB';
+      if (elHw) elHw.textContent = fmt(hwLicense);
+      if (elTerm) elTerm.textContent = termYears + (termYears === 1 ? ' year' : ' years');
+
+      // CAPEX NPV calc (matches staas-tco-npv.html computeCapexNpv)
+      var acq = hwLicense + d.installation + d.setup + d.successManager;
+      var prePaidSupport = d.maintenance * termYears;
+      var acqGross = acq + prePaidSupport;
+      var acqWithTax = Math.round(acqGross * (1 + d.taxRate));
+      var annualOngoing = d.datacenter;
+      var discountRate = 0.12;
+
+      var capexNpv = acqWithTax;
+      for (var y = 1; y <= termYears; y++) {
+        capexNpv += annualOngoing / Math.pow(1 + discountRate, y);
+      }
+      capexNpv = Math.round(capexNpv);
+
+      // Keystone NPV
+      var keystoneNpv = 0;
+      for (var ky = 1; ky <= termYears; ky++) {
+        keystoneNpv += keystoneYearly / Math.pow(1 + discountRate, ky);
+      }
+      keystoneNpv = Math.round(keystoneNpv);
+
+      // NPV boxes
+      document.getElementById('capex-fin-npv-capex').textContent = fmt(capexNpv);
+      document.getElementById('capex-fin-npv-keystone').textContent = fmt(keystoneNpv);
+
+      // Verdict
+      var verdictEl = document.getElementById('capex-fin-verdict');
+      var verdictIcon = document.getElementById('capex-fin-verdict-icon');
+      var verdictText = document.getElementById('capex-fin-verdict-text');
+      var diff = capexNpv - keystoneNpv;
+      var pctSavings = capexNpv > 0 ? Math.round(Math.abs(diff) / Math.max(capexNpv, keystoneNpv) * 100) : 0;
+      if (keystoneNpv < capexNpv) {
+        verdictEl.className = 'capex-fin-verdict keystone-wins';
+        verdictIcon.textContent = '✓';
+        verdictText.innerHTML = '<strong>Keystone saves ' + fmt(Math.abs(diff)) + '</strong> (' + pctSavings + '% lower NPV over ' + termYears + ' yrs)';
+      } else if (capexNpv < keystoneNpv) {
+        verdictEl.className = 'capex-fin-verdict capex-wins';
+        verdictIcon.textContent = '✓';
+        verdictText.innerHTML = '<strong>CAPEX saves ' + fmt(Math.abs(diff)) + '</strong> (' + pctSavings + '% lower NPV over ' + termYears + ' yrs)';
+      } else {
+        verdictEl.className = 'capex-fin-verdict';
+        verdictIcon.textContent = '=';
+        verdictText.textContent = 'Both options have equal NPV';
+      }
+
+      // Exec Summary
+      var execSummary = document.getElementById('capex-fin-exec-summary');
+      var execDetail = document.getElementById('capex-fin-exec-detail');
+      var winner = keystoneNpv <= capexNpv ? 'Keystone' : 'CAPEX';
+      var savingsAmt = fmt(Math.abs(diff));
+      execSummary.textContent = winner + ' is the recommended option, saving ' + savingsAmt + ' in NPV over ' + termYears + ' years.';
+      execDetail.textContent = 'CAPEX total (Year 0): ' + fmt(acqWithTax) +
+        ' · Ongoing: ' + fmt(annualOngoing) + '/yr · CAPEX NPV: ' + fmt(capexNpv) +
+        ' · Keystone: ' + fmt(keystoneYearly) + '/yr · Keystone NPV: ' + fmt(keystoneNpv);
+
+      // Yearly cost table
+      var tbody = document.getElementById('capex-fin-yearly-body');
+      var rows = '';
+      var capexTotal = 0;
+      var keystoneTotal = 0;
+      for (var yr = 0; yr <= termYears; yr++) {
+        var capexCost = yr === 0 ? acqWithTax : annualOngoing;
+        var ksCost = yr === 0 ? 0 : keystoneYearly;
+        capexTotal += capexCost;
+        keystoneTotal += ksCost;
+        rows += '<tr><td>Year ' + yr + '</td><td class="num">' + fmt(capexCost) + '</td><td class="num">' + fmt(ksCost) + '</td></tr>';
+      }
+      rows += '<tr><td>Total</td><td class="num">' + fmt(capexTotal) + '</td><td class="num">' + fmt(keystoneTotal) + '</td></tr>';
+      tbody.innerHTML = rows;
+
+      // Build chart data
+      var yearLabels = [];
+      var capexData = [];
+      var keystoneData = [];
+      var capexCumNpvData = [];
+      var keystoneCumNpvData = [];
+      var capexCumNpv = 0;
+      var keystoneCumNpv = 0;
+      for (var cy = 0; cy <= termYears; cy++) {
+        yearLabels.push('Year ' + cy);
+        var cc = cy === 0 ? acqWithTax : annualOngoing;
+        var kc = cy === 0 ? 0 : keystoneYearly;
+        capexData.push(cc);
+        keystoneData.push(kc);
+        if (cy === 0) {
+          capexCumNpv = cc;
+          keystoneCumNpv = 0;
+        } else {
+          capexCumNpv += annualOngoing / Math.pow(1 + discountRate, cy);
+          keystoneCumNpv += keystoneYearly / Math.pow(1 + discountRate, cy);
+        }
+        capexCumNpvData.push(Math.round(capexCumNpv));
+        keystoneCumNpvData.push(Math.round(keystoneCumNpv));
+      }
+
+      // Cash flow chart
+      var cfCanvas = document.getElementById('capexFinCashflowChart');
+      if (cfCanvas && window.Chart) {
+        if (capexCashflowChart && capexCashflowChart.destroy) capexCashflowChart.destroy();
+        capexCashflowChart = new Chart(cfCanvas, {
+          type: 'bar',
+          data: {
+            labels: yearLabels,
+            datasets: [
+              { label: 'CAPEX', data: capexData, backgroundColor: 'rgba(25, 118, 210, 0.6)', borderColor: '#1976d2', borderWidth: 1 },
+              { label: 'Keystone', data: keystoneData, backgroundColor: 'rgba(63, 185, 80, 0.6)', borderColor: '#3fb950', borderWidth: 1 }
+            ]
+          },
+          options: { scales: { y: { beginAtZero: true } } }
+        });
+      }
+
+      // NPV comparison chart
+      var npvCanvas = document.getElementById('capexFinNpvChart');
+      if (npvCanvas && window.Chart) {
+        if (capexNpvBarChart && capexNpvBarChart.destroy) capexNpvBarChart.destroy();
+        capexNpvBarChart = new Chart(npvCanvas, {
+          type: 'bar',
+          data: {
+            labels: yearLabels,
+            datasets: [
+              { type: 'line', label: 'CAPEX cumulative NPV', data: capexCumNpvData, borderColor: '#1976d2', backgroundColor: 'transparent', borderWidth: 2, borderDash: [6, 3], pointRadius: 3, fill: false },
+              { type: 'line', label: 'Keystone cumulative NPV', data: keystoneCumNpvData, borderColor: '#3fb950', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, fill: false }
+            ]
+          },
+          options: { scales: { y: { beginAtZero: true } } }
+        });
+      }
+    }
+
+    function clearCapexPanel() {
+      ['capex-fin-capacity', 'capex-fin-hw', 'capex-fin-term', 'capex-fin-plan',
+       'capex-fin-npv-capex', 'capex-fin-npv-keystone'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = '—';
+      });
+      var verdict = document.getElementById('capex-fin-verdict');
+      if (verdict) { verdict.className = 'capex-fin-verdict'; }
+      var vText = document.getElementById('capex-fin-verdict-text');
+      if (vText) vText.textContent = 'No workload configuration available.';
+      var tbody = document.getElementById('capex-fin-yearly-body');
+      if (tbody) tbody.innerHTML = '';
+    }
+  })();
+  </script>
+  <script>
+  (function(){
+    document.querySelectorAll('.meta-link-tooltip-wrap').forEach(function(wrap){
+      var link = wrap.querySelector('.meta-link');
+      var tip = wrap.querySelector('.meta-tooltip');
+      if(!link||!tip) return;
+      var col = wrap.closest('.meta-col');
+      if(col){
+        var val = col.querySelector('.meta-value');
+        var txt = (val ? val.textContent : '').trim().toLowerCase();
+        if(!txt || txt === 'not applicable' || txt === 'n/a' || txt === '—' || txt === '-'){
+          wrap.style.display = 'none';
+          return;
+        }
+      }
+      wrap.addEventListener('mouseenter', function(){
+        var r = link.getBoundingClientRect();
+        tip.style.left = r.left + 'px';
+        tip.style.top = (r.bottom + 6) + 'px';
+      });
+    });
+  })();
+  </script>
 </body>
 </html>

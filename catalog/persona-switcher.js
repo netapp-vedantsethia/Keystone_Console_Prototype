@@ -4,10 +4,10 @@
   var STORAGE_KEY = 'appPersona';
   var PERSONAS = {
     sales: {
-      label: 'Chris Collins (Sales)',
+      label: 'Derek Keller (Sales)',
       allowedPages: ['create-opportunity.html', 'sizing.html', 'sales-dashboard.html'],
       defaultPage: 'sales-dashboard.html',
-      allowedNavHrefs: ['create-opportunity.html', 'sizing.html', 'sales-dashboard.html']
+      allowedNavHrefs: ['create-opportunity.html', 'sizing.html', 'sales-dashboard.html', 'staas-tco-npv.html']
     },
     'deal-desk': {
       label: 'Laura Ramirez (Deal Desk)',
@@ -16,7 +16,7 @@
       allowedNavHrefs: ['index.html', 'margin-analysis.html']
     },
     customer: {
-      label: 'Mega Hostings Inc. (Customer)',
+      label: 'AUMOVIO Germany GmbH (Customer)',
       allowedPages: ['customer-sizing.html'],
       defaultPage: 'customer-sizing.html',
       allowedNavHrefs: ['customer-sizing.html']
@@ -37,12 +37,18 @@
   }
 
   function getPersona() {
-    var stored = '';
-    try { stored = localStorage.getItem(STORAGE_KEY) || ''; } catch (e) {}
-    if (PERSONAS[stored]) return stored;
     var page = getCurrentPage();
+    var qp = '';
+    try { qp = new URLSearchParams(window.location.search).get('persona') || ''; } catch (e) {}
+    if (PERSONAS[qp]) {
+      setPersona(qp);
+      return qp;
+    }
+    if (PERSONAS.customer.allowedPages.indexOf(page) !== -1) return 'customer';
     if (PERSONAS['deal-desk'].allowedPages.indexOf(page) !== -1) return 'deal-desk';
-    if (PERSONAS['customer'].allowedPages.indexOf(page) !== -1) return 'customer';
+    var stored = '';
+    try { stored = localStorage.getItem(STORAGE_KEY) || ''; } catch (e2) {}
+    if (PERSONAS[stored]) return stored;
     return 'sales';
   }
 
@@ -108,6 +114,27 @@
     });
   }
 
+  /** The Console app sits one level above this catalog, so '../' resolves it under any base path. */
+  function getConsoleHomeUrl() {
+    try {
+      return new URL('../', window.location.href).href;
+    } catch (e) {
+      return '/';
+    }
+  }
+
+  /** Adds an always-available way out of the prototype pages back to the Console overview. */
+  function mountConsoleHomeLink() {
+    var headerRight = document.querySelector('.header-right');
+    if (!headerRight || headerRight.querySelector('.header-console-link')) return;
+    var link = document.createElement('a');
+    link.className = 'header-console-link';
+    link.href = getConsoleHomeUrl();
+    link.title = 'Return to the Console home screen';
+    link.textContent = '\u2190 Console';
+    headerRight.insertBefore(link, headerRight.firstChild);
+  }
+
   function mountPersonaSwitcher(persona) {
     var headerPersona = document.querySelector('.header-persona');
     if (!headerPersona) return;
@@ -122,12 +149,18 @@
     select.className = 'header-persona-select';
     select.setAttribute('aria-label', 'Switch persona');
     select.innerHTML =
-      '<option value="sales">Chris Collins (Sales)</option>' +
+      '<option value="sales">Derek Keller (Sales)</option>' +
       '<option value="deal-desk">Laura Ramirez (Deal Desk)</option>' +
-      '<option value="customer">Mega Hostings Inc. (Customer)</option>';
+      '<option value="customer">AUMOVIO Germany GmbH (Customer)</option>';
     select.value = persona;
     select.addEventListener('change', function () {
       var nextPersona = select.value;
+      if (nextPersona === 'sales' || nextPersona === 'deal-desk') {
+        var loginCfg = PERSONAS[nextPersona];
+        var redirect = loginCfg ? loginCfg.defaultPage : 'index.html';
+        window.location.href = 'login.html?persona=' + encodeURIComponent(nextPersona) + '&redirect=' + encodeURIComponent(redirect);
+        return;
+      }
       setPersona(nextPersona);
       var nextCfg = PERSONAS[nextPersona];
       var currentPage = getCurrentPage();
@@ -231,6 +264,7 @@
 
   function init() {
     var persona = getPersona();
+    mountConsoleHomeLink();
     mountPersonaSwitcher(persona);
     applyNavVisibility(persona);
     applyProgressExperience(persona);

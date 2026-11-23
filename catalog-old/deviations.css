@@ -1,0 +1,318 @@
+/* Combined Deviations page — choice (existing vs new) + panels */
+
+.deviations-page {
+  background: var(--ma-bg);
+  min-height: 100vh;
+}
+
+.deviations-page .layout-wrapper {
+  display: block;
+}
+
+.deviations-main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 32px 48px;
+}
+
+.deviations-main .flow-breadcrumb a {
+  color: var(--ma-primary);
+}
+.deviations-main .flow-breadcrumb-current {
+  color: var(--ma-text);
+}
+.deviations-main .flow-breadcrumb {
+  color: var(--ma-text-secondary);
+}
+
+.deviations-return-wrap {
+  margin: 0 0 12px;
+}
+
+.deviations-return-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ma-primary);
+  text-decoration: none;
+}
+
+.deviations-return-link:hover {
+  text-decoration: underline;
+}
+
+.deviations-page-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviations-intro {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: var(--ma-text-secondary);
+  line-height: 1.5;
+}
+
+/* Step 1: Deviation type (config / margin / legal) */
+.deviations-type-choice {
+  padding: var(--ma-space-lg);
+  margin-bottom: 24px;
+  border-radius: var(--ma-radius-md);
+  border: 1px solid var(--ma-border);
+  box-shadow: var(--ma-shadow-card);
+}
+
+.deviations-type-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.deviations-type-option {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 2px solid var(--ma-border);
+  border-radius: var(--ma-radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.deviations-type-option:hover {
+  border-color: var(--ma-primary);
+  background: var(--ma-info-bg);
+}
+
+.deviations-type-option:has(input:checked) {
+  border-color: var(--ma-primary);
+  background: var(--ma-info-bg);
+  box-shadow: 0 0 0 1px var(--ma-primary);
+}
+
+.deviations-type-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.deviations-type-heading {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviations-type-desc {
+  font-size: 13px;
+  color: var(--ma-text-secondary);
+  line-height: 1.45;
+}
+
+.deviations-type-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--ma-text-muted);
+  min-height: 1.4em;
+}
+
+/* Choice: existing vs new */
+.deviations-choice {
+  padding: var(--ma-space-lg);
+  margin-bottom: 24px;
+  border-radius: var(--ma-radius-md);
+  border: 1px solid var(--ma-border);
+  box-shadow: var(--ma-shadow-card);
+}
+
+.deviations-choice-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviations-choice-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.deviations-choice-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 2px solid var(--ma-border);
+  border-radius: var(--ma-radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.deviations-choice-option:hover {
+  border-color: var(--ma-primary);
+  background: var(--ma-info-bg);
+}
+
+.deviations-choice-option:has(input:checked) {
+  border-color: var(--ma-primary);
+  background: var(--ma-info-bg);
+  box-shadow: 0 0 0 1px var(--ma-primary);
+}
+
+.deviations-choice-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.deviations-choice-heading {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviations-choice-desc {
+  font-size: 13px;
+  color: var(--ma-text-secondary);
+  line-height: 1.45;
+}
+
+/* Panels */
+.deviations-panel {
+  padding: var(--ma-space-lg);
+  margin-bottom: 24px;
+  border-radius: var(--ma-radius-md);
+  border: 1px solid var(--ma-border);
+  box-shadow: var(--ma-shadow-card);
+}
+
+.deviations-panel-hidden {
+  display: none;
+}
+
+.deviations-panel-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviations-panel-desc {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: var(--ma-text-secondary);
+  line-height: 1.5;
+}
+
+.deviations-panel .deviation-request-form,
+.deviations-panel .deviation-form {
+  padding: 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.deviations-footer-links {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ma-text-muted);
+}
+
+.deviations-footer-links a {
+  color: var(--ma-primary);
+  text-decoration: none;
+}
+
+.deviations-footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* Opportunity & quotes (existing deviation panel) */
+.deviations-opp-quotes-section {
+  padding-bottom: var(--ma-space-lg);
+  margin-bottom: var(--ma-space-lg);
+  border-bottom: 1px solid var(--ma-border);
+}
+
+.deviations-opp-quotes-section .deviation-request-section-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ma-text);
+}
+
+.deviations-quotes-hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--ma-text-secondary);
+  line-height: 1.45;
+}
+
+.deviations-quote-ids-wrap {
+  margin-top: 16px;
+}
+
+.deviations-quote-ids-wrap > .deviation-request-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ma-text);
+}
+
+.deviations-quote-ids-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.deviations-quote-id-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.deviations-quote-id-row .deviation-request-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.deviations-quote-remove {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ma-text-muted);
+  background: var(--ma-card);
+  border: 1px solid var(--ma-border);
+  border-radius: var(--ma-radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deviations-quote-remove:hover {
+  color: var(--ma-text);
+  border-color: var(--ma-primary);
+  background: var(--ma-info-bg);
+}
+
+.deviations-add-quote {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ma-primary);
+  background: transparent;
+  border: 1px dashed var(--ma-primary);
+  border-radius: var(--ma-radius-sm);
+  cursor: pointer;
+}
+
+.deviations-add-quote:hover {
+  background: var(--ma-info-bg);
+}

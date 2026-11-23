@@ -17,7 +17,7 @@
       <div class="search-bar"><input type="search" placeholder="Search..." aria-label="Search"></div>
     </div>
     <div class="header-right">
-      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Chris Collins (Sales)</span></div>
+      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Derek Keller (Sales)</span></div>
       <button class="icon-btn" aria-label="Notifications">N</button>
       <button class="icon-btn" aria-label="Help">?</button>
       <div class="user-avatar">JD</div>
@@ -27,9 +27,10 @@
   <nav class="nav-bar">
     <ul class="nav-list">
       <li><a href="create-opportunity.html" class="nav-link active">Opportunity</a></li>
-      <li><a href="sizing.html" class="nav-link">Sizing</a></li>
-      <li><a href="deviations.html" class="nav-link">Feature requests</a></li>
       <li><a href="sales-dashboard.html" class="nav-link">Sales dashboard</a></li>
+      <li><a href="sizing.html" class="nav-link">Sizing</a></li>
+      <li><a href="staas-tco-npv.html" class="nav-link" style="color:#0067c5;font-weight:600;">STaaS TCO &amp; NPV</a></li>
+      <li><a href="deviations.html" class="nav-link">Feature requests</a></li>
       <li><a href="index.html" class="nav-link">Deal dashboard</a></li>
       <li><a href="margin-analysis.html" class="nav-link">Deal margin</a></li>
       <li><a href="#" class="nav-link">Analytics</a></li>
@@ -104,7 +105,7 @@
             <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#374151;">
               Customer name
               <select id="customer-name" required style="height:38px;border:1px solid #d1d5db;border-radius:6px;padding:0 10px;">
-                <option value="Mega Hostings Inc." selected>Mega Hostings Inc.</option>
+                <option value="AUMOVIO Germany GmbH" selected>AUMOVIO Germany GmbH</option>
                 <option value="Electronic Arts">Electronic Arts</option>
                 <option value="Ford">Ford</option>
                 <option value="All for one">All for one</option>
@@ -160,12 +161,12 @@
       function safeString(v) { return String(v == null ? '' : v).trim(); }
       function normalizeCustomerName(v) {
         var name = safeString(v);
-        if (!name || /iron\s*lea(f|d)/i.test(name)) return 'Mega Hostings Inc.';
+        if (!name || /iron\s*lea(f|d)/i.test(name)) return 'AUMOVIO Germany GmbH';
         return name;
       }
       var dateInput = getById('subscription-start-date');
       var customerSelect = getById('customer-name');
-      if (customerSelect) customerSelect.value = 'Mega Hostings Inc.';
+      if (customerSelect) customerSelect.value = 'AUMOVIO Germany GmbH';
       if (dateInput) {
         var today = new Date();
         var yyyy = today.getFullYear();

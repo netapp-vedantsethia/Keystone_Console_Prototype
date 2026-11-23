@@ -30,7 +30,7 @@
   var DEFAULT_OPPORTUNITY_PROFILE = Object.freeze({
     opportunityId:   '3876523',
     opportunityName: 'Enterprise Multi-Area',
-    customerName:    'Mega Hostings Inc.',
+    customerName:    'AUMOVIO Germany GmbH',
     customerPhone:   '+1 (604) 555-0147',
     customerAddress: '1095 West Pender Street, Suite 2100\nVancouver, BC  V6E 2M6\nCanada',
     partnerName:     'Not applicable',
@@ -55,7 +55,8 @@
   }
   function getQuoteNamesForOpportunity(oppId) {
     try {
-      var raw = sessionStorage.getItem(getQuoteNamesKey(oppId));
+      // localStorage fallback: a request raised in the Console lands in another tab's session.
+      var raw = sessionStorage.getItem(getQuoteNamesKey(oppId)) || localStorage.getItem(getQuoteNamesKey(oppId));
       var parsed = raw ? JSON.parse(raw) : {};
       return parsed && typeof parsed === 'object' ? parsed : {};
     } catch (e) {
@@ -80,7 +81,7 @@
   }
   function getQuotesForOpportunity(oppId) {
     try {
-      var raw = sessionStorage.getItem(getOpportunityQuotesKey(oppId));
+      var raw = sessionStorage.getItem(getOpportunityQuotesKey(oppId)) || localStorage.getItem(getOpportunityQuotesKey(oppId));
       if (!raw) return [];
       var list = JSON.parse(raw);
       return Array.isArray(list) ? list : [];
@@ -267,7 +268,10 @@
   var sidebarHardwareMode = false;
   var sidebarFlipAnimating = false;
   var quoteReadOnlyMode = false;
+  /** True once a saved quote has been loaded, so page defaults stop overwriting its fields. */
+  var quoteStateRestored = false;
   var fromCustomerRequest = false;
+  var fromNpvReturn = false;
   var hwConfigReviewed = !!(window.CUSTOMER_VIEW);
   var hwConfigApproved = false;
 
@@ -401,6 +405,18 @@
    *   36–59 months : $6.34 / TiB / month
    *   60+ months   : $5.71 / TiB / month
    */
+  /**
+   * Add-on pricing shown in this prototype is scaled down from the published list rates so demo
+   * figures are not mistaken for real quotes. Applies to Metro Cluster, Data Tiering, DII and
+   * Cluster Join, covering the cards, the sidebar rows, the totals and the generated quote.
+   */
+  var ADDON_DEMO_PRICE_FACTOR = 0.5;
+
+  /** Scales a published add-on list rate to the demo rate. */
+  function demoAddonRate(rate) {
+    return rate * ADDON_DEMO_PRICE_FACTOR;
+  }
+
   var ADP_RATE_CARD = Object.freeze([
     { minMonths: 1,  maxMonths: 11,  perTiBPerMonth: 7.61 },
     { minMonths: 12, maxMonths: 35,  perTiBPerMonth: 7.61 },
@@ -412,10 +428,10 @@
     var months = Math.max(1, Math.round(contractMonths || 12));
     for (var i = 0; i < ADP_RATE_CARD.length; i++) {
       if (months >= ADP_RATE_CARD[i].minMonths && months <= ADP_RATE_CARD[i].maxMonths) {
-        return ADP_RATE_CARD[i].perTiBPerMonth;
+        return demoAddonRate(ADP_RATE_CARD[i].perTiBPerMonth);
       }
     }
-    return ADP_RATE_CARD[ADP_RATE_CARD.length - 1].perTiBPerMonth;
+    return demoAddonRate(ADP_RATE_CARD[ADP_RATE_CARD.length - 1].perTiBPerMonth);
   }
 
   /** Returns total committed TiB across all currently selected workloads. */
@@ -424,9 +440,9 @@
     var total = 0;
     for (var i = 0; i < selected.length; i++) {
       var cfg = workloadConfigs[selected[i].id];
-      if (cfg && cfg.capacity) {
-        var cap = parseFloat(cfg.capacity);
-        if (!isNaN(cap) && cap > 0) total += cap;
+      if (cfg) {
+        var cap = getEffectiveCapacity(cfg);
+        if (cap > 0) total += cap;
       }
     }
     return total;
@@ -469,10 +485,10 @@
     var t = Math.max(1, Math.round(tib || 1));
     for (var i = 0; i < DT_RATE_TIERS.length; i++) {
       if (t >= DT_RATE_TIERS[i].minTiB && t <= DT_RATE_TIERS[i].maxTiB) {
-        return DT_RATE_TIERS[i].perTiBPerMonth;
+        return demoAddonRate(DT_RATE_TIERS[i].perTiBPerMonth);
       }
     }
-    return DT_RATE_TIERS[DT_RATE_TIERS.length - 1].perTiBPerMonth;
+    return demoAddonRate(DT_RATE_TIERS[DT_RATE_TIERS.length - 1].perTiBPerMonth);
   }
 
   /** Returns annual Data Tiering cost only when the tiering checkbox is explicitly checked and capacity is set. */
@@ -549,17 +565,17 @@
       var e = entries[i];
       if (months >= e.minM && months <= e.maxM) {
         for (var j = 0; j < e.tiers.length; j++) {
-          if (tib <= e.tiers[j].maxTiB) return e.tiers[j].rate;
+          if (tib <= e.tiers[j].maxTiB) return demoAddonRate(e.tiers[j].rate);
         }
-        return e.tiers[e.tiers.length - 1].rate;
+        return demoAddonRate(e.tiers[e.tiers.length - 1].rate);
       }
     }
     // Fallback: use last term bucket
     var last = entries[entries.length - 1];
     for (var k = 0; k < last.tiers.length; k++) {
-      if (tib <= last.tiers[k].maxTiB) return last.tiers[k].rate;
+      if (tib <= last.tiers[k].maxTiB) return demoAddonRate(last.tiers[k].rate);
     }
-    return last.tiers[last.tiers.length - 1].rate;
+    return demoAddonRate(last.tiers[last.tiers.length - 1].rate);
   }
 
   /**
@@ -575,11 +591,11 @@
     var tibByPlan = {};
     for (var i = 0; i < selected.length; i++) {
       var cfg = workloadConfigs[selected[i].id];
-      if (!cfg || !cfg.capacity || !cfg.selectedPlan) continue;
+      if (!cfg || !cfg.selectedPlan) continue;
       var planMeta = getPlanByName(cfg.selectedPlan);
       var planId = planMeta ? planMeta.id : null;
       if (!planId) continue;
-      var tib = parseFloat(cfg.capacity) || 0;
+      var tib = getEffectiveCapacity(cfg);
       if (tib <= 0) continue;
       tibByPlan[planId] = (tibByPlan[planId] || 0) + tib;
     }
@@ -594,20 +610,51 @@
     return Math.round(total * 100) / 100;
   }
 
+  /**
+   * Extrapolate per-TiB/month rate for burst values beyond the 20/40/60 rate card
+   * using quadratic fit on the three known data points.
+   * Points: (20, r20), (40, r40), (60, r60) → fit ax² + bx + c, evaluate at burstN.
+   */
+  function extrapolateBurstRate(r20, r40, r60, burstN) {
+    var a = (r60 - 2 * r40 + r20) / 800;
+    var b = (r40 - r20) / 20 - 60 * a;
+    var c = r20 - a * 400 - b * 20;
+    return Math.max(r60, a * burstN * burstN + b * burstN + c);
+  }
+
   function getIotRateCardEntry(capacityTiB, burstPct, usableEffectiveMode) {
     var cap = Number(capacityTiB);
     if (isNaN(cap) || cap <= 0) return null;
     var burst = String(burstPct || '20');
+    var burstN = parseFloat(burst);
+    if (isNaN(burstN) || burstN < 0) burstN = 20;
     var mode = String(usableEffectiveMode || 'effective').toLowerCase();
     var map = mode === 'usable' ? IOT_RATE_CARD.usable : IOT_RATE_CARD.effective;
-    // Select tier by capacity bracket; 100 TiB tier applies for all large deployments
     var tierKey = cap < 100 ? 50 : 100;
     var tierMap = map[tierKey];
     if (!tierMap) return null;
-    var rateEntry = tierMap[burst] || tierMap['20'];
-    if (!rateEntry) return null;
-    // Scale linearly: any capacity × per-TiB rate
-    var perTiBPerMonth = rateEntry.perTiBPerMonth;
+
+    var perTiBPerMonth;
+    var standardBurst = tierMap[burst];
+    if (standardBurst) {
+      perTiBPerMonth = standardBurst.perTiBPerMonth;
+    } else {
+      var r20 = tierMap['20'].perTiBPerMonth;
+      var r40 = tierMap['40'].perTiBPerMonth;
+      var r60 = tierMap['60'].perTiBPerMonth;
+      if (burstN <= 20) {
+        perTiBPerMonth = r20;
+      } else if (burstN <= 60) {
+        var lower = burstN <= 40 ? r20 : r40;
+        var upper = burstN <= 40 ? r40 : r60;
+        var frac = burstN <= 40 ? (burstN - 20) / 20 : (burstN - 40) / 20;
+        perTiBPerMonth = lower + (upper - lower) * frac;
+      } else {
+        perTiBPerMonth = extrapolateBurstRate(r20, r40, r60, burstN);
+      }
+      perTiBPerMonth = Math.round(perTiBPerMonth * 100) / 100;
+    }
+
     var monthly = Math.round(cap * perTiBPerMonth * 100) / 100;
     var yearlyNet = Math.round(monthly * 12 * 100) / 100;
     var averagePerTiBYear = Math.round(perTiBPerMonth * 12 * 100) / 100;
@@ -644,6 +691,45 @@
     return list;
   }
 
+  /**
+   * A request submitted from the Console arrives as configured workloads with no quote lines yet.
+   * Adds one line per configured workload so the seller opens a populated quote, the same result
+   * as pressing "Add to quote" on each workload card.
+   */
+  function addConfiguredWorkloadsToQuote() {
+    var years = getCurrentContractYears();
+    getSelectedWorkloads().forEach(function (w) {
+      var cfg = workloadConfigs[w.id];
+      if (!cfg || !cfg.selectedPlan) return;
+      var alreadyQuoted = quoteItems.some(function (item) { return item.workloadId === w.id; });
+      if (alreadyQuoted) return;
+      var planMeta = getPlanByName(cfg.selectedPlan);
+      if (!cfg.selectedPlanCost) {
+        var benchmark = getBenchmarkPricingOverrideForConfig(years, cfg, planMeta ? planMeta.id : null);
+        cfg.selectedPlanCost = benchmark && benchmark.yearlyNet
+          ? benchmark.yearlyNet
+          : (planMeta ? planMeta.cost : 0);
+      }
+      var capacity = getEffectiveCapacity(cfg) || cfg.capacity;
+      var specParts = [];
+      if (capacity) specParts.push(capacity + ' TiB');
+      if (cfg.iops) specParts.push(cfg.iops + (cfg.iopsUnit || '') + ' IOPS');
+      if (cfg.latency) specParts.push(cfg.latency + ' ms max latency');
+      quoteItems.push({
+        name: w.label + ' — ' + cfg.selectedPlan,
+        cost: cfg.selectedPlanCost || 0,
+        workloadId: w.id,
+        workloadLabel: w.label,
+        planName: cfg.selectedPlan,
+        capacityTiB: parseFloat(capacity) || 0,
+        spec: specParts.join(' \u00b7 ') || '—',
+        hardwareSeries: planMeta && planMeta.hardwareSeries && planMeta.hardwareSeries.length
+          ? planMeta.hardwareSeries.join(', ')
+          : 'As per selected performance level'
+      });
+    });
+  }
+
   function collapseAllSelectedWorkloads() {
     collapsedWorkloadIds = {};
     getSelectedWorkloads().forEach(function (w) {
@@ -672,7 +758,7 @@
       planConfigs[planId] = {
         usableEffective: 'effective',
         ioMix: 'random',
-        snapmirror: 'no',
+        snapmirror: 'yes',
         burst: '20',
         ioMixReadRandomPct: 70,
         ioMixReadRandomBlock: '8K',
@@ -954,6 +1040,51 @@
     return list;
   }
 
+  /**
+   * Sovereign deployments are identified by their site-value prefix rather than a fixed list, so
+   * a Console-submitted request naming any EU-Sovereign / Dark-Site location still resolves.
+   */
+  function isSovereignDeploymentValue(value) {
+    return /^(EU-Sovereign|Dark-Site)/i.test(String(value || ''));
+  }
+
+  /**
+   * A sovereign site can only be sold as a sovereign subscription, so the subscription type
+   * follows the chosen site instead of being picked independently. Moving back to a standard
+   * site restores the default type.
+   */
+  function syncSubscriptionTypeToDeployment() {
+    var deploymentSelect = document.querySelector('select[name="deployment_location"]');
+    var typeSelect = getById('subscription-type');
+    if (!deploymentSelect || !typeSelect) return;
+    if (isSovereignDeploymentValue(deploymentSelect.value)) {
+      typeSelect.value = 'Sovereign';
+    } else if (typeSelect.value === 'Sovereign') {
+      typeSelect.value = 'USPS';
+    }
+    updateSovereignTag();
+  }
+
+  /**
+   * Flags a sovereign quote next to the page title, matching the Console's sovereignty tag, so the
+   * constraint is visible without scrolling down to the subscription-type field.
+   */
+  function updateSovereignTag() {
+    var tag = getById('sizing-sovereign-tag');
+    if (!tag) return;
+    var deploymentSelect = document.querySelector('select[name="deployment_location"]');
+    var typeSelect = getById('subscription-type');
+    var siteValue = deploymentSelect ? deploymentSelect.value : '';
+    var isSovereign = (typeSelect && typeSelect.value === 'Sovereign') || isSovereignDeploymentValue(siteValue);
+    tag.hidden = !isSovereign;
+    if (!isSovereign) return;
+    var siteLabel = '';
+    if (deploymentSelect && deploymentSelect.selectedIndex >= 0) {
+      siteLabel = deploymentSelect.options[deploymentSelect.selectedIndex].textContent || '';
+    }
+    tag.textContent = siteLabel ? 'Sovereign \u00b7 ' + siteLabel : 'Sovereign';
+  }
+
   function getQuoteStateForStorage() {
     var contractEl = document.querySelector('input[name="contract-length"]:checked');
     var billingEl = document.querySelector('input[name="billing-frequency"]:checked');
@@ -1004,11 +1135,21 @@
         return '12';
       })(),
       deploymentLocation: deploymentEl ? deploymentEl.value : '',
+      deploymentLocationLabel: (deploymentEl && deploymentEl.selectedIndex >= 0)
+        ? (deploymentEl.options[deploymentEl.selectedIndex].textContent || '')
+        : '',
       subscriptionType: subscriptionTypeEl ? subscriptionTypeEl.value : 'USPS',
       billToAddress: (getById('bill-to-address') && getById('bill-to-address').value) || '',
       shipToAddress: (getById('ship-to-address') && getById('ship-to-address').value) || '',
       selectedWorkloadIds: selectedWorkloadIds,
       requestedDeviations: requestedDeviations.slice(),
+      selectedAddons: (function () {
+        var picked = [];
+        document.querySelectorAll('input[name="addon_subscription"]:checked').forEach(function (cb) {
+          picked.push(cb.value);
+        });
+        return picked;
+      })(),
       adpAnnualCost: getAdpAnnualCost(),
       dataTieringTiB: dataTieringTiB,
       diiAnnualCost: getDiiAnnualCost(),
@@ -1037,7 +1178,7 @@
   }
 
   function restoreQuoteStateFromStorage(forceFromKey) {
-    if (!ENABLE_SIZING_DRAFT_PERSISTENCE && !quoteReadOnlyMode && !fromCustomerRequest) return false;
+    if (!ENABLE_SIZING_DRAFT_PERSISTENCE && !quoteReadOnlyMode && !fromCustomerRequest && !fromNpvReturn) return false;
     try {
       var raw = null;
       if (forceFromKey) {
@@ -1053,7 +1194,10 @@
       if (!raw) {
         raw = localStorage.getItem(getQuoteStorageKey(currentQuoteId));
       }
-      if (!raw) return false;
+      if (!raw) {
+        quoteStateRestored = false;
+        return false;
+      }
       var state = JSON.parse(raw);
       sessionStorage.removeItem('sizingReturnUrl');
 
@@ -1132,9 +1276,29 @@
       if (durationWrap) durationWrap.hidden = (state.autoRenew !== 'yes');
       updateAutoRenewDurationVisibility();
       var deploymentSelect = document.querySelector('select[name="deployment_location"]');
-      if (deploymentSelect && state.deploymentLocation) deploymentSelect.value = state.deploymentLocation;
+      if (deploymentSelect && state.deploymentLocation) {
+        // A Console-submitted request can name a site that isn't in the seller's static list.
+        var hasSiteOption = Array.prototype.some.call(deploymentSelect.options, function (o) {
+          return o.value === state.deploymentLocation;
+        });
+        if (!hasSiteOption) {
+          var siteOption = document.createElement('option');
+          siteOption.value = state.deploymentLocation;
+          siteOption.textContent = state.deploymentLocationLabel || state.deploymentLocation;
+          deploymentSelect.appendChild(siteOption);
+        }
+        deploymentSelect.value = state.deploymentLocation;
+      }
       var subscriptionTypeSelect = getById('subscription-type');
       if (subscriptionTypeSelect) subscriptionTypeSelect.value = state.subscriptionType || 'USPS';
+      syncSubscriptionTypeToDeployment();
+
+      if (Array.isArray(state.selectedAddons)) {
+        document.querySelectorAll('input[name="addon_subscription"]').forEach(function (cb) {
+          cb.checked = state.selectedAddons.indexOf(cb.value) !== -1;
+        });
+      }
+      if (state.dataTieringTiB) dataTieringTiB = state.dataTieringTiB;
       var billToEl = getById('bill-to-address');
       var shipToEl = getById('ship-to-address');
       if (billToEl) billToEl.value = state.billToAddress || '';
@@ -1149,8 +1313,10 @@
         });
       }
 
+      quoteStateRestored = true;
       return true;
     } catch (e) {
+      quoteStateRestored = false;
       return false;
     }
   }
@@ -1230,8 +1396,10 @@
     if (state.subscriptionType) parts.push(detailLine('Subscription type', state.subscriptionType, false));
     if (state.billToAddress) parts.push(detailLine('Bill-to', state.billToAddress, false));
     if (state.shipToAddress) parts.push(detailLine('Ship-to', state.shipToAddress, false));
-    parts.push(detailLine('Currency', state.currency || 'USD', false));
-    if (state.discountRatePct && parseInt(state.discountRatePct, 10) > 0) parts.push(detailLine('Discount', state.discountRatePct + '%', false));
+    if (!window.CUSTOMER_VIEW) {
+      parts.push(detailLine('Currency', state.currency || 'USD', false));
+      if (state.discountRatePct && parseInt(state.discountRatePct, 10) > 0) parts.push(detailLine('Discount', state.discountRatePct + '%', false));
+    }
     parts.push('</div>');
 
     if (hasAddedPlans) {
@@ -1329,7 +1497,7 @@
         var dtAnnual = getDtAnnualCost();
         tieringEl.textContent = '$' + dtRate.toFixed(2) + ' / TiB / month  (' + dataTieringTiB + ' TiB — $' + Math.round(dtAnnual).toLocaleString() + '/yr)';
       } else {
-        tieringEl.textContent = '$33.79 – $16.90 / TiB / month';
+        tieringEl.textContent = '$' + getDtRatePerTiBMonth(1).toFixed(2) + ' – $' + getDtRatePerTiBMonth(1000).toFixed(2) + ' / TiB / month';
       }
     }
     // DII card — show calculated total once workloads are configured, else show range
@@ -1340,7 +1508,7 @@
       if (diiCb && diiCb.checked && diiAnnualPreview > 0) {
         diiEl.textContent = formatCurrency(Math.round(diiAnnualPreview)) + ' / year';
       } else {
-        diiEl.textContent = '$0.36 – $4.00 / TiB / month (by plan)';
+        diiEl.textContent = '$' + demoAddonRate(0.36).toFixed(2) + ' – $' + demoAddonRate(4.00).toFixed(2) + ' / TiB / month (by plan)';
       }
     }
   }
@@ -1418,12 +1586,575 @@
     }
   }
 
+  /* ── Inline sizing output panel ── */
+
+  var sizingOutputPendingBilling = null;
+  var sizingOutputConfirmed = false;
+
+  function sizingOutputRoundUp25(v) {
+    return Math.ceil((v || 0) / 25) * 25;
+  }
+
+  function sizingOutputRoundUpToStep(x, step) {
+    var s = Math.max(1, Number(step) || 1);
+    return Math.ceil((x || 0) / s) * s;
+  }
+
+  function sizingOutputGetCapacityAtMonth(inputs, monthIndex) {
+    var start = Number(inputs.startingCapacity) || 0;
+    if (!isFinite(monthIndex) || monthIndex <= 0) return start;
+    var growth = Number(inputs.growthRate) || 0;
+    return start * Math.pow(1 + growth, monthIndex / 12);
+  }
+
+  function sizingOutputGetFirstCrossMonth(inputs, capacity, demandAtMonth) {
+    var totalMonths = Math.max(1, Math.floor(Number(inputs.termYears) || 1)) * 12;
+    for (var m = 1; m <= totalMonths; m++) {
+      if (demandAtMonth(m) >= capacity) return m;
+    }
+    return null;
+  }
+
+  function sizingOutputGetRecommendedCapacity(inputs, demandAtMonth, step) {
+    var totalMonths = Math.max(1, Math.floor(Number(inputs.termYears) || 1)) * 12;
+    var windowStart = Math.min(13, totalMonths);
+    var windowEnd = Math.min(17, totalMonths);
+    var targetMonth = Math.min(15, totalMonths);
+    var candidates = [];
+    for (var m = windowStart; m <= windowEnd; m++) {
+      var cap = sizingOutputRoundUpToStep(demandAtMonth(m), step);
+      var crossMonth = sizingOutputGetFirstCrossMonth(inputs, cap, demandAtMonth);
+      if (crossMonth !== null) candidates.push({ capacity: cap, crossMonth: crossMonth });
+    }
+    var inWindow = candidates.filter(function (c) { return c.crossMonth >= windowStart && c.crossMonth <= windowEnd; });
+    if (inWindow.length) {
+      inWindow.sort(function (a, b) { return Math.abs(a.crossMonth - targetMonth) - Math.abs(b.crossMonth - targetMonth) || a.capacity - b.capacity; });
+      return inWindow[0].capacity;
+    }
+    if (candidates.length) {
+      candidates.sort(function (a, b) { return Math.abs(a.crossMonth - targetMonth) - Math.abs(b.crossMonth - targetMonth) || a.capacity - b.capacity; });
+      return candidates[0].capacity;
+    }
+    return sizingOutputRoundUpToStep(demandAtMonth(targetMonth), step);
+  }
+
+  function sizingOutputGatherInputs() {
+    var selected = getSelectedWorkloads();
+    if (!selected.length) return null;
+    var firstCfg = null;
+    var firstPlan = null;
+    for (var i = 0; i < selected.length; i++) {
+      var cfg = workloadConfigs[selected[i].id];
+      if (cfg && cfg.selectedPlan) {
+        firstCfg = cfg;
+        firstPlan = getPlanByName(cfg.selectedPlan);
+        break;
+      }
+    }
+    if (!firstCfg) return null;
+
+    var usedCap = parseFloat(firstCfg.capacity);
+    if (isNaN(usedCap) || usedCap <= 0) return null;
+
+    var iops = parseFloat(firstCfg.iops);
+    if (isNaN(iops) || iops <= 0) return null;
+
+    var latency = parseFloat(firstCfg.latency);
+    if (isNaN(latency) || latency < 0) return null;
+
+    var growthRate = parseFloat(firstCfg.annualGrowthRate);
+    if (isNaN(growthRate)) return null;
+
+    var se = parseFloat(firstCfg.storageEfficiencyRatio);
+    if (isNaN(se) || se <= 0) return null;
+
+    var burstPct = parseFloat(getNormalizedBurstValue(firstCfg.burst));
+    if (isNaN(burstPct) || burstPct <= 0) return null;
+
+    var termYears = getCurrentContractYears() || 3;
+
+    return {
+      usedCapEffective: usedCap,
+      usedCapUsable: usedCap / Math.max(1, se),
+      se: se,
+      burstPct: burstPct,
+      growthRate: growthRate / 100,
+      termYears: termYears,
+      usableEffective: firstCfg.usableEffective || 'effective',
+      planName: firstCfg.selectedPlan,
+      planFamily: firstPlan ? firstPlan.family : 'Unified'
+    };
+  }
+
+  function clearSizingOutputPanel() {
+    var dash = '—';
+    var ids = [
+      'sizing-out-usable-min', 'sizing-out-usable-burst', 'sizing-out-usable-full',
+      'sizing-out-eff-min', 'sizing-out-eff-burst', 'sizing-out-eff-full',
+      'sizing-out-month-min-usable', 'sizing-out-month-min-eff',
+      'sizing-out-month-burst-usable', 'sizing-out-month-burst-eff',
+      'sizing-out-eg1-min', 'sizing-out-eg1-burst', 'sizing-out-eg1-full',
+      'sizing-out-capex-min'
+    ];
+    for (var i = 0; i < ids.length; i++) {
+      var el = getById(ids[i]);
+      if (el) el.textContent = dash;
+    }
+    var forecastBody = getById('sizing-output-forecast-body');
+    if (forecastBody) forecastBody.innerHTML = '';
+    var cards = document.querySelectorAll('.sizing-output-card');
+    for (var j = 0; j < cards.length; j++) {
+      cards[j].classList.remove('sizing-output-card--active');
+    }
+  }
+
+  function renderSizingOutputPanel() {
+    if (sizingOutputConfirmed) return;
+    var panel = getById('sizing-output-panel');
+    if (!panel) return;
+    var inputs = sizingOutputGatherInputs();
+    if (!inputs) {
+      clearSizingOutputPanel();
+      return;
+    }
+
+    var termYears = inputs.termYears;
+    var growthRate = inputs.growthRate;
+    var startUsable = inputs.usedCapUsable;
+    var startEffective = inputs.usedCapEffective;
+    var burstPct = inputs.burstPct;
+    var se = inputs.se;
+
+    var usableInputs = { startingCapacity: startUsable, growthRate: growthRate, termYears: termYears };
+    var effectiveInputs = { startingCapacity: startEffective, growthRate: growthRate, termYears: termYears };
+
+    // Forecast table
+    var forecastBody = getById('sizing-output-forecast-body');
+    if (forecastBody) {
+      var rows = '';
+      for (var y = 0; y <= termYears; y++) {
+        var month = y * 12;
+        var usable = sizingOutputGetCapacityAtMonth(usableInputs, month);
+        var effective = sizingOutputGetCapacityAtMonth(effectiveInputs, month);
+        rows += '<tr><td>Year ' + y + '</td><td>' + Math.round(usable) + ' TiB</td><td>' + Math.round(effective) + ' TiB</td></tr>';
+      }
+      forecastBody.innerHTML = rows;
+    }
+
+    // Usable path
+    var usableDemand = function (m) { return sizingOutputGetCapacityAtMonth(usableInputs, m); };
+    var usableMin = sizingOutputGetRecommendedCapacity(usableInputs, usableDemand, 25);
+    var usableBurst = sizingOutputRoundUp25(usableMin * (burstPct / 100));
+    var usableFull = usableMin + usableBurst;
+
+    var elUsableMin = getById('sizing-out-usable-min');
+    var elUsableBurst = getById('sizing-out-usable-burst');
+    var elUsableFull = getById('sizing-out-usable-full');
+    if (elUsableMin) elUsableMin.textContent = usableMin + ' TiB';
+    if (elUsableBurst) elUsableBurst.textContent = usableBurst + ' TiB (' + burstPct + '%)';
+    if (elUsableFull) elUsableFull.textContent = usableFull + ' TiB';
+
+    // Effective path
+    var effDemand = function (m) { return sizingOutputGetCapacityAtMonth(effectiveInputs, m); };
+    var effMin = sizingOutputGetRecommendedCapacity(effectiveInputs, effDemand, 25);
+    var effBurst = sizingOutputRoundUp25(effMin * (burstPct / 100));
+    var effFull = effMin + effBurst;
+
+    var elEffMin = getById('sizing-out-eff-min');
+    var elEffBurst = getById('sizing-out-eff-burst');
+    var elEffFull = getById('sizing-out-eff-full');
+    if (elEffMin) elEffMin.textContent = effMin + ' TiB';
+    if (elEffBurst) elEffBurst.textContent = effBurst + ' TiB (' + burstPct + '%)';
+    if (elEffFull) elEffFull.textContent = effFull + ' TiB';
+
+    // Threshold timing
+    var usableMonthMin = sizingOutputGetFirstCrossMonth(usableInputs, usableMin, usableDemand);
+    var usableMonthBurst = sizingOutputGetFirstCrossMonth(usableInputs, usableFull, usableDemand);
+    var effMonthMin = sizingOutputGetFirstCrossMonth(effectiveInputs, effMin, effDemand);
+    var effMonthBurst = sizingOutputGetFirstCrossMonth(effectiveInputs, effFull, effDemand);
+
+    function fmtMonth(m) { return m ? 'Month ' + m : 'Not within term'; }
+    var elMonthMinU = getById('sizing-out-month-min-usable');
+    var elMonthMinE = getById('sizing-out-month-min-eff');
+    var elMonthBurstU = getById('sizing-out-month-burst-usable');
+    var elMonthBurstE = getById('sizing-out-month-burst-eff');
+    if (elMonthMinU) elMonthMinU.textContent = fmtMonth(usableMonthMin);
+    if (elMonthMinE) elMonthMinE.textContent = fmtMonth(effMonthMin);
+    if (elMonthBurstU) elMonthBurstU.textContent = fmtMonth(usableMonthBurst);
+    if (elMonthBurstE) elMonthBurstE.textContent = fmtMonth(effMonthBurst);
+
+    // Pure EG1 Effective — uses effective capacity path with 25% burst
+    var eg1BurstPct = 25;
+    var eg1DemandAtMonth = function (m) {
+      return inputs.usableEffective === 'effective'
+        ? effDemand(m)
+        : usableDemand(m) * Math.max(1, se);
+    };
+    var eg1Min = sizingOutputGetRecommendedCapacity(effectiveInputs, eg1DemandAtMonth, 25);
+    var eg1Burst = sizingOutputRoundUp25(eg1Min * (eg1BurstPct / 100));
+    var eg1Full = eg1Min + eg1Burst;
+    var elEg1Min = getById('sizing-out-eg1-min');
+    var elEg1Burst = getById('sizing-out-eg1-burst');
+    var elEg1Full = getById('sizing-out-eg1-full');
+    if (elEg1Min) elEg1Min.textContent = eg1Min + ' TiB';
+    if (elEg1Burst) elEg1Burst.textContent = eg1Burst + ' TiB (25%)';
+    if (elEg1Full) elEg1Full.textContent = eg1Full + ' TiB';
+
+    // CAPEX — end-of-term usable demand, rounded up to nearest TiB
+    var capexCap = sizingOutputRoundUpToStep(sizingOutputGetCapacityAtMonth(usableInputs, termYears * 12), 1);
+    var elCapexMin = getById('sizing-out-capex-min');
+    if (elCapexMin) elCapexMin.textContent = capexCap + ' TiB';
+
+    // Update the deep link with current params
+    var deeplink = getById('sizing-output-deeplink');
+    if (deeplink) {
+      var params = new URLSearchParams();
+      params.set('view', 'new-workload');
+      params.set('capacity', String(Math.round(inputs.usedCapEffective)));
+      params.set('se', String(inputs.se));
+      params.set('burst', String(Math.round(inputs.burstPct)));
+      params.set('term', String(inputs.termYears));
+      params.set('growth', String(Math.round(inputs.growthRate * 100)));
+      var planName = (inputs.planName || '').toLowerCase();
+      if (planName.indexOf('extreme') !== -1 || planName.indexOf('premium') !== -1) params.set('level', 'premium');
+      else if (planName.indexOf('standard') !== -1) params.set('level', 'standard');
+      else if (planName.indexOf('value') !== -1) params.set('level', 'value');
+      if (planName.indexOf('block') !== -1) params.set('stype', 'block');
+      else if (planName.indexOf('object') !== -1) params.set('stype', 'object');
+      else params.set('stype', 'unified');
+
+      var capexResult = computeCapexHardwareLicense();
+      if (capexResult) {
+        params.set('capex_hw', String(capexResult.hwLicense));
+      }
+      var cd = CAPEX_DEFAULTS;
+      params.set('capex_tax', String(Math.round(cd.taxRate * 100)));
+      params.set('capex_install', String(cd.installation));
+      params.set('capex_setup', String(cd.setup));
+      params.set('capex_maint', String(cd.maintenance));
+      params.set('capex_dc', String(cd.datacenter));
+      params.set('capex_sm', String(cd.successManager));
+
+      deeplink.href = 'staas-tco-npv.html?' + params.toString();
+    }
+
+    // Show only the card that matches the currently selected billing mode
+    var currentMode = 'effective';
+    var selected = getSelectedWorkloads();
+    for (var si = 0; si < selected.length; si++) {
+      var sc = workloadConfigs[selected[si].id];
+      if (sc) {
+        currentMode = sc.usableEffective || 'effective';
+        break;
+      }
+    }
+    var cardUsable = getById('sizing-out-card-usable');
+    var cardEffective = getById('sizing-out-card-effective');
+    if (cardUsable) {
+      cardUsable.style.display = '';
+      cardUsable.classList.toggle('sizing-output-card--active', currentMode === 'usable');
+    }
+    if (cardEffective) {
+      cardEffective.style.display = '';
+      cardEffective.classList.toggle('sizing-output-card--active', currentMode === 'effective');
+    }
+
+    // Redraw chart if visible
+    sizingOutputDrawChart();
+  }
+
+  /* ── Forecast vs commit capacity chart ── */
+
+  var sizingCapChart = null;
+
+  function sizingOutputGetChartMode() {
+    var active = document.querySelector('.sizing-chart-mode-btn.is-active');
+    return (active && active.dataset.chartMode) || 'both';
+  }
+
+  function sizingOutputBuildChartData(inputs, usableMin, effMin) {
+    var termYears = inputs.termYears;
+    var growthRate = inputs.growthRate;
+    var startUsable = inputs.usedCapUsable;
+    var startEffective = inputs.usedCapEffective;
+    var labels = [];
+    var usableForecast = [];
+    var effectiveForecast = [];
+    for (var y = 1; y <= termYears; y++) {
+      labels.push('Year ' + y);
+      var month = y * 12;
+      var uInputs = { startingCapacity: startUsable, growthRate: growthRate, termYears: termYears };
+      var eInputs = { startingCapacity: startEffective, growthRate: growthRate, termYears: termYears };
+      usableForecast.push(sizingOutputGetCapacityAtMonth(uInputs, month));
+      effectiveForecast.push(sizingOutputGetCapacityAtMonth(eInputs, month));
+    }
+    var usableCommit = [];
+    var effectiveCommit = [];
+    for (var y2 = 0; y2 < termYears; y2++) {
+      usableCommit.push(usableMin);
+      effectiveCommit.push(effMin);
+    }
+    return {
+      labels: labels,
+      usableForecast: usableForecast,
+      effectiveForecast: effectiveForecast,
+      usableCommit: usableCommit,
+      effectiveCommit: effectiveCommit
+    };
+  }
+
+  function sizingOutputBuildChartSpec(mode, comp) {
+    var tibTick = function (v) {
+      return typeof v === 'number' && isFinite(v)
+        ? (new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v))
+        : String(v);
+    };
+    var gridColor = 'rgba(48, 54, 61, 0.35)';
+    var tickColor = '#64748b';
+    var ds = [];
+    if (mode === 'usable') {
+      ds.push({ label: 'Forecast usable (TiB)', data: comp.usableForecast, backgroundColor: 'rgba(46, 125, 50, 0.75)', borderColor: '#2e7d32', borderWidth: 1 });
+      ds.push({ type: 'line', label: 'Min billing usable (TiB)', data: comp.usableCommit, borderColor: '#14532d', backgroundColor: '#14532d', borderWidth: 2, tension: 0.12, pointRadius: 3 });
+    } else if (mode === 'effective') {
+      ds.push({ label: 'Forecast effective (TiB)', data: comp.effectiveForecast, backgroundColor: 'rgba(88, 166, 255, 0.75)', borderColor: '#58a6ff', borderWidth: 1 });
+      ds.push({ type: 'line', label: 'Min billing effective (TiB)', data: comp.effectiveCommit, borderColor: '#1e40af', backgroundColor: '#1e40af', borderWidth: 2, tension: 0.12, pointRadius: 3 });
+    } else {
+      ds.push({ label: 'Forecast usable (TiB)', data: comp.usableForecast, backgroundColor: 'rgba(46, 125, 50, 0.7)', borderColor: '#2e7d32', borderWidth: 1 });
+      ds.push({ label: 'Forecast effective (TiB)', data: comp.effectiveForecast, backgroundColor: 'rgba(88, 166, 255, 0.65)', borderColor: '#58a6ff', borderWidth: 1 });
+      ds.push({ type: 'line', label: 'Min billing usable (TiB)', data: comp.usableCommit, borderColor: '#14532d', backgroundColor: '#14532d', borderWidth: 2, tension: 0.12, pointRadius: 3 });
+      ds.push({ type: 'line', label: 'Min billing effective (TiB)', data: comp.effectiveCommit, borderColor: '#1e3a5f', backgroundColor: '#1e3a5f', borderWidth: 2, borderDash: [5, 4], tension: 0.12, pointRadius: 3 });
+    }
+    return {
+      type: 'bar',
+      data: { labels: comp.labels, datasets: ds },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        unifiedY: true,
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: tickColor, maxRotation: 0 } },
+          y: { grid: { color: gridColor }, ticks: { color: tickColor, callback: tibTick } }
+        }
+      }
+    };
+  }
+
+  function sizingOutputDrawChart() {
+    var toggle = getById('sizingOutputChartToggle');
+    var body = getById('sizingOutputChartBody');
+    var canvas = getById('sizingOutputCapChart');
+    if (!toggle || !body || !canvas) return;
+
+    if (!toggle.checked) {
+      body.style.display = 'none';
+      if (sizingCapChart) { sizingCapChart.destroy(); sizingCapChart = null; }
+      return;
+    }
+    body.style.display = '';
+
+    var inputs = sizingOutputGatherInputs();
+    if (!inputs) {
+      if (sizingCapChart) { sizingCapChart.destroy(); sizingCapChart = null; }
+      return;
+    }
+
+    var usableInputs = { startingCapacity: inputs.usedCapUsable, growthRate: inputs.growthRate, termYears: inputs.termYears };
+    var effectiveInputs = { startingCapacity: inputs.usedCapEffective, growthRate: inputs.growthRate, termYears: inputs.termYears };
+    var usableDemand = function (m) { return sizingOutputGetCapacityAtMonth(usableInputs, m); };
+    var effDemand = function (m) { return sizingOutputGetCapacityAtMonth(effectiveInputs, m); };
+    var usableMin = sizingOutputGetRecommendedCapacity(usableInputs, usableDemand, 25);
+    var effMin = sizingOutputGetRecommendedCapacity(effectiveInputs, effDemand, 25);
+
+    var comp = sizingOutputBuildChartData(inputs, usableMin, effMin);
+    var mode = sizingOutputGetChartMode();
+    var spec = sizingOutputBuildChartSpec(mode, comp);
+
+    if (sizingCapChart) { sizingCapChart.destroy(); sizingCapChart = null; }
+    sizingCapChart = new Chart(canvas, spec);
+  }
+
+  // Bind chart toggle and mode buttons
+  document.addEventListener('change', function (e) {
+    if (e.target && e.target.id === 'sizingOutputChartToggle') {
+      sizingOutputDrawChart();
+    }
+  });
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.sizing-chart-mode-btn');
+    if (!btn) return;
+    var btns = document.querySelectorAll('.sizing-chart-mode-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('is-active');
+    btn.classList.add('is-active');
+    sizingOutputDrawChart();
+  });
+
+  function sizingOutputApplyConfirmed(mode, recommendedCap) {
+    var selected = getSelectedWorkloads();
+    if (!selected.length) return;
+
+    for (var i = 0; i < selected.length; i++) {
+      var wid = selected[i].id;
+      var cfg = workloadConfigs[wid];
+      if (!cfg) continue;
+
+      cfg.usableEffective = mode;
+
+      if (recommendedCap > 0) {
+        cfg.suggestedCapacity = String(recommendedCap);
+      }
+
+      cfg.manualPlanOverride = false;
+    }
+
+    renderWorkloadConfigCards();
+    updateSidebarFromSelections();
+  }
+
+  /**
+   * Runs the forecast math in the background for a single workload and
+   * writes the result into cfg.suggestedCapacity.  Returns true if
+   * a value was computed, false if inputs are insufficient.
+   */
+  function autoComputeSuggestedCapacity(wid) {
+    var cfg = workloadConfigs[wid];
+    if (!cfg) return false;
+
+    function clearField() {
+      cfg.suggestedCapacity = '';
+      var f = getById('suggested-capacity-field-' + wid);
+      if (f) f.style.display = 'none';
+      var rf = getById('requested-capacity-field-' + wid);
+      if (rf) rf.style.display = 'none';
+      return false;
+    }
+
+    var usedCap = parseFloat(cfg.capacity);
+    if (isNaN(usedCap) || usedCap <= 0) return clearField();
+
+    var growthRate = parseFloat(cfg.annualGrowthRate);
+    if (isNaN(growthRate)) return clearField();
+
+    var se = parseFloat(cfg.storageEfficiencyRatio);
+    if (isNaN(se) || se <= 0) return clearField();
+
+    var burstPct = parseFloat(getNormalizedBurstValue(cfg.burst));
+    if (isNaN(burstPct) || burstPct <= 0) return clearField();
+
+    var termYears = getCurrentContractYears() || 3;
+    var mode = cfg.usableEffective || 'effective';
+
+    var startEffective = usedCap;
+    var startUsable = usedCap / Math.max(1, se);
+    var startCap = mode === 'usable' ? startUsable : startEffective;
+
+    var inputs = { startingCapacity: startCap, growthRate: growthRate / 100, termYears: termYears };
+    var demandFn = function (m) { return sizingOutputGetCapacityAtMonth(inputs, m); };
+    var minCap = sizingOutputGetRecommendedCapacity(inputs, demandFn, 25);
+
+    cfg.suggestedCapacity = String(minCap);
+
+    var field = getById('suggested-capacity-field-' + wid);
+    var input = getById('suggested-capacity-' + wid);
+    if (field) field.style.display = '';
+    if (input) input.value = minCap;
+    var reqField = getById('requested-capacity-field-' + wid);
+    if (reqField) reqField.style.display = '';
+
+    return true;
+  }
+
+  function sizingOutputUpdateConfirmLabel(billing) {
+    var label = getById('sizing-output-confirm-label');
+    if (label) {
+      var name = billing === 'usable' ? 'Keystone Usable' : 'Keystone Effective';
+      label.textContent = name + ' selected — confirm to apply to configuration.';
+    }
+  }
+
+  var sizingOutputPendingCap = 0;
+
+  function sizingOutputSelectCard(billing) {
+    sizingOutputPendingBilling = billing;
+
+    var cardUsable = getById('sizing-out-card-usable');
+    var cardEffective = getById('sizing-out-card-effective');
+    if (cardUsable) cardUsable.classList.toggle('sizing-output-card--active', billing === 'usable');
+    if (cardEffective) cardEffective.classList.toggle('sizing-output-card--active', billing === 'effective');
+
+    // Read the displayed recommended min billing from the selected card
+    var valueEl = billing === 'usable' ? getById('sizing-out-usable-min') : getById('sizing-out-eff-min');
+    sizingOutputPendingCap = valueEl ? parseInt(valueEl.textContent, 10) || 0 : 0;
+
+    sizingOutputUpdateConfirmLabel(billing);
+  }
+
+  // Expose forecasting state for the inline script in sizing.html
+  window._sizingForecast = {
+    getConfirmed: function () { return sizingOutputConfirmed; },
+    setConfirmed: function (v) { sizingOutputConfirmed = v; },
+    getPendingBilling: function () { return sizingOutputPendingBilling; },
+    setPendingBilling: function (v) { sizingOutputPendingBilling = v; },
+    getPendingCap: function () { return sizingOutputPendingCap; },
+    apply: sizingOutputApplyConfirmed,
+    render: renderSizingOutputPanel
+  };
+
+  // Expose state persistence for NPV navigation round-trip
+  window._sizingSaveBeforeNpv = function () {
+    saveQuoteStateToStorage(currentQuoteId, true);
+    try {
+      sessionStorage.setItem('sizingRestoreOnLoad', '1');
+      sessionStorage.setItem('sizingNpvReturnQuoteId', currentQuoteId);
+      sessionStorage.setItem('sizingNpvReturnOppId', currentOpportunityId);
+    } catch (e) {}
+  };
+
+  // Expose CAPEX financial comparison API for the inline script
+  window._capexFinApi = {
+    compute: function () {
+      var result = computeCapexHardwareLicense();
+      if (!result) return null;
+      var selected = getSelectedWorkloads();
+      var cfg = null;
+      for (var i = 0; i < selected.length; i++) {
+        var c = workloadConfigs[selected[i].id];
+        if (c && c.capacity) { cfg = c; break; }
+      }
+      result.planName = cfg ? (cfg.selectedPlan || '—') : '—';
+      result.defaults = CAPEX_DEFAULTS;
+      return result;
+    }
+  };
+
+  (function () {
+    document.addEventListener('click', function (e) {
+      var card = e.target.closest('.sizing-output-card--clickable');
+      if (!card) return;
+      var billing = card.dataset.billing;
+      if (billing) sizingOutputSelectCard(billing);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var card = e.target.closest('.sizing-output-card--clickable');
+      if (!card) return;
+      e.preventDefault();
+      var billing = card.dataset.billing;
+      if (billing) sizingOutputSelectCard(billing);
+    });
+  
+  })();
+
   function updateSidebarFromSelections() {
     var state = getQuoteState();
     renderSidebarSelections(state);
     renderSidebarHardwareDetails();
     updateSidebarTotals();
     updateAddonCardPrices();
+    renderSizingOutputPanel();
+    if (!window.CUSTOMER_VIEW) {
+      renderCapexComparison();
+      updateCapexVerdictBanners();
+    }
   }
 
   function renderSidebarHardwareDetails() {
@@ -1433,6 +2164,7 @@
       listEl.innerHTML = '<p class="quote-empty-desc">No hardware details available yet. Add workloads and plans to quote.</p>';
       return;
     }
+    var matchedWids = {};
     listEl.innerHTML = quoteItems.map(function (item) {
       var label = item.workloadLabel || item.name || 'Workload';
       var planName = item.planName || '—';
@@ -1442,9 +2174,39 @@
       var protocolText = planMeta && planMeta.protocols && planMeta.protocols.length
         ? planMeta.protocols.join(', ')
         : 'Protocol set based on selected plan';
+
+      var wid = item.workloadId || null;
+      if (!wid || matchedWids[wid]) {
+        wid = null;
+        var workloads = getSelectedWorkloads();
+        for (var wi = 0; wi < workloads.length; wi++) {
+          if (matchedWids[workloads[wi].id]) continue;
+          var candCfg = workloadConfigs[workloads[wi].id];
+          if (!candCfg || candCfg.selectedPlan !== item.planName) continue;
+          if (item.workloadLabel && workloads[wi].label === item.workloadLabel) { wid = workloads[wi].id; break; }
+          if (!wid) wid = workloads[wi].id;
+        }
+      }
+      if (wid) matchedWids[wid] = true;
+      var cfg = wid ? workloadConfigs[wid] : null;
+      var committed = 0;
+      if (cfg) {
+        committed = getEffectiveCapacity(cfg);
+      }
+      var burstPct = cfg ? (parseFloat(getNormalizedBurstValue(cfg.burst)) || 0) : 0;
+      var totalCap = Math.round(committed * (1 + burstPct / 100) * 100) / 100;
+      var capacityLine = '';
+      if (committed > 0) {
+        capacityLine = '<p class="quote-hardware-item-meta">Capacity (committed + burst): ' +
+          escapeHtml(committed + ' TiB') +
+          (burstPct > 0 ? ' + ' + escapeHtml(burstPct + '%') + ' burst = ' + escapeHtml(totalCap + ' TiB') : '') +
+          '</p>';
+      }
+
       return '<div class="quote-hardware-item">' +
         '<span class="quote-hardware-item-label">' + escapeHtml(label) + '</span>' +
         '<p class="quote-hardware-item-meta">Plan: ' + escapeHtml(planName) + '</p>' +
+        capacityLine +
         '<p class="quote-hardware-item-meta">Hardware: ' + escapeHtml(hardwareText) + '</p>' +
         '<p class="quote-hardware-item-meta">Configuration: ' + escapeHtml(configSpec) + '</p>' +
         '<p class="quote-hardware-item-meta">Protocols: ' + escapeHtml(protocolText) + '</p>' +
@@ -1470,6 +2232,7 @@
     var actions = document.querySelector('.quote-sidebar-actions');
     var flipBtn = getById('btn-flip-sidebar');
     var reviewHardwareBtn = getById('btn-review-hardware');
+    var card = getById('quote-sidebar-flip-card');
     if (!hardwareSection) return;
     if (sidebarHardwareMode) {
       hardwareSection.removeAttribute('hidden');
@@ -1585,6 +2348,7 @@
       window.setTimeout(function () {
         card.classList.remove('is-flipping-in');
         sidebarFlipAnimating = false;
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 180);
     }, 180);
   }
@@ -1596,10 +2360,10 @@
         iops: '',
         iopsUnit: 'M',
         latency: '',
-        annualGrowthRate: '',
-        actualUsedCapacity: '',
+        annualGrowthRate: '20',
+        storageEfficiencyRatio: '1.5',
         usableEffective: 'effective',
-        snapmirror: 'no',
+        snapmirror: 'yes',
         burst: '20',
         ioMixReadRandomPct: 70,
         ioMixReadSeqPct: 0,
@@ -1611,11 +2375,13 @@
         ioMixWriteSeqBlock: '32K',
         selectedPlan: null,
         selectedPlanCost: null,
-        manualPlanOverride: false
+        manualPlanOverride: false,
+        suggestedCapacity: '',
+        requestedCapacity: ''
       };
     }
     if (!workloadConfigs[wid].usableEffective) workloadConfigs[wid].usableEffective = 'effective';
-    if (!workloadConfigs[wid].snapmirror) workloadConfigs[wid].snapmirror = 'no';
+    if (!workloadConfigs[wid].snapmirror) workloadConfigs[wid].snapmirror = 'yes';
     if (!workloadConfigs[wid].burst) workloadConfigs[wid].burst = '20';
     if (workloadConfigs[wid].ioMixReadRandomPct == null) workloadConfigs[wid].ioMixReadRandomPct = 70;
     if (workloadConfigs[wid].ioMixReadSeqPct == null) workloadConfigs[wid].ioMixReadSeqPct = 0;
@@ -1627,6 +2393,30 @@
     if (!workloadConfigs[wid].ioMixWriteSeqBlock) workloadConfigs[wid].ioMixWriteSeqBlock = '32K';
     if (workloadConfigs[wid].manualPlanOverride === undefined) workloadConfigs[wid].manualPlanOverride = false;
     return workloadConfigs[wid];
+  }
+
+  function getEffectiveCapacity(cfg) {
+    if (!cfg) return 0;
+    if (!window.CUSTOMER_VIEW && cfg.requestedCapacity && !isNaN(parseFloat(cfg.requestedCapacity)) && parseFloat(cfg.requestedCapacity) > 0) {
+      return parseFloat(cfg.requestedCapacity);
+    }
+    if (!window.CUSTOMER_VIEW && cfg.suggestedCapacity && !isNaN(parseFloat(cfg.suggestedCapacity)) && parseFloat(cfg.suggestedCapacity) > 0) {
+      return parseFloat(cfg.suggestedCapacity);
+    }
+    return parseFloat(cfg.capacity) || 0;
+  }
+
+  function updateCapacityFieldGreyout(wid) {
+    var cfg = workloadConfigs[wid];
+    if (!cfg) return;
+    var hasRequested = cfg.requestedCapacity && !isNaN(parseFloat(cfg.requestedCapacity)) && parseFloat(cfg.requestedCapacity) > 0;
+    var capField = getById('capacity-' + wid);
+    var sugField = getById('suggested-capacity-field-' + wid);
+    if (capField) {
+      var capWrap = capField.closest('.config-workload-field');
+      if (capWrap) capWrap.classList.toggle('config-field-greyed-out', hasRequested);
+    }
+    if (sugField) sugField.classList.toggle('config-field-greyed-out', hasRequested);
   }
 
   function renderWorkloadConfigCards() {
@@ -1655,18 +2445,73 @@
           return '<option value="' + escapeHtml(k) + '"' + (k === selected ? ' selected' : '') + '>' + escapeHtml(k) + '</option>';
         }).join('');
       }
-      var planCardsHtml = PLAN_OPTIONS.map(function (opt) {
-        var selectedClass = cfg.selectedPlan === opt.name ? ' selected' : '';
-        var costStr = formatCurrency(Math.round(getDisplayYearlyCostForPlan(opt, cfg))) + ' / year';
+      var contractYearsNow = getCurrentContractYears() || 3;
+      var COMBO_MODES = ['effective', 'usable'];
+      var COMBO_BURSTS = ['20', '40', '60'];
+      var costPrefix = window.CUSTOMER_VIEW ? 'Est. ' : '';
+      var planCardsHtml = '';
+      PLAN_OPTIONS.forEach(function (opt) {
+        var multiplier = (opt.id === 'unified-extreme') ? 1.15 : (opt.id === 'standard') ? 0.85 : 1;
         var platformLabel = (opt.hardwareSeries && opt.hardwareSeries.length) ? opt.hardwareSeries[0] : 'N/A';
-        return '<div class="config-plan-card' + selectedClass + '" data-plan-id="' + escapeHtml(opt.id) + '" data-plan-name="' + escapeHtml(opt.name) + '" data-plan-cost="' + opt.cost + '" role="button" tabindex="0">' +
-          '<span class="config-plan-radio" aria-hidden="true"></span>' +
-          '<span class="config-plan-badge" style="display:none"></span>' +
-          '<span class="config-plan-name">' + escapeHtml(opt.name) + '</span>' +
-          '<span class="config-plan-cost">' + costStr + '</span>' +
-          '<span class="config-plan-platform">Platform: ' + escapeHtml(platformLabel) + '</span>' +
-          '<a href="#" class="config-plan-link">View full details <span class="config-plan-link-chevron">▼</span></a></div>';
-      }).join('');
+
+        if (window.CUSTOMER_VIEW) {
+          var isSelectedOrig = cfg.selectedPlan === opt.name;
+          var selectedOrigClass = isSelectedOrig ? ' selected' : '';
+          planCardsHtml += '<div class="config-plan-card' + selectedOrigClass + '"' +
+            ' data-plan-id="' + escapeHtml(opt.id) + '"' +
+            ' data-plan-name="' + escapeHtml(opt.name) + '"' +
+            ' data-plan-cost="' + opt.cost + '"' +
+            ' role="button" tabindex="0">' +
+            '<span class="config-plan-radio" aria-hidden="true"></span>' +
+            '<span class="config-plan-badge" style="display:none"></span>' +
+            '<span class="config-plan-name">' + escapeHtml(opt.name) + '</span>' +
+            '<span class="config-plan-hardware">' + escapeHtml(platformLabel) + '</span>' +
+            '<a href="#" class="config-plan-link" data-plan-id="' + escapeHtml(opt.id) + '">View details</a>' +
+            '</div>';
+        } else {
+          planCardsHtml += '<div class="config-plan-group" data-plan-id="' + escapeHtml(opt.id) + '">';
+          planCardsHtml += '<h4 class="config-plan-group-title">' + escapeHtml(opt.name) + ' <span class="config-plan-group-platform">' + escapeHtml(platformLabel) + '</span>' +
+            '<span class="config-plan-group-links">' +
+            (window.CUSTOMER_VIEW ? '' : '<a href="#" class="config-view-forecasting config-plan-link" data-workload-id="' + escapeHtml(w.id) + '" role="button">View Forecasting</a>') +
+            '</span>' +
+            '</h4>';
+          planCardsHtml += '<div class="config-plan-combo-grid">';
+          var capForPricing = getEffectiveCapacity(cfg) || cfg.capacity;
+          COMBO_MODES.forEach(function (mode) {
+            COMBO_BURSTS.forEach(function (burst) {
+              var iot = getIotRateCardEntry(capForPricing, burst, mode);
+              var yearlyCost = 0;
+              if (iot) {
+                yearlyCost = Math.round(iot.yearlyNet * multiplier);
+              }
+              var costStr = costPrefix + formatCurrency(yearlyCost) + ' / year';
+              var npvVal = calculateNPV(yearlyCost, contractYearsNow);
+              var npvStr = formatCurrency(Math.round(npvVal));
+              var npvLine = '<span class="config-plan-npv">NPV <span class="config-plan-npv-value">' + npvStr + '</span></span>';
+              var modeLabel = mode === 'usable' ? 'Usable' : 'Effective';
+              var comboKey = opt.name + '|' + mode + '|' + burst;
+              var isSelected = cfg.selectedPlan === opt.name && cfg.usableEffective === mode && String(cfg.burst) === burst;
+              var selectedClass = isSelected ? ' selected' : '';
+              planCardsHtml += '<div class="config-plan-card config-plan-combo-card' + selectedClass + '"' +
+                ' data-plan-id="' + escapeHtml(opt.id) + '"' +
+                ' data-plan-name="' + escapeHtml(opt.name) + '"' +
+                ' data-plan-cost="' + opt.cost + '"' +
+                ' data-combo-mode="' + mode + '"' +
+                ' data-combo-burst="' + burst + '"' +
+                ' data-combo-key="' + escapeHtml(comboKey) + '"' +
+                ' role="button" tabindex="0">' +
+                '<span class="config-plan-radio" aria-hidden="true"></span>' +
+                '<span class="config-plan-badge" style="display:none"></span>' +
+                '<span class="config-plan-name">' + escapeHtml(modeLabel) + ' ' + burst + '%</span>' +
+                '<span class="config-plan-cost">' + costStr + '</span>' +
+                npvLine +
+                '</div>';
+            });
+          });
+          planCardsHtml += '</div>';
+          planCardsHtml += '</div>';
+        }
+      });
       var card = document.createElement('div');
       card.className = 'config-workload-card';
       card.dataset.workloadId = w.id;
@@ -1679,15 +2524,15 @@
             '<button type="button" class="config-workload-btn config-workload-collapse" aria-label="Collapse" aria-expanded="true">▲</button>' +
           '</div></div>' +
         '<div class="config-workload-card-body">' +
-          '<h3 class="config-workload-section-title config-workload-section-title--primary">Capacity and performance requirements <span class="config-required-hint">(capacity required)</span></h3>' +
+          '<h3 class="config-workload-section-title config-workload-section-title--primary">Capacity and performance requirements <span class="config-required-hint">' + (window.CUSTOMER_VIEW ? '(capacity required)' : '(all fields required)') + '</span></h3>' +
           '<div class="config-workload-inputs-row">' +
             '<div class="config-workload-field">' +
-              '<label class="config-workload-field-label">Capacity</label>' +
+              '<label class="config-workload-field-label">Current used capacity</label>' +
               '<div class="config-workload-input-wrap config-workload-input-suffix-pill">' +
                 '<input type="number" class="config-workload-input" id="capacity-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.capacity) + '" min="1" aria-label="Capacity" data-workload-input="capacity">' +
                 '<span class="config-workload-suffix-pill">TiB</span></div></div>' +
             '<div class="config-workload-field">' +
-              '<label class="config-workload-field-label">IOPS <span class="config-required-hint">(optional)</span></label>' +
+              '<label class="config-workload-field-label">IOPS</label>' +
               '<div class="config-workload-input-segmented">' +
                 '<input type="number" class="config-workload-input config-workload-input-num" id="iops-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.iops) + '" min="1" max="99999" aria-label="IOPS" data-workload-input="iops">' +
                 '<select class="config-workload-unit-dropdown" id="iops-unit-' + escapeHtml(w.id) + '" aria-label="IOPS unit" data-workload-input="iopsUnit">' +
@@ -1695,28 +2540,40 @@
                   '<option value="M"' + (cfg.iopsUnit === 'M' ? ' selected' : '') + '>M</option>' +
                   '<option value="G"' + (cfg.iopsUnit === 'G' ? ' selected' : '') + '>G</option></select></div></div>' +
             '<div class="config-workload-field">' +
-              '<label class="config-workload-field-label">Maximum latency <span class="config-required-hint">(optional)</span></label>' +
+              '<label class="config-workload-field-label">Maximum latency</label>' +
               '<div class="config-workload-input-wrap config-workload-input-suffix-pill">' +
                 '<input type="number" class="config-workload-input" id="latency-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.latency) + '" min="1" max="999" aria-label="Maximum latency" data-workload-input="latency">' +
-                '<span class="config-workload-suffix-pill">ms</span></div></div></div>' +
-          '<div class="config-workload-inputs-row">' +
+                '<span class="config-workload-suffix-pill">ms</span></div></div>' +
+            (window.CUSTOMER_VIEW ? '' :
             '<div class="config-workload-field">' +
-              '<label class="config-workload-field-label">Annual growth rate</label>' +
+              '<label class="config-workload-field-label">Growth / Shrink rate</label>' +
               '<div class="config-workload-input-wrap config-workload-input-suffix-pill">' +
-                '<input type="number" class="config-workload-input" id="annual-growth-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.annualGrowthRate) + '" min="0" max="100" step="0.1" placeholder="e.g. 10" aria-label="Annual growth rate" data-workload-input="annualGrowthRate">' +
+                '<input type="number" class="config-workload-input" id="annual-growth-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.annualGrowthRate) + '" min="-25" max="100" step="0.1" placeholder="e.g. 10 or -5" aria-label="Growth or Shrink rate" data-workload-input="annualGrowthRate">' +
                 '<span class="config-workload-suffix-pill">%</span></div></div>' +
             '<div class="config-workload-field">' +
-              '<label class="config-workload-field-label">Actual used capacity</label>' +
+              '<label class="config-workload-field-label">Storage efficiency ratio</label>' +
               '<div class="config-workload-input-wrap config-workload-input-suffix-pill">' +
-                '<input type="number" class="config-workload-input" id="actual-capacity-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.actualUsedCapacity) + '" min="0" max="999" step="0.1" placeholder="e.g. 50" aria-label="Actual used capacity" data-workload-input="actualUsedCapacity">' +
-                '<span class="config-workload-suffix-pill">TiB</span></div></div></div>' +
-          '<h3 class="config-workload-section-title">Performance plan configuration <span class="config-required-hint">(defaults applied)</span></h3>' +
+                '<input type="number" class="config-workload-input" id="storage-efficiency-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.storageEfficiencyRatio) + '" min="0" max="99" step="0.1" placeholder="e.g. 2.5" aria-label="Storage efficiency ratio" data-workload-input="storageEfficiencyRatio">' +
+                '<span class="config-workload-suffix-pill">: 1</span></div></div>' +
+            '<div class="config-workload-field config-suggested-capacity-field" id="suggested-capacity-field-' + escapeHtml(w.id) + '" style="' + (cfg.suggestedCapacity ? '' : 'display:none') + '">' +
+              '<label class="config-workload-field-label">Suggested capacity</label>' +
+              '<div class="config-workload-input-wrap config-workload-input-suffix-pill">' +
+                '<input type="number" class="config-workload-input config-suggested-capacity-input" id="suggested-capacity-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.suggestedCapacity) + '" readonly aria-label="Suggested capacity" data-workload-input="suggestedCapacity">' +
+                '<span class="config-workload-suffix-pill">TiB</span></div></div>' +
+            '<div class="config-workload-field config-requested-capacity-field" id="requested-capacity-field-' + escapeHtml(w.id) + '" style="' + (cfg.suggestedCapacity ? '' : 'display:none') + '">' +
+              '<label class="config-workload-field-label">Customer requested capacity</label>' +
+              '<div class="config-workload-input-wrap config-workload-input-suffix-pill">' +
+                '<input type="number" class="config-workload-input" id="requested-capacity-' + escapeHtml(w.id) + '" value="' + escapeHtml(cfg.requestedCapacity || '') + '" min="0" step="1" placeholder="" aria-label="Customer requested capacity" data-workload-input="requestedCapacity">' +
+                '<span class="config-workload-suffix-pill">TiB</span></div>' +
+              '<div class="config-workload-field-hint" style="font-size:0.8rem;color:#6b7280;margin-top:0.25rem;">Overrides suggested capacity for plan recommendations</div></div>') +
+          '</div>' +
+          '<h3 class="config-workload-section-title">' + (window.CUSTOMER_VIEW ? 'Performance plan configuration' : 'Additional configuration') + ' <span class="config-required-hint">(defaults applied)</span></h3>' +
           '<div class="config-options-row">' +
             '<div class="config-option">' +
               '<span class="config-option-label">Usable / Effective</span>' +
               '<div class="config-toggle-group config-toggle-group--sm" role="radiogroup" aria-label="Usable or Effective">' +
                 '<label class="config-toggle-opt"><input type="radio" name="pre_usable_effective_' + escapeHtml(w.id) + '" value="usable" data-workload-input="usableEffective"' + (cfg.usableEffective === 'usable' ? ' checked' : '') + '> Usable</label>' +
-                '<label class="config-toggle-opt"><input type="radio" name="pre_usable_effective_' + escapeHtml(w.id) + '" value="effective" data-workload-input="usableEffective"' + (cfg.usableEffective !== 'usable' ? ' checked' : '') + '> Effective</label>' +
+                '<label class="config-toggle-opt"><input type="radio" name="pre_usable_effective_' + escapeHtml(w.id) + '" value="effective" data-workload-input="usableEffective"' + (cfg.usableEffective === 'effective' ? ' checked' : '') + '> Effective</label>' +
               '</div></div>' +
             '<div class="config-option">' +
               '<span class="config-option-label">SnapMirror</span>' +
@@ -1726,14 +2583,10 @@
               '</div></div>' +
             '<div class="config-option">' +
               '<span class="config-option-label">Burst</span>' +
-              '<select class="config-option-select config-burst-select-plan" data-workload-input="burst" aria-label="Burst">' +
-                '<option value="20"' + (cfg.burst === '20' ? ' selected' : '') + '>20%</option>' +
+              '<select class="config-option-select" data-workload-input="burst" aria-label="Burst">' +
+                '<option value="20"' + (cfg.burst === '20' || !cfg.burst ? ' selected' : '') + '>20%</option>' +
                 '<option value="40"' + (cfg.burst === '40' ? ' selected' : '') + '>40%</option>' +
                 '<option value="60"' + (cfg.burst === '60' ? ' selected' : '') + '>60%</option>' +
-                ((cfg.burst && ['20', '40', '60', 'custom'].indexOf(String(cfg.burst)) === -1)
-                  ? ('<option value="' + escapeHtml(String(cfg.burst)) + '" selected>' + escapeHtml(String(cfg.burst)) + '% (custom)</option>')
-                  : '') +
-                '<option value="custom">Custom...</option>' +
               '</select></div>' +
           '</div>' +
           '<div class="config-io-mix-wrap">' +
@@ -1755,13 +2608,22 @@
             '</div>' +
           '</div>' +
           '<div class="config-plan-recommendations-wrap config-recommendations-hidden" data-workload-id="' + escapeHtml(w.id) + '">' +
-          '<h3 class="config-workload-section-title">Performance service plan recommendations</h3>' +
+          '<div class="config-recommendations-divider"></div>' +
+          '<h3 class="config-workload-section-title config-recommendations-title">' + (window.CUSTOMER_VIEW ? 'Performance service plan recommendations' : 'Plan recommendations') + '</h3>' +
+          (window.CUSTOMER_VIEW ? '' : '<div class="config-capex-verdict-banner" id="capex-verdict-banner-' + escapeHtml(w.id) + '"></div>') +
           '<div class="config-plan-cards">' + planCardsHtml + '</div>' +
-          '<a href="#" class="config-add-to-quote" data-workload-id="' + escapeHtml(w.id) + '" role="button">Add to quote</a>' +
+          (window.CUSTOMER_VIEW ? '' :
+            '<div class="config-plan-actions-bar">' +
+              '<button type="button" class="config-plan-add-btn config-add-to-quote" data-workload-id="' + escapeHtml(w.id) + '">Add to quote</button>' +
+            '</div>') +
+          (window.CUSTOMER_VIEW ? '<a href="#" class="config-add-to-quote" data-workload-id="' + escapeHtml(w.id) + '" role="button">Add to quote</a>' : '') +
           '</div>' +
         '</div>';
       container.appendChild(card);
+      if (!window.CUSTOMER_VIEW) autoComputeSuggestedCapacity(w.id);
       toggleRecommendationsVisibility(card, w.id);
+      toggleStorageEfficiencyField(card, w.id);
+      updateCapacityFieldGreyout(w.id);
     });
     container.querySelectorAll('.config-workload-card').forEach(function (card) {
       var wid = card.dataset.workloadId;
@@ -1954,6 +2816,21 @@
     });
   }
 
+  function toggleStorageEfficiencyField(card, wid) {
+    var cfg = workloadConfigs[wid];
+    if (!cfg) return;
+    var seField = card.querySelector('#storage-efficiency-' + wid);
+    if (!seField) return;
+    var fieldWrap = seField.closest('.config-workload-field');
+    if (cfg.usableEffective === 'usable') {
+      seField.disabled = true;
+      if (fieldWrap) fieldWrap.classList.add('config-field-disabled');
+    } else {
+      seField.disabled = false;
+      if (fieldWrap) fieldWrap.classList.remove('config-field-disabled');
+    }
+  }
+
   function bindWorkloadCards() {
     var container = getById('configure-workload-cards');
     if (!container) return;
@@ -2002,15 +2879,14 @@
       var detailsLink = e.target.closest('.config-plan-link');
       if (detailsLink) {
         e.preventDefault();
-        if (planCard && planCard.dataset.planId) {
-          openPlanDetailsModal(planCard.dataset.planId);
-        }
+        var detailsPlanId = detailsLink.dataset.planId || (planCard && planCard.dataset.planId);
+        if (detailsPlanId) openPlanDetailsModal(detailsPlanId);
         return;
       }
       if (e.target.closest('a') && !addBtn) return;
       if (addBtn) {
         e.preventDefault();
-        var wid = addBtn.dataset.workloadId;
+        var wid = addBtn.dataset.workloadId || (card ? card.dataset.workloadId : null);
         var w = getSelectedWorkloads().filter(function (x) { return x.id === wid; })[0];
         var cfg = workloadConfigs[wid];
         if (w && cfg && cfg.selectedPlan) {
@@ -2019,7 +2895,8 @@
           var hardwareSeriesText = selectedPlanMeta && selectedPlanMeta.hardwareSeries && selectedPlanMeta.hardwareSeries.length
             ? selectedPlanMeta.hardwareSeries.join(', ')
             : 'As per selected performance level';
-          if (cfg.capacity) specParts.push(cfg.capacity + ' TiB');
+          var hwCap = getEffectiveCapacity(cfg) || cfg.capacity;
+          if (hwCap) specParts.push(hwCap + ' TiB');
           if (cfg.iops) specParts.push(cfg.iops + (cfg.iopsUnit || '') + ' IOPS');
           if (cfg.latency) specParts.push(cfg.latency + ' ms max latency');
           quoteItems.push({
@@ -2028,7 +2905,7 @@
             workloadId: wid,
             workloadLabel: w.label,
             planName: cfg.selectedPlan,
-            capacityTiB: parseFloat(cfg.capacity) || 0,
+            capacityTiB: parseFloat(hwCap) || 0,
             spec: specParts.join(' · ') || '—',
             hardwareSeries: hardwareSeriesText
           });
@@ -2037,23 +2914,33 @@
         }
         return;
       }
+      var groupTitle = e.target.closest('.config-plan-group-title');
+      if (groupTitle && groupTitle.querySelector('.config-plan-group-chevron')) {
+        var groupEl = groupTitle.closest('.config-plan-group');
+        if (groupEl) groupEl.classList.toggle('config-plan-group--collapsed');
+        return;
+      }
       if (planCard && card) {
         e.preventDefault();
         var wid = card.dataset.workloadId;
         var planName = planCard.dataset.planName;
         var planCost = parseInt(planCard.dataset.planCost, 10) || 0;
         ensureWorkloadConfig(wid);
-        workloadConfigs[wid].selectedPlan = planName;
+        var wcfg = workloadConfigs[wid];
+        wcfg.selectedPlan = planName;
+        if (planCard.dataset.comboMode) wcfg.usableEffective = planCard.dataset.comboMode;
+        if (planCard.dataset.comboBurst) wcfg.burst = planCard.dataset.comboBurst;
         var yearsNow = getCurrentContractYears();
         var selectedPlanMeta = PLAN_OPTIONS.filter(function (p) { return p.name === planName; })[0] || null;
-        var benchmarkNow = getBenchmarkPricingOverrideForConfig(yearsNow, workloadConfigs[wid], selectedPlanMeta ? selectedPlanMeta.id : null);
-        workloadConfigs[wid].selectedPlanCost = benchmarkNow && benchmarkNow.yearlyNet ? benchmarkNow.yearlyNet : planCost;
-        workloadConfigs[wid].manualPlanOverride = true;
+        var benchmarkNow = getBenchmarkPricingOverrideForConfig(yearsNow, wcfg, selectedPlanMeta ? selectedPlanMeta.id : null);
+        wcfg.selectedPlanCost = benchmarkNow && benchmarkNow.yearlyNet ? benchmarkNow.yearlyNet : planCost;
+        wcfg.manualPlanOverride = true;
         var body = card.querySelector('.config-workload-card-body');
         if (body) {
           body.querySelectorAll('.config-plan-card').forEach(function (c) { c.classList.remove('selected'); });
           planCard.classList.add('selected');
         }
+        toggleStorageEfficiencyField(card, wid);
         renderAdditionalConfigByPlan();
         updateSidebarFromSelections();
       }
@@ -2079,6 +2966,9 @@
         }
       }
     });
+
+    var forecastTriggerKeys = { capacity: 1, annualGrowthRate: 1, storageEfficiencyRatio: 1, usableEffective: 1, burst: 1 };
+
     container.addEventListener('input', function (e) {
       var input = e.target;
       if (!input.dataset || !input.dataset.workloadInput) return;
@@ -2089,9 +2979,12 @@
       ensureWorkloadConfig(wid);
       var key = input.dataset.workloadInput;
       workloadConfigs[wid][key] = input.value;
-      if (key === 'capacity' || key === 'iops' || key === 'iopsUnit' || key === 'latency' || key === 'usableEffective' || key === 'snapmirror' || key === 'burst' || key === 'ioMixReadRandomPct' || key === 'ioMixReadSeqPct' || key === 'ioMixWriteRandomPct' || key === 'ioMixWriteSeqPct') {
+      if (key === 'capacity' || key === 'iops' || key === 'iopsUnit' || key === 'latency' || key === 'usableEffective' || key === 'snapmirror' || key === 'burst' || key === 'requestedCapacity' || key === 'ioMixReadRandomPct' || key === 'ioMixReadSeqPct' || key === 'ioMixWriteRandomPct' || key === 'ioMixWriteSeqPct') {
         workloadConfigs[wid].manualPlanOverride = false;
       }
+      if (key === 'usableEffective') toggleStorageEfficiencyField(card, wid);
+      if (key === 'requestedCapacity') updateCapacityFieldGreyout(wid);
+      if (!window.CUSTOMER_VIEW && forecastTriggerKeys[key]) autoComputeSuggestedCapacity(wid);
       toggleRecommendationsVisibility(card, wid);
       updateSidebarFromSelections();
     });
@@ -2108,9 +3001,12 @@
         return;
       }
       workloadConfigs[wid][key] = input.value;
-      if (key === 'capacity' || key === 'iops' || key === 'iopsUnit' || key === 'latency' || key === 'usableEffective' || key === 'snapmirror' || key === 'burst' || key === 'ioMixReadRandomPct' || key === 'ioMixReadSeqPct' || key === 'ioMixWriteRandomPct' || key === 'ioMixWriteSeqPct' || key === 'ioMixReadRandomBlock' || key === 'ioMixReadSeqBlock' || key === 'ioMixWriteRandomBlock' || key === 'ioMixWriteSeqBlock') {
+      if (key === 'capacity' || key === 'iops' || key === 'iopsUnit' || key === 'latency' || key === 'usableEffective' || key === 'snapmirror' || key === 'burst' || key === 'requestedCapacity' || key === 'ioMixReadRandomPct' || key === 'ioMixReadSeqPct' || key === 'ioMixWriteRandomPct' || key === 'ioMixWriteSeqPct' || key === 'ioMixReadRandomBlock' || key === 'ioMixReadSeqBlock' || key === 'ioMixWriteRandomBlock' || key === 'ioMixWriteSeqBlock') {
         workloadConfigs[wid].manualPlanOverride = false;
       }
+      if (key === 'usableEffective') toggleStorageEfficiencyField(card, wid);
+      if (key === 'requestedCapacity') updateCapacityFieldGreyout(wid);
+      if (!window.CUSTOMER_VIEW && forecastTriggerKeys[key]) autoComputeSuggestedCapacity(wid);
       toggleRecommendationsVisibility(card, wid);
       updateSidebarFromSelections();
     });
@@ -2133,7 +3029,7 @@
     if (cfg.latency && !isNaN(parseFloat(cfg.latency))) parts.push(cfg.latency + ' ms max latency');
     var reqText = parts.length ? parts.join(' · ') : '—';
     var planText = cfg.selectedPlan || '—';
-    var costText = cfg.selectedPlanCost != null && !isNaN(cfg.selectedPlanCost) ? formatCurrency(cfg.selectedPlanCost) + '/yr' : '';
+    var costText = (!window.CUSTOMER_VIEW && cfg.selectedPlanCost != null && !isNaN(cfg.selectedPlanCost)) ? formatCurrency(cfg.selectedPlanCost) + '/yr' : '';
     summaryEl.textContent = costText ? reqText + ' — ' + planText + ' — ' + costText : reqText + ' — ' + planText;
   }
 
@@ -2142,26 +3038,32 @@
     var wrap = card.querySelector('.config-plan-recommendations-wrap');
     if (!wrap) return;
     var cfg = workloadConfigs[wid];
-    var capacityOk = cfg.capacity !== '' && cfg.capacity != null && !isNaN(parseFloat(cfg.capacity)) && parseFloat(cfg.capacity) > 0;
+    var capSource = getEffectiveCapacity(cfg);
+    var capacityOk = capSource > 0;
     var iopsOk = cfg.iops !== '' && cfg.iops != null && !isNaN(parseFloat(cfg.iops)) && parseFloat(cfg.iops) > 0;
     var latencyOk = cfg.latency !== '' && cfg.latency != null && !isNaN(parseFloat(cfg.latency)) && parseFloat(cfg.latency) >= 0;
+    var allInputsOk = capacityOk && iopsOk && latencyOk;
+    if (!window.CUSTOMER_VIEW) {
+      var growthOk = cfg.annualGrowthRate !== '' && cfg.annualGrowthRate != null && !isNaN(parseFloat(cfg.annualGrowthRate));
+      var seOk = cfg.storageEfficiencyRatio !== '' && cfg.storageEfficiencyRatio != null && !isNaN(parseFloat(cfg.storageEfficiencyRatio)) && parseFloat(cfg.storageEfficiencyRatio) > 0;
+      allInputsOk = allInputsOk && growthOk && seOk;
+    }
     var workloadSelected = !!wid;
-    if (workloadSelected && capacityOk && iopsOk && latencyOk) {
+    if (workloadSelected && allInputsOk) {
       wrap.classList.remove('config-recommendations-hidden');
       updateRecommendationBadges(card, wid);
     } else {
       wrap.classList.add('config-recommendations-hidden');
       cfg.selectedPlan = null;
       cfg.selectedPlanCost = null;
-      card.querySelectorAll('.config-plan-cards .config-plan-card').forEach(function (planEl) {
-        planEl.style.display = '';
-        var badgeEl = planEl.querySelector('.config-plan-badge');
-        if (badgeEl) {
-          badgeEl.textContent = '';
-          badgeEl.style.display = 'none';
-        }
+      card.querySelectorAll('.config-plan-group').forEach(function (g) { g.style.display = ''; });
+      card.querySelectorAll('.config-plan-card').forEach(function (planEl) {
         planEl.classList.remove('selected');
+        planEl.style.display = '';
+        var b = planEl.querySelector('.config-plan-badge');
+        if (b) { b.style.display = 'none'; b.textContent = ''; }
       });
+      card.querySelectorAll('.config-plan-group-badge').forEach(function (b) { b.remove(); });
       renderAdditionalConfigByPlan();
       updateSidebarFromSelections();
     }
@@ -2170,16 +3072,19 @@
   function updateRecommendationBadges(card, wid) {
     if (!card || !wid) return;
     var cfg = workloadConfigs[wid];
-    var capacityOk = cfg.capacity !== '' && cfg.capacity != null && !isNaN(parseFloat(cfg.capacity)) && parseFloat(cfg.capacity) > 0;
-    if (!capacityOk) return;
-    var qualifying = getQualifyingPlans(cfg.capacity, cfg.iops, cfg.iopsUnit || 'K', cfg.latency, wid, cfg);
+    var capForPlans = getEffectiveCapacity(cfg);
+    if (capForPlans <= 0) return;
+    var qualifying = getQualifyingPlans(capForPlans, cfg.iops, cfg.iopsUnit || 'K', cfg.latency, wid, cfg);
     var qualifyingIds = {};
     qualifying.forEach(function (p, i) { qualifyingIds[p.id] = i === 0 ? 'Recommended' : 'Eligible'; });
     var currentSelectionQualifies = qualifying.some(function (p) { return p.name === cfg.selectedPlan; });
     var shouldUseRecommendedByDefault = !cfg.manualPlanOverride;
     var selectionChanged = false;
+
     if (qualifying.length > 0 && (shouldUseRecommendedByDefault || !currentSelectionQualifies)) {
       cfg.selectedPlan = qualifying[0].name;
+      if (!cfg.usableEffective) cfg.usableEffective = 'effective';
+      if (!cfg.burst) cfg.burst = '20';
       var yearsNow = getCurrentContractYears();
       var benchmarkNow = getBenchmarkPricingOverrideForConfig(yearsNow, cfg, qualifying[0].id);
       cfg.selectedPlanCost = benchmarkNow && benchmarkNow.yearlyNet ? benchmarkNow.yearlyNet : qualifying[0].cost;
@@ -2189,23 +3094,87 @@
       cfg.selectedPlanCost = null;
       selectionChanged = true;
     }
-    card.querySelectorAll('.config-plan-cards .config-plan-card').forEach(function (planEl) {
-      var planId = planEl.dataset.planId;
-      var badge = qualifyingIds[planId];
-      var show = badge !== undefined;
-      planEl.style.display = show ? '' : 'none';
-      var planMeta = PLAN_OPTIONS.filter(function (p) { return p.id === planId; })[0] || null;
-      var costEl = planEl.querySelector('.config-plan-cost');
-      if (planMeta && costEl) {
-        costEl.textContent = formatCurrency(Math.round(getDisplayYearlyCostForPlan(planMeta, cfg))) + ' / year';
-      }
-      var badgeEl = planEl.querySelector('.config-plan-badge');
-      if (badgeEl) {
-        badgeEl.textContent = badge || '';
-        badgeEl.style.display = badge ? '' : 'none';
-      }
-      planEl.classList.toggle('selected', cfg.selectedPlan === planEl.dataset.planName);
-    });
+
+    var contractYearsNow = getCurrentContractYears() || 3;
+    var costPrefix = window.CUSTOMER_VIEW ? 'Est. ' : '';
+
+    if (window.CUSTOMER_VIEW) {
+      card.querySelectorAll('.config-plan-card').forEach(function (planCard) {
+        var planId = planCard.dataset.planId;
+        var badge = qualifyingIds[planId];
+        var show = badge !== undefined;
+        planCard.style.display = show ? '' : 'none';
+        var existingBadge = planCard.querySelector('.config-plan-badge');
+        if (existingBadge) {
+          existingBadge.style.display = badge ? '' : 'none';
+          existingBadge.className = 'config-plan-badge config-plan-badge--' + (badge === 'Recommended' ? 'recommended' : 'eligible');
+          existingBadge.textContent = badge || '';
+        }
+        var multiplier = (planId === 'unified-extreme') ? 1.15 : (planId === 'standard') ? 0.85 : 1;
+        var burstMode = cfg.burst || '20';
+        var ueMode = cfg.usableEffective || 'effective';
+        var iot = getIotRateCardEntry(getEffectiveCapacity(cfg) || cfg.capacity, burstMode, ueMode);
+        var yearlyCost = iot ? Math.round(iot.yearlyNet * multiplier) : 0;
+        planCard.dataset.planCost = yearlyCost;
+        var costEl = planCard.querySelector('.config-plan-cost');
+        if (costEl) costEl.textContent = costPrefix + formatCurrency(yearlyCost) + ' / year';
+        planCard.classList.toggle('selected', cfg.selectedPlan === planCard.dataset.planName);
+      });
+    } else {
+      card.querySelectorAll('.config-plan-group').forEach(function (groupEl) {
+        var planId = groupEl.dataset.planId;
+        var badge = qualifyingIds[planId];
+        var show = badge !== undefined;
+        groupEl.style.display = show ? '' : 'none';
+        groupEl.classList.toggle('config-plan-group--collapsed', badge === 'Eligible');
+        groupEl.classList.toggle('config-plan-group--eligible', badge === 'Eligible');
+        var titleEl = groupEl.querySelector('.config-plan-group-title');
+        if (titleEl) {
+          var existingBadgeWrap = titleEl.querySelector('.config-plan-group-badge-wrap');
+          if (existingBadgeWrap) existingBadgeWrap.remove();
+          if (badge) {
+            var wrap = document.createElement('span');
+            wrap.className = 'config-plan-group-badge-wrap';
+            var span = document.createElement('span');
+            span.className = 'config-plan-group-badge config-plan-group-badge--' + (badge === 'Recommended' ? 'recommended' : 'eligible');
+            span.textContent = badge;
+            wrap.appendChild(span);
+            var chevron = document.createElement('span');
+            chevron.className = 'config-plan-group-chevron';
+            chevron.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5.5 7L9 10.5L12.5 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            wrap.appendChild(chevron);
+            titleEl.appendChild(wrap);
+          }
+        }
+      });
+    }
+
+    if (!window.CUSTOMER_VIEW) {
+      var activeMode = cfg.usableEffective || 'effective';
+      card.querySelectorAll('.config-plan-combo-card').forEach(function (comboEl) {
+        var planId = comboEl.dataset.planId;
+        var comboMode = comboEl.dataset.comboMode;
+        var comboBurst = comboEl.dataset.comboBurst;
+
+        comboEl.style.display = '';
+
+        if (!qualifyingIds[planId]) return;
+        var planMeta = PLAN_OPTIONS.filter(function (p) { return p.id === planId; })[0] || null;
+        if (!planMeta) return;
+        var multiplier = (planId === 'unified-extreme') ? 1.15 : (planId === 'standard') ? 0.85 : 1;
+        var iot = getIotRateCardEntry(getEffectiveCapacity(cfg) || cfg.capacity, comboBurst, comboMode);
+        var yearlyCost = iot ? Math.round(iot.yearlyNet * multiplier) : 0;
+        var costEl = comboEl.querySelector('.config-plan-cost');
+        if (costEl) costEl.textContent = costPrefix + formatCurrency(yearlyCost) + ' / year';
+        var npvEl = comboEl.querySelector('.config-plan-npv-value');
+        if (npvEl) npvEl.textContent = formatCurrency(Math.round(calculateNPV(yearlyCost, contractYearsNow)));
+
+        var isSelected = cfg.selectedPlan === comboEl.dataset.planName &&
+          activeMode === comboMode && String(cfg.burst) === comboBurst;
+        comboEl.classList.toggle('selected', isSelected);
+      });
+    }
+
     if (selectionChanged) {
       renderAdditionalConfigByPlan();
       updateSidebarFromSelections();
@@ -2238,7 +3207,7 @@
       '<div><strong>Maximum IOPS</strong><span>' + escapeHtml(iopsText) + '</span></div>' +
       '<div><strong>Latency target (90th percentile)</strong><span>' + escapeHtml(latencyText) + '</span></div>' +
       '<div><strong>Maximum throughput</strong><span>' + escapeHtml(gbpsText) + '</span></div>' +
-      '<div><strong>Indicative yearly cost</strong><span>' + escapeHtml(formatCurrency(plan.cost)) + '</span></div>' +
+      (window.CUSTOMER_VIEW ? '' : '<div><strong>Indicative yearly cost</strong><span>' + escapeHtml(formatCurrency(plan.cost)) + '</span></div>') +
       '</div>' +
       '<p class="plan-details-notes">' + escapeHtml(plan.details || '') + '</p>' +
       includesList +
@@ -2319,7 +3288,11 @@
       });
       Object.keys(configs).forEach(function (wid) {
         var c = configs[wid];
-        if (c && c.capacity) totalCapacity += parseFloat(c.capacity) || 0;
+        if (c && (c.requestedCapacity || c.suggestedCapacity || c.capacity)) {
+          var committed = getEffectiveCapacity(c);
+          var burstPct = parseFloat(getNormalizedBurstValue(c.burst)) || 0;
+          totalCapacity += Math.round(committed * (1 + burstPct / 100) * 100) / 100;
+        }
       });
       if (protocols.indexOf('FC') >= 0 || protocols.indexOf('iSCSI') >= 0 || protocols.indexOf('NVMe/FC') >= 0) {
         var hasNfs = protocols.indexOf('NFS') >= 0 || protocols.indexOf('SMB') >= 0;
@@ -2345,15 +3318,22 @@
         }
         if (wid) matchedWids[wid] = true;
         var cap = item.capacityTiB ? parseFloat(item.capacityTiB) || 0 : 0;
-        if (!cap && wid && configs[wid]) cap = parseFloat(configs[wid].capacity) || 0;
+        if (!cap && wid && configs[wid]) {
+          cap = getEffectiveCapacity(configs[wid]);
+        }
         if (!cap && wid) {
-          var capEl = document.getElementById('capacity-' + wid);
+          var capEl = document.getElementById('suggested-capacity-' + wid) || document.getElementById('capacity-' + wid);
           if (capEl) cap = parseFloat(capEl.value) || 0;
         }
         if (!cap && item.spec) {
           var specMatch = item.spec.match(/([\d.]+)\s*TiB/);
           if (specMatch) cap = parseFloat(specMatch[1]) || 0;
         }
+        var wBurstPct = 0;
+        if (wid && configs[wid]) {
+          wBurstPct = parseFloat(getNormalizedBurstValue(configs[wid].burst)) || 0;
+        }
+        cap = Math.round(cap * (1 + wBurstPct / 100) * 100) / 100;
         var proto = 'unified';
         if (plan && plan.protocols) {
           var pHasFc = plan.protocols.indexOf('FC') >= 0 || plan.protocols.indexOf('iSCSI') >= 0 || plan.protocols.indexOf('NVMe/FC') >= 0;
@@ -2536,6 +3516,25 @@
 
   function canRequestApproval() {
     return appliedDiscountPct > 45 && hwConfigReviewed;
+  }
+
+  function getListPerTiBRate() {
+    var years = getCurrentContractYears();
+    var benchmarkPricing = getBenchmarkPricingOverride(years);
+    if (benchmarkPricing && benchmarkPricing.perTiBPerMonth > 0) {
+      return benchmarkPricing.perTiBPerMonth;
+    }
+    var totalTiB = getTotalCommittedTiB();
+    var subtotal = quoteItems.reduce(function (sum, item) { return sum + (item.cost || 0); }, 0);
+    if (totalTiB > 0 && subtotal > 0) {
+      return Math.round((subtotal / 12 / totalTiB) * 100) / 100;
+    }
+    return 0;
+  }
+
+  function setText(id, text) {
+    var el = getById(id);
+    if (el) el.textContent = text;
   }
 
   function isQuoteSubmittedForApproval(quoteId) {
@@ -2809,6 +3808,10 @@
     var modal = getById('send-quote-modal');
     var emailInput = getById('send-quote-email');
     if (!modal || !emailInput) return;
+    var titleEl = getById('send-quote-modal-title');
+    if (titleEl && currentQuoteId) {
+      titleEl.textContent = 'Send Quote #' + currentQuoteId + ' to customer';
+    }
     emailInput.value = '';
     modal.removeAttribute('hidden');
     emailInput.focus();
@@ -2860,7 +3863,7 @@
         localStorage.setItem(key, JSON.stringify(list));
       } catch (err) {}
       if (notice) {
-        notice.textContent = 'Quote ' + currentQuoteId + ' sent to ' + email + ' — ' + consoleUrl;
+        notice.textContent = 'Quote #' + currentQuoteId + ' sent to ' + email + ' — ' + consoleUrl;
         notice.classList.remove('quote-discount-warning-hidden');
       }
       closeSendQuoteModal();
@@ -2898,8 +3901,8 @@
     var keystoneVersion = DEFAULT_OPPORTUNITY_PROFILE.keystoneVersion;
     var siteName = DEFAULT_OPPORTUNITY_PROFILE.siteName;
     var quoteFrom = 'NetApp Inc., 3060 Olsen Drive, San Jose, CA, 95128, US';
-    var contactName = 'Chris Collins';
-    var contactEmail = 'chris.collins@netapp.com';
+    var contactName = 'Derek Keller';
+    var contactEmail = 'derek.keller@netapp.com';
     var contactPhone = '+1 (408) 822-6174';
     var fulfilmentMethod = 'Consolidated';
     var serviceCustomer = DEFAULT_OPPORTUNITY_PROFILE.customerName;
@@ -3033,8 +4036,8 @@
         var pdfCustomerName = (pdfProfile && pdfProfile.customerName) ? pdfProfile.customerName : DEFAULT_OPPORTUNITY_PROFILE.customerName;
         // Fixed metadata
         var pdfOpportunityName = DEFAULT_OPPORTUNITY_PROFILE.opportunityName;
-        var pdfContactName = 'Chris Collins';
-        var pdfContactEmail = 'chris.collins@netapp.com';
+        var pdfContactName = 'Derek Keller';
+        var pdfContactEmail = 'derek.keller@netapp.com';
         var pdfContactPhone = '+1 (408) 822-6174';
         var pdfQuoteFrom = 'NetApp Inc., 3060 Olsen Drive, San Jose, CA, 95128, US';
         var pdfSoftwareDeliveryContact = 'Ryan Holloway';
@@ -3225,7 +4228,8 @@
         }
         var pdfCjCb = document.querySelector('input[name="addon_subscription"][value="co-mingling"]');
         if (pdfCjCb && pdfCjCb.checked) {
-          tableRows.push(['SUB-KEY3-CJ', 'Cluster Join (one-time fee)', '1', '—', '14400.00', '14400.00']);
+          var pdfCjFee = demoAddonRate(14400).toFixed(2);
+          tableRows.push(['SUB-KEY3-CJ', 'Cluster Join (one-time fee)', '1', '—', pdfCjFee, pdfCjFee]);
         }
         if (!tableRows.length) tableRows.push(['TODO', 'No line items added yet', '—', 'TODO', '0.00', '0.00']);
 
@@ -3307,7 +4311,7 @@
     var diiAnnual = getDiiAnnualCost();
     var cjCb = document.querySelector('input[name="addon_subscription"][value="co-mingling"]');
     var cjChecked = !!(cjCb && cjCb.checked);
-    var CJ_ONE_TIME_FEE = 14400;
+    var CJ_ONE_TIME_FEE = demoAddonRate(14400);
     var subtotal = baseSubtotal;
     var discountRateEl = getById('sidebar-discount-rate');
     var inputPct = discountRateEl && !isNaN(parseFloat(discountRateEl.value)) ? parseFloat(discountRateEl.value) : 0;
@@ -3418,6 +4422,17 @@
     return n;
   }
 
+  var WACC = 0.12;
+
+  function calculateNPV(yearlyRate, years) {
+    if (!yearlyRate || !years || years < 1) return 0;
+    var npv = 0;
+    for (var t = 1; t <= years; t++) {
+      npv += yearlyRate / Math.pow(1 + WACC, t);
+    }
+    return npv;
+  }
+
   function getCurrentContractYears() {
     var contractLengthEl = document.querySelector('input[name="contract-length"]:checked');
     var contractLabelEl = contractLengthEl && contractLengthEl.closest('.contract-terms-card') && contractLengthEl.closest('.contract-terms-card').querySelector('.contract-terms-card-label');
@@ -3517,7 +4532,7 @@
               '<span class="quote-itemization-name">' + escapeHtml(label) + '</span>' +
               '<span class="quote-itemization-badge">' + escapeHtml(planName) + '</span>' +
             '</span>' +
-            '<span class="quote-itemization-price">' + formatCurrency(item.cost) + ' <span class="quote-itemization-price-unit">/ year</span></span>' +
+            (window.CUSTOMER_VIEW ? '' : '<span class="quote-itemization-price">' + formatCurrency(item.cost) + ' <span class="quote-itemization-price-unit">/ year</span></span>') +
             '<button type="button" class="quote-itemization-delete" data-item-index="' + idx + '" aria-label="Remove ' + escapeHtml(label) + '" title="Remove from quote">✕</button>' +
             '<span class="quote-itemization-chevron" aria-hidden="true">▼</span>' +
           '</button>' +
@@ -3526,7 +4541,7 @@
             '<p class="quote-itemization-detail-line">Capacity and performance — ' + escapeHtml(spec) + '</p>' +
             '<p class="quote-itemization-detail-label">Hardware series provided:</p>' +
             '<p class="quote-itemization-detail-line">' + escapeHtml(hardwareText) + '</p>' +
-            '<a href="#" class="quote-itemization-add-discount">+ Add discount</a>' +
+            (window.CUSTOMER_VIEW ? '' : '<a href="#" class="quote-itemization-add-discount">+ Add discount</a>') +
           '</div>' +
         '</div>';
       }).join('');
@@ -3568,6 +4583,76 @@
     return specificCount + generalCount;
   }
 
+  /* ── Workload mode radio cards (General / Application workloads / TCO) ── */
+  var activeAccordionSection = null;
+
+  function initWorkloadAccordion() {
+    var card = document.querySelector('.add-workloads-card');
+    if (!card) return;
+    var tabs = card.querySelectorAll('.wl-type-cards .contract-terms-card');
+    if (!tabs.length) return;
+    tabs.forEach(function (label) {
+      var input = label.querySelector('.contract-terms-input');
+      if (input) {
+        input.addEventListener('change', function () {
+          var mode = label.getAttribute('data-wl-tab');
+          if (mode) showWorkloadMode(mode);
+        });
+      }
+    });
+    showWorkloadMode('general');
+  }
+
+  function showWorkloadMode(mode) {
+    var card = document.querySelector('.add-workloads-card');
+    if (!card) return;
+
+    card.querySelectorAll('.wl-type-cards .contract-terms-card').forEach(function (label) {
+      var isActive = label.getAttribute('data-wl-tab') === mode;
+      label.classList.toggle('selected', isActive);
+      label.setAttribute('aria-checked', isActive ? 'true' : 'false');
+      var inp = label.querySelector('.contract-terms-input');
+      if (inp) inp.checked = isActive;
+    });
+
+    card.querySelectorAll('.wl-tab-panel').forEach(function (panel) {
+      if (panel.getAttribute('data-wl-panel') === mode) {
+        panel.removeAttribute('hidden');
+      } else {
+        panel.setAttribute('hidden', '');
+      }
+    });
+
+    var prev = activeAccordionSection;
+    activeAccordionSection = mode;
+
+    if (prev !== mode && (mode === 'general' || mode === 'detailed')) {
+      clearOppositeWorkloadGroup(mode);
+    }
+  }
+
+  function clearOppositeWorkloadGroup(activeGroup) {
+    var specific = document.getElementById('workload-specific');
+    var generalContainer = document.querySelector('.wl-tab-panel .quote-workload-tiles-general');
+    if (activeGroup === 'general' && specific) {
+      specific.querySelectorAll('.quote-workload-tile.selected').forEach(function (t) { t.classList.remove('selected'); });
+    } else if (activeGroup === 'detailed' && generalContainer) {
+      generalContainer.querySelectorAll('.quote-workload-tile.selected').forEach(function (t) { t.classList.remove('selected'); });
+    }
+    updateWorkloadCount();
+    renderWorkloadConfigCards();
+    updateSidebarFromSelections();
+  }
+
+  function setAccordionSectionBySelection() {
+    var specific = document.getElementById('workload-specific');
+    var generalContainer = document.querySelector('.wl-tab-panel .quote-workload-tiles-general');
+    var hasDetailed = specific && specific.querySelectorAll('.quote-workload-tile.selected').length > 0;
+    var hasGeneral = generalContainer && generalContainer.querySelectorAll('.quote-workload-tile.selected').length > 0;
+    if (hasDetailed) showWorkloadMode('detailed');
+    else if (hasGeneral) showWorkloadMode('general');
+  }
+
   function bindWorkloadTiles() {
     var specific = document.getElementById('workload-specific');
     var generalContainer = document.querySelector('.quote-workload-tiles-general');
@@ -3595,23 +4680,57 @@
         });
       }
     }
+    /** Drops a tile's selection along with its config card and any quote item it produced. */
+    function clearWorkloadTile(tile) {
+      var wid = tile.dataset.workload;
+      var labelEl = tile.querySelector('.quote-workload-tile-label');
+      var wLabel = labelEl ? labelEl.textContent.trim() : '';
+      if (wLabel) {
+        for (var qi = quoteItems.length - 1; qi >= 0; qi--) {
+          if (quoteItems[qi].workloadLabel === wLabel) quoteItems.splice(qi, 1);
+        }
+      }
+      tile.classList.remove('selected');
+      delete workloadConfigs[wid];
+      delete collapsedWorkloadIds[wid];
+    }
+
     function handleWorkloadTileClick(e) {
       var tile = e.target.closest('.quote-workload-tile');
       if (!tile || !tile.dataset.workload) return;
-      var totalSelected = getTotalSelectedWorkloadCount();
       if (tile.classList.contains('selected')) {
-        tile.classList.remove('selected');
-      } else if (totalSelected < MAX_SPECIFIC_WORKLOADS) {
-        tile.classList.add('selected');
+        clearWorkloadTile(tile);
+      } else {
+        /* Workloads and General are mutually exclusive, and General takes one tier at a time. */
+        var isGeneral = !!tile.closest('.quote-workload-tiles-general');
+        var clearSelector = isGeneral
+          ? '#workload-specific .quote-workload-tile.selected, .quote-workload-tiles-general .quote-workload-tile.selected'
+          : '.quote-workload-tiles-general .quote-workload-tile.selected';
+        document.querySelectorAll(clearSelector).forEach(clearWorkloadTile);
+        if (getTotalSelectedWorkloadCount() < MAX_SPECIFIC_WORKLOADS) tile.classList.add('selected');
       }
       updateWorkloadCount();
       renderWorkloadConfigCards();
+      updateItemization();
       updateSidebarFromSelections();
     }
     specific.addEventListener('click', handleWorkloadTileClick);
     if (generalContainer) generalContainer.addEventListener('click', handleWorkloadTileClick);
+
+    var appToggle = document.getElementById('wl-app-toggle');
+    if (appToggle && wrap && !window.CUSTOMER_VIEW) {
+      appToggle.addEventListener('click', function () {
+        var expanded = appToggle.getAttribute('aria-expanded') === 'true';
+        appToggle.setAttribute('aria-expanded', String(!expanded));
+        wrap.classList.toggle('wl-app-collapsed', expanded);
+      });
+    }
+
     updateWorkloadCount();
     renderWorkloadConfigCards();
+
+    initWorkloadAccordion();
+    setAccordionSectionBySelection();
   }
 
   function openCustomBurstModal(planId) {
@@ -4241,6 +5360,207 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     }
   }
 
+  var CAPEX_DEFAULTS = {
+    taxRate: 0.10,
+    installation: 25000,
+    setup: 5000,
+    maintenance: 75000,
+    datacenter: 40000,
+    successManager: 15000
+  };
+
+  function computeCapexHardwareLicense() {
+    var selected = getSelectedWorkloads();
+    if (!selected.length) return null;
+    var cfg = null;
+    for (var i = 0; i < selected.length; i++) {
+      var c = workloadConfigs[selected[i].id];
+      if (c && c.capacity) { cfg = c; break; }
+    }
+    if (!cfg) return null;
+
+    var reqCap = cfg.requestedCapacity ? parseFloat(cfg.requestedCapacity) : NaN;
+    var hasRequestedCapacity = !isNaN(reqCap) && reqCap > 0;
+
+    var usedCap = parseFloat(cfg.capacity);
+    if (isNaN(usedCap) || usedCap <= 0) return null;
+
+    var se = parseFloat(cfg.storageEfficiencyRatio);
+    if (isNaN(se) || se <= 0) se = 1;
+    var growthRate = parseFloat(cfg.annualGrowthRate);
+    if (isNaN(growthRate)) growthRate = 0;
+
+    var termYears = getCurrentContractYears() || 3;
+    var capexCapTiB;
+    if (hasRequestedCapacity) {
+      capexCapTiB = sizingOutputRoundUpToStep(reqCap, 1);
+    } else {
+      var startUsable = usedCap / Math.max(1, se);
+      var usableInputs = { startingCapacity: startUsable, growthRate: growthRate / 100, termYears: termYears };
+      capexCapTiB = sizingOutputRoundUpToStep(sizingOutputGetCapacityAtMonth(usableInputs, termYears * 12), 1);
+    }
+
+    var burst = getNormalizedBurstValue(cfg.burst) || '20';
+    var mode = cfg.usableEffective || 'effective';
+    var iot = getIotRateCardEntry(capexCapTiB, burst, mode);
+    if (!iot) return null;
+
+    var planMeta = cfg.selectedPlan ? PLAN_OPTIONS.filter(function (p) { return p.name === cfg.selectedPlan; })[0] : null;
+    var multiplier = planMeta ? ((planMeta.id === 'unified-extreme') ? 1.15 : (planMeta.id === 'standard') ? 0.85 : 1) : 1;
+    var hwLicense = Math.round(iot.yearlyNet * multiplier * termYears);
+
+    return {
+      capexCapTiB: capexCapTiB,
+      hwLicense: hwLicense,
+      termYears: termYears,
+      keystoneYearlyCost: cfg.selectedPlanCost || 0
+    };
+  }
+
+  function renderCapexComparison() {
+    var result = computeCapexHardwareLicense();
+
+    var elCap = getById('capex-capacity');
+    var elHw = getById('capex-hw-cost');
+    var elYear0 = getById('capex-year0');
+    var elAnnual = getById('capex-annual-ongoing');
+    var elCapexNpv = getById('capex-npv');
+    var elKeystoneNpv = getById('capex-keystone-npv');
+    var elVerdict = getById('capex-verdict');
+
+    if (!result) {
+      if (elCap) elCap.textContent = '—';
+      if (elHw) elHw.textContent = '—';
+      if (elYear0) elYear0.textContent = '—';
+      if (elAnnual) elAnnual.textContent = '—';
+      if (elCapexNpv) elCapexNpv.textContent = '—';
+      if (elKeystoneNpv) elKeystoneNpv.textContent = '—';
+      if (elVerdict) elVerdict.textContent = '';
+      return;
+    }
+
+    var d = CAPEX_DEFAULTS;
+    var termYears = result.termYears;
+    var hwLicense = result.hwLicense;
+
+    var acq = hwLicense + d.installation + d.setup + d.successManager;
+    var prePaidSupport = d.maintenance * termYears;
+    var acqGross = acq + prePaidSupport;
+    var acqWithTax = Math.round(acqGross * (1 + d.taxRate));
+    var annualOngoing = d.datacenter;
+
+    var capexNpv = acqWithTax;
+    for (var y = 1; y <= termYears; y++) {
+      capexNpv += annualOngoing / Math.pow(1 + WACC, y);
+    }
+    capexNpv = Math.round(capexNpv);
+
+    var keystoneYearly = result.keystoneYearlyCost;
+    var keystoneNpv = Math.round(calculateNPV(keystoneYearly, termYears));
+
+    if (elCap) elCap.textContent = result.capexCapTiB + ' TiB';
+    if (elHw) elHw.textContent = formatCurrency(hwLicense);
+    if (elYear0) elYear0.textContent = formatCurrency(acqWithTax);
+    if (elAnnual) elAnnual.textContent = formatCurrency(annualOngoing) + '/yr';
+    if (elCapexNpv) elCapexNpv.textContent = formatCurrency(capexNpv);
+    if (elKeystoneNpv) elKeystoneNpv.textContent = formatCurrency(keystoneNpv);
+
+    if (elVerdict) {
+      var diff = capexNpv - keystoneNpv;
+      var pctSavings = capexNpv > 0 ? Math.round(Math.abs(diff) / capexNpv * 100) : 0;
+      if (keystoneNpv < capexNpv) {
+        elVerdict.className = 'capex-verdict capex-verdict--keystone-wins';
+        elVerdict.innerHTML = '<strong>Keystone saves ' + formatCurrency(Math.abs(diff)) + '</strong> (' + pctSavings + '% lower NPV over ' + termYears + ' yrs)';
+      } else if (capexNpv < keystoneNpv) {
+        elVerdict.className = 'capex-verdict capex-verdict--capex-wins';
+        elVerdict.innerHTML = '<strong>CAPEX saves ' + formatCurrency(Math.abs(diff)) + '</strong> (' + pctSavings + '% lower NPV over ' + termYears + ' yrs)';
+      } else {
+        elVerdict.className = 'capex-verdict';
+        elVerdict.textContent = 'Both options have equal NPV';
+      }
+    }
+  }
+
+  function computeCapexVsKeystoneVerdict() {
+    var result = computeCapexHardwareLicense();
+    if (!result) return null;
+    var d = CAPEX_DEFAULTS;
+    var termYears = result.termYears;
+    var hwLicense = result.hwLicense;
+    var acq = hwLicense + d.installation + d.setup + d.successManager;
+    var prePaidSupport = d.maintenance * termYears;
+    var acqGross = acq + prePaidSupport;
+    var acqWithTax = Math.round(acqGross * (1 + d.taxRate));
+    var annualOngoing = d.datacenter;
+    var capexNpv = acqWithTax;
+    for (var y = 1; y <= termYears; y++) {
+      capexNpv += annualOngoing / Math.pow(1 + WACC, y);
+    }
+    capexNpv = Math.round(capexNpv);
+    var keystoneNpv = Math.round(calculateNPV(result.keystoneYearlyCost, termYears));
+    var diff = capexNpv - keystoneNpv;
+    var refMax = Math.max(capexNpv, keystoneNpv);
+    var pct = refMax > 0 ? Math.round(Math.abs(diff) / refMax * 100) : 0;
+    return { capexNpv: capexNpv, keystoneNpv: keystoneNpv, diff: diff, pct: pct, termYears: termYears };
+  }
+
+  function updateCapexVerdictBanners() {
+    if (window.CUSTOMER_VIEW) return;
+    var selected = getSelectedWorkloads();
+    for (var i = 0; i < selected.length; i++) {
+      var wid = selected[i].id;
+      var cfg = workloadConfigs[wid];
+      var banner = getById('capex-verdict-banner-' + wid);
+      if (!banner) continue;
+      if (!cfg || !cfg.selectedPlan) {
+        banner.innerHTML = '';
+        banner.className = 'config-capex-verdict-banner';
+        continue;
+      }
+      var v = computeCapexVsKeystoneVerdict();
+      if (!v) {
+        banner.innerHTML = '';
+        banner.className = 'config-capex-verdict-banner';
+        continue;
+      }
+      if (v.keystoneNpv < v.capexNpv) {
+        banner.className = 'config-capex-verdict-banner config-capex-verdict--keystone';
+        banner.innerHTML = '<span class="config-capex-verdict-icon">✓</span>' +
+          '<span class="config-capex-verdict-msg"><strong>Keystone saves ' + formatCurrency(Math.abs(v.diff)) + '</strong> — Keystone NPV ' + formatCurrency(v.keystoneNpv) + ' vs CAPEX NPV ' + formatCurrency(v.capexNpv) + ' (' + v.pct + '% lower over ' + v.termYears + ' yrs)</span>' +
+          '<span class="config-capex-verdict-cta">See more details →</span>';
+      } else if (v.capexNpv < v.keystoneNpv) {
+        banner.className = 'config-capex-verdict-banner config-capex-verdict--capex';
+        banner.innerHTML = '<span class="config-capex-verdict-icon">⚠</span>' +
+          '<span class="config-capex-verdict-msg"><strong>CAPEX saves ' + formatCurrency(Math.abs(v.diff)) + '</strong> — CAPEX NPV ' + formatCurrency(v.capexNpv) + ' vs Keystone NPV ' + formatCurrency(v.keystoneNpv) + ' (' + v.pct + '% lower over ' + v.termYears + ' yrs)</span>' +
+          '<span class="config-capex-verdict-cta">See more details →</span>';
+      } else {
+        banner.className = 'config-capex-verdict-banner config-capex-verdict--neutral';
+        banner.innerHTML = '<span class="config-capex-verdict-msg">Both CAPEX and Keystone have equal NPV</span>' +
+          '<span class="config-capex-verdict-cta">See more details →</span>';
+      }
+    }
+  }
+
+  function bindCapexCompareToggle() {
+    if (window.CUSTOMER_VIEW) return;
+    var toggle = getById('capex-compare-toggle');
+    if (!toggle) return;
+    var sidebarCard = getById('quote-sidebar-flip-card');
+    var columns = document.querySelector('.quote-prototype-columns');
+    if (!sidebarCard || !columns) return;
+
+    toggle.addEventListener('change', function () {
+      if (toggle.checked) {
+        sidebarCard.classList.add('capex-compare-active');
+        columns.classList.add('capex-columns-wide');
+        renderCapexComparison();
+      } else {
+        sidebarCard.classList.remove('capex-compare-active');
+        columns.classList.remove('capex-columns-wide');
+      }
+    });
+  }
+
   function bindSidebarInputs() {
     document.querySelectorAll('input[name="auto-renewal"]').forEach(function (radio) {
       radio.addEventListener('change', function () {
@@ -4268,7 +5588,12 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     });
     updateAutoRenewDurationVisibility();
     var deploymentSelect = document.querySelector('select[name="deployment_location"]');
-    if (deploymentSelect) deploymentSelect.addEventListener('change', updateSidebarFromSelections);
+    if (deploymentSelect) {
+      deploymentSelect.addEventListener('change', function () {
+        syncSubscriptionTypeToDeployment();
+        updateSidebarFromSelections();
+      });
+    }
     document.querySelectorAll('.quote-addon-group input[name="addon_subscription"]').forEach(function (cb) {
       cb.addEventListener('change', function () {
         if (cb.value === 'tiering' && cb.checked) {
@@ -4298,6 +5623,7 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
         updateApprovalUiState();
       });
     }
+
     var deviationsSelect = getById('sidebar-deviations');
     if (deviationsSelect) {
       deviationsSelect.addEventListener('change', function () {
@@ -4326,6 +5652,7 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     var subscriptionTypeSelect = getById('subscription-type');
     if (subscriptionTypeSelect) {
       subscriptionTypeSelect.addEventListener('change', function () {
+        updateSovereignTag();
         updateSidebarFromSelections();
       });
     }
@@ -4465,7 +5792,8 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     if (metaDistributor) metaDistributor.textContent = DEFAULT_OPPORTUNITY_PROFILE.distributorName;
     if (metaVersion) metaVersion.textContent = DEFAULT_OPPORTUNITY_PROFILE.keystoneVersion;
     var siteSelect = document.querySelector('select[name="deployment_location"]');
-    if (siteSelect) siteSelect.value = DEFAULT_OPPORTUNITY_PROFILE.siteName;
+    if (siteSelect && !quoteStateRestored) siteSelect.value = DEFAULT_OPPORTUNITY_PROFILE.siteName;
+    syncSubscriptionTypeToDeployment();
     var addDevOpp = getById('add-deviation-opportunity');
     if (addDevOpp) addDevOpp.value = currentOpportunityId;
     var addDevQuote = getById('add-deviation-quote');
@@ -4550,6 +5878,7 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     updatePageQuoteAndOpportunityUI();
     if (quoteReadOnlyMode) collapseAllSelectedWorkloads();
     renderWorkloadConfigCards();
+    if (didRestore && fromCustomerRequest) addConfiguredWorkloadsToQuote();
     renderAdditionalConfigByPlan();
     updateSidebarFromSelections();
     updateSidebarTotals();
@@ -4665,13 +5994,13 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
         var map = raw ? JSON.parse(raw) : {};
         var existing = map[submittedQuoteId] || {};
         var submitProfile = getOpportunityProfile(currentOpportunityId);
-        var submitCustomerName = (submitProfile && submitProfile.customerName) || DEFAULT_OPPORTUNITY_PROFILE.customerName || 'Mega Hostings.Inc';
+        var submitCustomerName = (submitProfile && submitProfile.customerName) || DEFAULT_OPPORTUNITY_PROFILE.customerName || 'AUMOVIO Germany GmbH';
         map[submittedQuoteId] = {
           quoteId: submittedQuoteId,
           quoteName: getQuoteDisplayName(submittedQuoteId, currentOpportunityId),
           opportunityId: currentOpportunityId || existing.opportunityId || DEFAULT_OPPORTUNITY_PROFILE.opportunityId,
           customerName: submitCustomerName,
-          assignedTo: existing.assignedTo || 'Chris Collins',
+          assignedTo: existing.assignedTo || 'Derek Keller',
           quoteDiscountPct: submittedDiscountPct,
           assignedFor: existing.assignedFor || 'sally',
           uploadedAt: new Date().toISOString(),
@@ -4689,8 +6018,8 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
         localStorage.setItem(uploadsKey, JSON.stringify(map));
       } catch (e) {}
       updateApprovalUiState();
-      window.alert('The quote is succesfully submitted for the approval');
-      window.location.href = 'index.html?tab=pending-review&quote=' + encodeURIComponent(submittedQuoteId);
+      window.alert('The quote has been successfully submitted for approval.');
+      window.location.href = 'sales-dashboard.html?tab=in-review';
     });
   }
 
@@ -4756,10 +6085,28 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     if (sidebar) sidebar.style.display = 'none';
   }
 
+  function generateUniqueId(prefix) {
+    var ts = Date.now().toString(36).toUpperCase();
+    var rand = Math.floor(Math.random() * 46656).toString(36).toUpperCase();
+    while (rand.length < 3) rand = '0' + rand;
+    return (prefix || '') + ts + rand;
+  }
+
   function init() {
     var params = new URLSearchParams(window.location.search || '');
     var isCustomerPage = window.location.pathname.indexOf('customer-sizing') !== -1;
-    if (!isCustomerPage && !params.has('quote') && !params.has('opportunity') && params.get('from') !== 'customer') {
+
+    if (isCustomerPage) {
+      currentQuoteId = generateUniqueId('QT-');
+      currentOpportunityId = generateUniqueId('OPP-');
+      ensureQuoteIdInMaps(currentQuoteId);
+      var metaQuoteEl = getById('meta-quote-number');
+      if (metaQuoteEl) metaQuoteEl.textContent = currentQuoteId;
+      var metaOppEl = getById('meta-opportunity-id');
+      if (metaOppEl) metaOppEl.textContent = currentOpportunityId;
+    }
+
+    if (!isCustomerPage && !params.has('quote') && !params.has('opportunity') && params.get('from') !== 'customer' && params.get('from') !== 'npv') {
       var newId = String(Math.floor(10000 + Math.random() * 90000));
       window.location.replace('sizing.html?quote=' + newId + '&opportunity=' + encodeURIComponent(currentOpportunityId));
       return;
@@ -4770,8 +6117,17 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     try {
       quoteReadOnlyMode = params.get('readonly') === '1';
       fromCustomerRequest = params.get('from') === 'customer';
+      fromNpvReturn = params.get('from') === 'npv';
+      if (fromNpvReturn) {
+        var savedQuoteId = sessionStorage.getItem('sizingNpvReturnQuoteId');
+        var savedOppId = sessionStorage.getItem('sizingNpvReturnOppId');
+        if (savedQuoteId) currentQuoteId = savedQuoteId;
+        if (savedOppId) currentOpportunityId = savedOppId;
+        sessionStorage.removeItem('sizingNpvReturnQuoteId');
+        sessionStorage.removeItem('sizingNpvReturnOppId');
+      }
       forceFreshSizing = sessionStorage.getItem('sizingForceFresh') === '1';
-      shouldRestoreStoredState = params.has('quote') || params.has('opportunity') || quoteReadOnlyMode || fromCustomerRequest;
+      shouldRestoreStoredState = params.has('quote') || params.has('opportunity') || quoteReadOnlyMode || fromCustomerRequest || fromNpvReturn;
       if (!shouldRestoreStoredState) {
         try {
           shouldRestoreStoredState = !!sessionStorage.getItem('sizingRestoreOnLoad');
@@ -4788,7 +6144,7 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     if (params.has('quote') && !quoteReadOnlyMode && currentQuoteId && isQuoteSubmittedForApproval(currentQuoteId)) {
       quoteReadOnlyMode = true;
     }
-    if (!ENABLE_SIZING_DRAFT_PERSISTENCE && !quoteReadOnlyMode && !fromCustomerRequest) {
+    if (!ENABLE_SIZING_DRAFT_PERSISTENCE && !quoteReadOnlyMode && !fromCustomerRequest && !fromNpvReturn) {
       try {
         // Clear current quote state
         sessionStorage.removeItem(getQuoteStorageKey(currentQuoteId));
@@ -4822,10 +6178,21 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
           '<span><strong>Submitted for approval</strong> — This quote has been submitted for deal desk review. Fields are locked. Click <em>Edit</em> above to unlock and make changes.</span>';
         topSection.insertAdjacentElement('afterend', banner);
       } else if (fromCustomerRequest) {
+        var pending = null;
+        try {
+          var pendingRaw = sessionStorage.getItem(getQuoteStorageKey(currentQuoteId)) || localStorage.getItem(getQuoteStorageKey(currentQuoteId));
+          pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+        } catch (eBanner) {}
+        var isSovereignRequest = !!(pending && (pending.subscriptionType === 'Sovereign' || isSovereignDeploymentValue(pending.deploymentLocation)));
+        var sovereignNote = isSovereignRequest
+          ? ' <strong>Sovereign request</strong> — the customer asked for a sovereign deployment at ' +
+            escapeHtml(pending.deploymentLocationLabel || pending.deploymentLocation) +
+            '. Keep the site and subscription type as sovereign when you quote.'
+          : '';
         banner.style.cssText = 'background:#e0f2fe;border:1px solid #7dd3fc;border-radius:8px;padding:12px 18px;margin:0 0 16px;display:flex;align-items:center;gap:12px;font-size:13px;color:#0c4a6e;';
         banner.innerHTML =
           '<svg viewBox="0 0 24 24" style="width:20px;height:20px;flex-shrink:0;fill:#0369a1" aria-hidden="true"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>' +
-          '<span><strong>Customer submitted request</strong> — All fields are pre-filled from the customer\'s submission. Review, add your details (discount, HW review), and use the action buttons to proceed.</span>';
+          '<span><strong>Customer submitted request</strong> — All fields are pre-filled from the customer\'s submission. Review, add your details (discount, HW review), and use the action buttons to proceed.' + sovereignNote + '</span>';
         topSection.insertAdjacentElement('afterend', banner);
       }
     }());
@@ -4871,8 +6238,10 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
     bindTabs();
     bindSidebarInputs();
     bindSidebarFlipToggle();
+    bindCapexCompareToggle();
     if (quoteReadOnlyMode) collapseAllSelectedWorkloads();
     renderWorkloadConfigCards();
+    if (didRestore && fromCustomerRequest) addConfiguredWorkloadsToQuote();
     renderAdditionalConfigByPlan();
     updateSidebarFromSelections();
     updateSidebarTotals();
@@ -4897,12 +6266,10 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
       btn.addEventListener('click', function () {
         if (btn.disabled) return;
 
-        // Generate a unique request ID and save the full quote state under it
-        var requestId = 'CSR-' + Date.now();
+        var requestId = currentQuoteId;
+        var oppId = currentOpportunityId;
         saveQuoteStateToStorage(requestId, true);
 
-        // Register the request in the opportunity quotes list (localStorage so sales dashboard can read it)
-        var oppId = DEFAULT_OPPORTUNITY_PROFILE.opportunityId;
         try {
           var quoteListKey = 'sizingQuotes_' + oppId;
           var rawList = localStorage.getItem(quoteListKey);
@@ -4911,28 +6278,27 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
           localStorage.setItem(quoteListKey, JSON.stringify(qList));
         } catch (e) {}
 
-        // Save a friendly name for the request
+        var quoteName = 'Customer request ' + requestId + ' \u2013 ' + DEFAULT_OPPORTUNITY_PROFILE.customerName;
         try {
           var namesKey = 'sizingQuoteNames_' + oppId;
           var rawNames = localStorage.getItem(namesKey) || sessionStorage.getItem(namesKey);
           var namesMap = rawNames ? JSON.parse(rawNames) : {};
-          namesMap[requestId] = 'Customer request \u2013 ' + DEFAULT_OPPORTUNITY_PROFILE.customerName;
+          namesMap[requestId] = quoteName;
           localStorage.setItem(namesKey, JSON.stringify(namesMap));
           sessionStorage.setItem(namesKey, JSON.stringify(namesMap));
         } catch (e) {}
 
-        // Write an entry to dealMarginUploadsByQuote so the sales dashboard picks it up
         var uploadsKey = 'dealMarginUploadsByQuote';
         try {
           var rawUploads = sessionStorage.getItem(uploadsKey) || localStorage.getItem(uploadsKey);
           var uploadsMap = rawUploads ? JSON.parse(rawUploads) : {};
           uploadsMap[requestId] = {
             quoteId: requestId,
-            quoteName: 'Customer request \u2013 ' + DEFAULT_OPPORTUNITY_PROFILE.customerName,
+            quoteName: quoteName,
             uploadedAt: new Date().toISOString(),
             customerName: DEFAULT_OPPORTUNITY_PROFILE.customerName,
             opportunityId: oppId,
-            assignedTo: 'Chris Collins',
+            assignedTo: 'Derek Keller',
             assignedFor: 'sales',
             customerSubmitted: true
           };
@@ -4949,6 +6315,10 @@ var checkboxes = modal.querySelectorAll('.modal-quote-checkboxes input[name="app
           notice.textContent = 'Your subscription request has been submitted. A NetApp representative will be in touch shortly.';
           notice.classList.remove('quote-discount-warning-hidden');
         }
+
+        setTimeout(function () {
+          window.location.href = 'sales-email-notification.html';
+        }, 1500);
       });
     }());
     updateApprovalUiState();

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quote 123 | Deal Approval · Margin Analysis</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="margin-analysis.css">
+  <link rel="stylesheet" href="margin-analysis.css?v=20260911">
 </head>
 <body class="margin-analysis-page">
   <header class="header">
@@ -72,7 +72,10 @@
   <div class="layout-wrapper">
     <main class="main-content margin-analysis-main">
   <div class="page-container">
-    <h1 class="page-title">Quote 42001</h1>
+    <div class="page-title-row">
+      <h1 class="page-title">Quote 42001</h1>
+      <span class="sovereign-tag" id="margin-sovereign-tag" hidden>Sovereign</span>
+    </div>
 
     <!-- Metadata / status card -->
     <div class="metadata-card card">
@@ -100,18 +103,45 @@
       </div>
       <div class="meta-col">
         <span class="meta-label">Customer</span>
-            <span class="meta-value"><a href="#" id="meta-customer-name">Mega Hostings Inc.</a></span>
-        <a href="#" class="meta-link">View contact details</a>
+        <span class="meta-value"><a href="#" id="meta-customer-name">AUMOVIO Germany GmbH</a></span>
+        <span class="meta-link-tooltip-wrap">
+          <a href="#" class="meta-link" onclick="return false">View contact details</a>
+          <div class="meta-tooltip">
+            <p><strong>James Whitfield</strong></p>
+            <p>VP of Infrastructure</p>
+            <p>james.whitfield@megahostings.com</p>
+            <p>+1 (214) 555-0193</p>
+            <p>4200 Commerce St, Dallas, TX 75226</p>
+          </div>
+        </span>
       </div>
       <div class="meta-col">
         <span class="meta-label">Partner</span>
         <span class="meta-value"><a href="#" id="meta-partner-name">Not applicable</a></span>
-        <a href="#" class="meta-link">View contact details</a>
+        <span class="meta-link-tooltip-wrap">
+          <a href="#" class="meta-link" onclick="return false">View contact details</a>
+          <div class="meta-tooltip">
+            <p><strong>Sarah Chen</strong></p>
+            <p>Channel Account Manager</p>
+            <p>s.chen@arrowtechsolutions.com</p>
+            <p>+1 (408) 555-0247</p>
+            <p>1100 Innovation Way, San Jose, CA 95134</p>
+          </div>
+        </span>
       </div>
       <div class="meta-col">
         <span class="meta-label">Distributor</span>
         <span class="meta-value"><a href="#" id="meta-distributor-name">Not applicable</a></span>
-        <a href="#" class="meta-link">View contact details</a>
+        <span class="meta-link-tooltip-wrap">
+          <a href="#" class="meta-link" onclick="return false">View contact details</a>
+          <div class="meta-tooltip">
+            <p><strong>Michael Torres</strong></p>
+            <p>Distribution Sales Lead</p>
+            <p>m.torres@techdata-dist.com</p>
+            <p>+1 (305) 555-0381</p>
+            <p>8700 NW 36th St, Miami, FL 33178</p>
+          </div>
+        </span>
       </div>
       <div class="meta-col">
         <span class="meta-label">Keystone version</span>
@@ -494,19 +524,19 @@
             <dt>Reseller Name</dt>
             <dd>Not applicable</dd>
             <dt>End Customer Name</dt>
-            <dd>Mega Hostings Inc.</dd>
+            <dd>AUMOVIO Germany GmbH</dd>
             <dt>Quote Name</dt>
-            <dd class="justification-quote-name">Mega Hostings Inc. — Keystone v3 Premium — Unified 100 TiB — 20% burst — 3yr — Annual — 42001</dd>
+            <dd class="justification-quote-name">AUMOVIO Germany GmbH — Keystone v3 Premium — Unified 100 TiB — 20% burst — 3yr — Annual — 42001</dd>
             <dt>Proposed Bookings</dt>
             <dd id="justification-proposed-bookings">925,500.00 USD</dd>
             <dt>Approval Initiated Date</dt>
             <dd>01-01-2026</dd>
             <dt>Approval Initiator</dt>
-            <dd>Chris Collins</dd>
+            <dd>Derek Keller</dd>
             <dt>NetApp Channel Rep</dt>
             <dd>Direct</dd>
             <dt>Primary NetApp Sales Rep</dt>
-            <dd>Chris Collins</dd>
+            <dd>Derek Keller</dd>
             <dt>District</dt>
             <dd>AM-West District</dd>
             <dt>DDS - Deal Score</dt>
@@ -592,7 +622,7 @@
           </tbody>
         </table>
 
-        <p class="pvr-submitter-line">PVR submitter: <strong id="justification-pvr-submitter-name">Chris Collins</strong></p>
+        <p class="pvr-submitter-line">PVR submitter: <strong id="justification-pvr-submitter-name">Derek Keller</strong></p>
       </div>
     </div>
 
@@ -602,21 +632,6 @@
         <h2 class="tab-content-title">Feature requests</h2>
         <p class="tab-content-note">Feature requests applied to this deal, by type. Those that affect deal margin are included in the margin calculation. Request a new feature request to open the Feature requests page with this deal pre-filled.</p>
         <div class="deviations-list deviations-list-typed" id="deviations-list">
-          <div class="deviation-item" data-type="margin">
-            <span class="deviation-badge deviation-badge--margin">Margin impact</span>
-            <span class="deviation-label">Discount above standard</span>
-            <span class="deviation-detail">40% vs 25% guideline — included in margin calculation</span>
-          </div>
-          <div class="deviation-item" data-type="margin">
-            <span class="deviation-badge deviation-badge--margin">Margin impact</span>
-            <span class="deviation-label">SLA credits</span>
-            <span class="deviation-detail">Applied per year — included in margin calculation</span>
-          </div>
-          <div class="deviation-item" data-type="config">
-            <span class="deviation-badge deviation-badge--config">Configuration</span>
-            <span class="deviation-label">Burst to 80%</span>
-            <span class="deviation-detail">Quote-level configuration</span>
-          </div>
         </div>
         <div class="deviations-request-wrap">
           <a href="deviations.html?opportunity=OPP-123&quote=123&type=margin" class="btn btn-secondary" id="btn-request-deviation">Request New Feature</a>
@@ -662,7 +677,37 @@
   </div>
 
   <div id="charge-formula-tooltip" class="charge-formula-tooltip" role="tooltip" aria-hidden="true"></div>
-  <script src="./margin-analysis.js?v=20260407"></script>
+  <script src="./margin-analysis.js?v=20260915b"></script>
   <script src="persona-switcher.js"></script>
+  <script>
+  (function () {
+    function initContactTooltips() {
+      document.querySelectorAll('.meta-link-tooltip-wrap').forEach(function (wrap) {
+        var link = wrap.querySelector('.meta-link');
+        var tip = wrap.querySelector('.meta-tooltip');
+        if (!link || !tip) return;
+        var col = wrap.closest('.meta-col');
+        if (col) {
+          var val = col.querySelector('.meta-value');
+          var txt = (val ? val.textContent : '').trim().toLowerCase();
+          if (!txt || txt === 'not applicable' || txt === 'n/a' || txt === '—' || txt === '-') {
+            wrap.style.display = 'none';
+            return;
+          }
+        }
+        wrap.addEventListener('mouseenter', function () {
+          var r = link.getBoundingClientRect();
+          tip.style.left = r.left + 'px';
+          tip.style.top = (r.bottom + 6) + 'px';
+        });
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initContactTooltips);
+    } else {
+      initContactTooltips();
+    }
+  }());
+  </script>
 </body>
 </html>

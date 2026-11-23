@@ -1,0 +1,312 @@
+/* Sales email notification — simulated inbox view */
+
+.email-notif-page {
+  background: #1a1a2e;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.email-notif-wrapper {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Scene label */
+.email-notif-scene-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.02em;
+  padding: 0 0.25rem;
+}
+
+.email-notif-scene-photo {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Card */
+.email-notif-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+/* Email header */
+.email-notif-header {
+  padding: 1.5rem 1.75rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.email-notif-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.email-notif-from-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.email-notif-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0067c5;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.email-notif-from-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.email-notif-from-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1d21;
+}
+
+.email-notif-from-email {
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.email-notif-time {
+  font-size: 0.8125rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.email-notif-to-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.email-notif-to-label {
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+.email-notif-to-photo {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.email-notif-subject {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1d21;
+  margin: 0;
+  line-height: 1.35;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.email-notif-new-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* Email body */
+.email-notif-body {
+  padding: 1.5rem 1.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: #374151;
+}
+
+.email-notif-body p {
+  margin: 0 0 1rem;
+}
+
+.email-notif-body p:last-of-type {
+  margin-bottom: 1.5rem;
+}
+
+/* Details box */
+.email-notif-details-box {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+
+.email-notif-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.email-notif-detail-row + .email-notif-detail-row {
+  border-top: 1px solid #f3f4f6;
+}
+
+.email-notif-detail-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.email-notif-detail-value {
+  color: #1a1d21;
+  font-weight: 600;
+  text-align: right;
+}
+
+.email-notif-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+/* CTA button */
+.email-notif-cta {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 0.875rem 1.5rem;
+  background: #0067c5;
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 0.75rem;
+}
+
+.email-notif-cta:hover {
+  background: #0056a6;
+  box-shadow: 0 2px 8px rgba(0, 103, 197, 0.3);
+}
+
+.email-notif-alt-link {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  word-break: break-all;
+}
+
+.email-notif-link-text {
+  color: #6b7280;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+
+/* Email footer */
+.email-notif-footer {
+  padding: 1.25rem 1.75rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+.email-notif-footer p {
+  margin: 0 0 0.25rem;
+}
+
+.email-notif-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+}
+
+.email-notif-footer-links a {
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.75rem;
+}
+
+.email-notif-footer-links a:hover {
+  text-decoration: underline;
+  color: #374151;
+}
+
+.email-notif-footer-links span {
+  color: #d1d5db;
+}
+
+/* Page footer */
+.email-notif-page-footer {
+  text-align: center;
+}
+
+.email-notif-page-footer p {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .email-notif-card {
+    border-radius: 8px;
+  }
+
+  .email-notif-header,
+  .email-notif-body,
+  .email-notif-footer {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .email-notif-subject {
+    font-size: 1.1rem;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+}

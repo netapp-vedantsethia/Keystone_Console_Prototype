@@ -1,0 +1,11 @@
+{
+  "name": "gartner-subscription-engine",
+  "private": true,
+  "description": "Static demo shell; Console UI is the Vite React app copied from console-module.",
+  "scripts": {
+    "sync-console": "node scripts/sync-console-from-vite.mjs",
+    "console:dev": "npm run dev --prefix ../../console-module/Console_Figma_Prototype_v2",
+    "console:preview": "node scripts/run-console-vite-preview.mjs",
+    "console:build": "npm run build --prefix ../../console-module/Console_Figma_Prototype_v2 && node scripts/sync-console-from-vite.mjs"
+  }
+}

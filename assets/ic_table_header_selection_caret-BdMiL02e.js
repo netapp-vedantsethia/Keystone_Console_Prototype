@@ -1,0 +1,1 @@
+import{k as e}from"./index-t4FvfSML.js";const t=e('<svg viewBox="0 0 7.79423 4.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.89711 4.5L7.79423 0H0L3.89711 4.5Z" fill="currentColor"/></svg>');export{t as IcTableHeaderSelectionCaretIcon,t as default};

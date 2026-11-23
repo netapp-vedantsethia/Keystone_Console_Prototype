@@ -5,47 +5,391 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subscription Request | NetApp Keystone</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="margin-analysis.css">
-  <link rel="stylesheet" href="sizing.css">
+  <link rel="stylesheet" href="margin-analysis.css?v=20260421b">
+  <link rel="stylesheet" href="sizing.css?v=20260915c">
   <style>
-    /* Customer-view overrides */
-    .customer-hero {
-      background: linear-gradient(135deg, #0069b1 0%, #004f8b 100%);
-      color: #fff;
-      padding: 28px 32px 22px;
-      border-radius: 10px;
-      margin-bottom: 20px;
+    /* ── Console-aligned theme for customer sizing ── */
+
+    /* SF Pro font stack */
+    @font-face {
+      font-family: 'SF_Pro';
+      src: local('SF Pro Text'), local('SF Pro Display'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI'), local('Roboto');
+      font-weight: normal;
+      font-style: normal;
     }
-    .customer-hero-title {
-      font-size: 22px;
-      font-weight: 700;
-      margin: 0 0 6px;
-      letter-spacing: -0.3px;
+    @font-face {
+      font-family: 'SF_Pro';
+      src: local('SF Pro Text Semibold'), local('SF Pro Display Semibold'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI Semibold'), local('Roboto Medium');
+      font-weight: 590;
+      font-style: normal;
     }
-    .customer-hero-sub {
-      font-size: 13px;
-      opacity: 0.85;
+
+    /* Base overrides */
+    body.sizing-page {
+      font-family: 'SF_Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5 !important;
+      color: #1c1c1c;
       margin: 0;
     }
+
+    /* ── Header: match ConsoleHeader (72px, white, NetApp branding) ── */
+    .header {
+      position: fixed !important;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 72px !important;
+      background: #fff !important;
+      display: flex;
+      align-items: center;
+      padding: 0 32px !important;
+      box-shadow: inset 0px -1px 0px 0px #e0e0e0;
+      gap: 24px;
+    }
+    .header-left { display: flex; align-items: center; gap: 24px; }
+    .menu-toggle { display: none !important; }
+    .logo {
+      font-family: 'SF_Pro', sans-serif;
+      font-size: 16px !important;
+      font-weight: 590 !important;
+      color: #1c1c1c !important;
+      text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .logo-icon {
+      width: 24px !important; height: 24px !important;
+      background: #0067c5 !important;
+      color: #fff !important;
+      font-size: 0.7rem !important;
+      font-weight: 700;
+      border-radius: 4px !important;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .logo-text { font-size: 16px; line-height: 28px; }
+    .header-center { display: none !important; }
+    .header-right {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .header-persona {
+      display: flex; flex-direction: column; align-items: flex-end;
+      line-height: 1.2; margin-right: 8px;
+    }
+    .header-persona-label {
+      font-size: 11px !important;
+      color: #717182 !important;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 400;
+    }
+    .header-persona-value {
+      font-size: 13px !important;
+      font-weight: 590 !important;
+      color: #1c1c1c !important;
+    }
+    .header-persona-select {
+      margin-top: 4px;
+      font-size: 11px;
+      padding: 2px 6px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      background: #f5f5f5;
+      color: #1c1c1c;
+    }
+    .icon-btn {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; border-radius: 6px;
+      color: #1c1c1c; cursor: pointer;
+      font-size: 0.8rem; font-weight: 590;
+    }
+    .icon-btn:hover { background: #f5f5f5; }
+    .user-avatar {
+      width: 36px; height: 36px;
+      background: #1c1c1c !important;
+      color: #fff !important;
+      border-radius: 50%;
+      font-size: 0.75rem; font-weight: 590;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Navigation bar: console-style tab bar ── */
+    .nav-bar {
+      position: fixed !important;
+      top: 72px; left: 0; right: 0;
+      z-index: 99;
+      background: #fff !important;
+      border-bottom: 1px solid #e0e0e0 !important;
+      padding: 0 32px !important;
+      height: 48px;
+    }
+    .nav-list {
+      display: flex; align-items: center; gap: 0; margin: 0; padding: 0;
+      list-style: none; height: 48px;
+    }
+    .nav-link {
+      padding: 0 20px; height: 100%;
+      display: flex; align-items: center;
+      font-family: 'SF_Pro', sans-serif;
+      font-size: 14px !important;
+      font-weight: 590 !important;
+      color: #1c1c1c !important;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s;
+    }
+    .nav-link:hover { color: #0067c5 !important; }
+    .nav-link.active {
+      color: #0067c5 !important;
+      border-bottom-color: #0067c5 !important;
+    }
+
+    /* ── Layout: push content below fixed header + nav ── */
+    .layout-wrapper {
+      margin-top: 120px !important;
+      min-height: calc(100vh - 120px);
+    }
+
+    /* ── Main content area ── */
+    .quote-prototype-main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px 48px !important;
+      background: transparent !important;
+    }
+
+    /* ── Hero banner: console accent style ── */
+    .customer-hero {
+      background: #fff;
+      color: #1c1c1c;
+      padding: 24px 32px 20px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid #0067c5;
+    }
+    .customer-hero-title {
+      font-size: 24px;
+      font-weight: 400;
+      font-family: 'SF_Pro', sans-serif;
+      margin: 0 0 6px;
+      letter-spacing: -0.3px;
+      line-height: 36px;
+      color: #1c1c1c;
+    }
+    .customer-hero-sub {
+      font-size: 14px;
+      line-height: 24px;
+      color: #404040;
+      margin: 0;
+      opacity: 1;
+    }
+
+    /* ── Account meta strip ── */
     .customer-meta-strip {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px 24px;
-      background: #f0f7ff;
-      border: 1px solid #cce0f5;
-      border-radius: 8px;
-      padding: 12px 18px;
-      margin-bottom: 18px;
-      font-size: 12.5px;
+      gap: 6px 32px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 16px 24px;
+      margin-bottom: 20px;
+      font-size: 13px;
     }
-    .customer-meta-item { display: flex; gap: 6px; align-items: baseline; }
-    .customer-meta-label { color: #64748b; }
-    .customer-meta-value { font-weight: 600; color: #1e3a5f; }
+    .customer-meta-item { display: flex; gap: 8px; align-items: baseline; }
+    .customer-meta-label { color: #717182; font-size: 12px; font-weight: 400; }
+    .customer-meta-value { font-weight: 590; color: #1c1c1c; font-size: 13px; }
+    .customer-meta-value a { color: #0067c5; }
+
+    /* ── Cards: white with subtle border, rounded ── */
+    .sizing-page .quote-card,
+    .sizing-page .config-workload-section,
+    .sizing-page .quote-sidebar-card,
+    .sizing-page .metadata-card,
+    .sizing-page .quote-tabs-wrap,
+    .sizing-page .quote-tabs-wrap-quotes-only {
+      background: #fff !important;
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 10px !important;
+      box-shadow: none !important;
+    }
+
+    /* ── Titles inside cards: #1c1c1c, not blue ── */
+    .sizing-page .quote-card-title,
+    .sizing-page .contract-terms-title,
+    .sizing-page .config-workload-page-title,
+    .sizing-page .quote-sidebar-title,
+    .sizing-page .quote-sidebar-section-title,
+    .sizing-page .config-workload-section-title,
+    .sizing-page .config-workload-section-title--primary {
+      color: #1c1c1c !important;
+      font-family: 'SF_Pro', sans-serif;
+      font-weight: 590 !important;
+    }
+
+    /* ── Description text ── */
+    .sizing-page .quote-card-desc,
+    .sizing-page .contract-terms-subtitle,
+    .sizing-page .config-workload-subtitle {
+      color: #404040 !important;
+    }
+
+    /* ── Page title ── */
+    .sizing-page .page-title {
+      color: #1c1c1c !important;
+      font-family: 'SF_Pro', sans-serif;
+      font-weight: 400;
+    }
+
+    /* ── Accent color: #0067c5 ── */
+    .sizing-page .config-plan-link,
+    .sizing-page .config-workload-links-row a,
+    .sizing-page .meta-link,
+    .sizing-page .quote-tab-action-link,
+    .sizing-page .workload-expand-btn {
+      color: #0067c5 !important;
+    }
+
+    /* ── Buttons ── */
+    .sizing-page .quote-btn-primary {
+      background: #0067c5 !important;
+      color: #fff !important;
+      border: 1px solid #0067c5 !important;
+      border-radius: 6px !important;
+      font-family: 'SF_Pro', sans-serif;
+      font-weight: 590 !important;
+      font-size: 14px;
+    }
+    .sizing-page .quote-btn-primary:hover {
+      background: #0056a6 !important;
+      border-color: #0056a6 !important;
+    }
+    .sizing-page .quote-btn-secondary {
+      background: #fff !important;
+      border: 1px solid #e0e0e0 !important;
+      color: #1c1c1c !important;
+      border-radius: 6px !important;
+      font-family: 'SF_Pro', sans-serif;
+      font-weight: 590 !important;
+    }
+    .sizing-page .quote-btn-secondary:hover {
+      background: #f5f5f5 !important;
+    }
+
+    /* ── Selected states ── */
+    .sizing-page .contract-terms-card.selected,
+    .sizing-page .contract-terms-card:has(.contract-terms-input:checked),
+    .sizing-page .quote-workload-tile.selected,
+    .sizing-page .config-plan-card.selected {
+      background: #f4fbff !important;
+      border-color: #0067c5 !important;
+    }
+    .sizing-page .contract-terms-radio,
+    .sizing-page .quote-tile-checkbox {
+      border-color: #1c1c1c !important;
+    }
+    .sizing-page .contract-terms-card.selected .contract-terms-radio,
+    .sizing-page .contract-terms-card:has(.contract-terms-input:checked) .contract-terms-radio,
+    .sizing-page .quote-workload-tile.selected .quote-tile-checkbox {
+      background: #0067c5 !important;
+      border-color: #0067c5 !important;
+    }
+
+    /* ── Input fields ── */
+    .sizing-page .quote-select-sm,
+    .sizing-page .quote-input,
+    .sizing-page textarea.quote-select-sm,
+    .sizing-page .config-workload-input-wrap,
+    .sizing-page .config-workload-input-segmented {
+      background: #fff !important;
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 6px !important;
+      color: #1c1c1c;
+      font-family: 'SF_Pro', sans-serif;
+    }
+    .sizing-page .quote-select-sm:focus,
+    .sizing-page .quote-input:focus {
+      border-color: #0067c5 !important;
+      box-shadow: 0 0 0 2px rgba(0, 103, 197, 0.15) !important;
+    }
+
+    /* ── Add-on cards ── */
+    .sizing-page .subscription-addons-section .addon-card {
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 10px !important;
+      background: #fff !important;
+    }
+    .sizing-page .subscription-addons-section .addon-card:hover,
+    .sizing-page .subscription-addons-section .addon-card:has(.addon-card-input:checked) {
+      border-color: #0067c5 !important;
+      background: #f4fbff !important;
+    }
+    .sizing-page .subscription-addons-section .addon-card-icon {
+      color: #0067c5 !important;
+    }
+    .sizing-page .subscription-addons-section .addon-card-action {
+      border: 1px solid #0067c5 !important;
+      color: #0067c5 !important;
+      border-radius: 6px !important;
+      font-weight: 590;
+    }
+
+    /* ── Sidebar ── */
+    .sizing-page .quote-sidebar-card {
+      border-radius: 10px !important;
+    }
+    .sizing-page .quote-sidebar-title {
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .sizing-page .quote-sidebar-icon {
+      color: #0067c5 !important;
+    }
+    .sizing-page .quote-sidebar-actions {
+      border-top: 1px solid #e0e0e0;
+    }
+    .estimated-pricing-note {
+      margin: 10px 0 0;
+      padding: 8px 10px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #64748b;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    /* ── Workload tiles ── */
+    .sizing-page .quote-workload-tile,
+    .sizing-page .contract-terms-card,
+    .sizing-page .config-plan-card {
+      border-radius: 10px !important;
+      border: 1px solid #e0e0e0 !important;
+    }
+
+    /* ── Dividers ── */
+    .sizing-page .contract-terms-divider {
+      background: #e0e0e0 !important;
+    }
+
+    /* ── Config workload cards ── */
+    .sizing-page .config-workload-card {
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 10px !important;
+      background: #fff !important;
+    }
+
+    /* ── Progress strip: hide for customer persona ── */
+    .progress-strip { display: none !important; }
+
+    /* ── Customer sidebar title ── */
     .customer-sidebar-title-main {
       font-size: 14px;
-      font-weight: 700;
-      color: #0069b1;
+      font-weight: 590;
+      color: #1c1c1c;
     }
+
     /* Submit button state after submission */
     .quote-btn-submitted {
       background: #16a34a !important;
@@ -63,6 +407,59 @@
       display: none;
     }
     .customer-submit-notice.visible { display: block; }
+
+    /* ── Label typography ── */
+    .sizing-page .quote-field-label,
+    .sizing-page .contract-terms-group-label,
+    .sizing-page .config-workload-field-label,
+    .sizing-page .quote-addon-category {
+      font-family: 'SF_Pro', sans-serif;
+      color: #1c1c1c;
+    }
+
+    /* ── Workload tile label ── */
+    .sizing-page .quote-workload-tile-label,
+    .sizing-page .contract-terms-card-label {
+      font-family: 'SF_Pro', sans-serif;
+      font-weight: 590;
+      color: #1c1c1c;
+    }
+
+    /* ── Cost display ── */
+    .sizing-page .config-plan-cost {
+      color: #1c1c1c !important;
+    }
+    .sizing-page .config-plan-card.selected .config-plan-cost {
+      color: #0067c5 !important;
+    }
+
+    /* ── Empty states ── */
+    .sizing-page .quote-empty-state,
+    .sizing-page .config-workload-empty {
+      background: #f5f5f5;
+      border: 1px dashed #e0e0e0;
+      border-radius: 10px;
+    }
+    .sizing-page .quote-empty-icon {
+      background: #f5f5f5;
+      color: #0067c5;
+    }
+
+    /* ── Summary rows ── */
+    .sizing-page .quote-meta-label {
+      color: #717182;
+      font-family: 'SF_Pro', sans-serif;
+    }
+    .sizing-page .quote-summary-value {
+      color: #1c1c1c;
+      font-family: 'SF_Pro', sans-serif;
+    }
+
+    /* ── Toggle group ── */
+    .sizing-page .config-toggle-opt:has(input:checked) {
+      background: #0067c5;
+      color: #fff;
+    }
   </style>
 </head>
 <body class="sizing-page quote-prototype">
@@ -72,10 +469,9 @@
       <a href="customer-sizing.html" class="logo"><span class="logo-icon">N</span><span class="logo-text">NetApp Keystone</span></a>
     </div>
     <div class="header-center">
-      <div class="search-bar"><input type="search" placeholder="Search..." aria-label="Search"></div>
     </div>
     <div class="header-right">
-      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">Mega Hostings Inc. (Customer)</span></div>
+      <div class="header-persona" aria-label="Logged in persona"><span class="header-persona-label">Logged in as</span><span class="header-persona-value">AUMOVIO Germany GmbH (Customer)</span></div>
       <button class="icon-btn" aria-label="Notifications">N</button>
       <button class="icon-btn" aria-label="Help">?</button>
       <div class="user-avatar">MH</div>
@@ -103,7 +499,15 @@
         <div class="customer-meta-strip" role="region" aria-label="Account details">
           <div class="customer-meta-item">
             <span class="customer-meta-label">Account</span>
-            <span class="customer-meta-value" id="meta-customer-name">Mega Hostings Inc.</span>
+            <span class="customer-meta-value" id="meta-customer-name">AUMOVIO Germany GmbH</span>
+          </div>
+          <div class="customer-meta-item">
+            <span class="customer-meta-label">Quote #</span>
+            <span class="customer-meta-value" id="meta-quote-number" style="font-family:monospace;letter-spacing:0.5px;">—</span>
+          </div>
+          <div class="customer-meta-item">
+            <span class="customer-meta-label">Opportunity</span>
+            <span class="customer-meta-value" id="meta-opportunity-id" style="font-family:monospace;letter-spacing:0.5px;">—</span>
           </div>
           <div class="customer-meta-item">
             <span class="customer-meta-label">Service</span>
@@ -119,7 +523,7 @@
           </div>
           <div class="customer-meta-item">
             <span class="customer-meta-label">Your NetApp contact</span>
-            <span class="customer-meta-value">Chris Collins — <a href="mailto:chris.collins@netapp.com" style="font-weight:400;color:#0069b1;">chris.collins@netapp.com</a></span>
+            <span class="customer-meta-value" style="display:flex;align-items:center;gap:8px;"><img src="images/avatar-placeholder.svg" alt="Derek Keller" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">Derek Keller — <a href="mailto:derek.keller@netapp.com" style="font-weight:400;color:#0069b1;">derek.keller@netapp.com</a></span>
           </div>
         </div>
       </div>
@@ -241,12 +645,23 @@
             </div>
           </section>
 
-          <!-- 2) Add workloads -->
+          <!-- 2) Add workloads — contract-terms style -->
           <section class="quote-card card add-workloads-card">
-            <h2 class="quote-card-title">Add workloads <span class="quote-card-count" id="workload-count">(0/5 selected)</span></h2>
-            <p class="quote-card-desc">Select up to 5 workloads. Choose the types of applications you plan to run on this subscription.</p>
-            <div class="quote-field-group">
-              <span class="quote-field-label">Workloads</span>
+            <h2 class="contract-terms-title">Add workloads <span class="quote-card-count" id="workload-count">(0/5 selected)</span></h2>
+            <p class="contract-terms-subtitle">Select one or more workloads to size your subscription</p>
+            <div class="contract-terms-divider"></div>
+
+            <div class="wl-workload-group" id="wl-panel-general">
+              <span class="contract-terms-group-label">General workloads</span>
+              <div class="quote-workload-tiles quote-workload-tiles-general">
+                <label class="quote-workload-tile" data-workload="mission-critical"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Mission critical (&lt; 1 ms)</span></label>
+                <label class="quote-workload-tile" data-workload="general-purpose"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">General purpose (2-4 ms)</span></label>
+                <label class="quote-workload-tile" data-workload="secondary"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Secondary (&gt; 5 ms)</span></label>
+              </div>
+            </div>
+
+            <div class="wl-workload-group" id="wl-panel-detailed">
+              <span class="contract-terms-group-label">Application workloads</span>
               <div class="quote-workload-tiles-wrap" id="workload-tiles-wrap">
                 <div class="quote-workload-tiles" id="workload-specific">
                   <label class="quote-workload-tile" data-workload="ai-ml"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">AI / ML</span></label>
@@ -265,25 +680,16 @@
                   <label class="quote-workload-tile workload-tile-more" data-workload="backup"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Backup</span></label>
                   <label class="quote-workload-tile workload-tile-more" data-workload="archive"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Archive</span></label>
                 </div>
-                <button type="button" class="workload-expand-btn" id="workload-expand-btn" aria-expanded="false">Show more (<span id="workload-more-count">7</span>)</button>
+                <button type="button" class="workload-expand-btn" id="workload-expand-btn" aria-expanded="false">Show more (<span id="workload-more-count">3</span>)</button>
               </div>
             </div>
-            <div class="quote-field-group quote-field-group-general">
-              <span class="quote-field-label">General</span>
-              <div class="quote-workload-tiles quote-workload-tiles-general">
-                <label class="quote-workload-tile" data-workload="mission-critical"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Mission critical (&lt; 1 ms)</span></label>
-                <label class="quote-workload-tile" data-workload="general-purpose"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">General purpose (2-4 ms)</span></label>
-                <label class="quote-workload-tile" data-workload="secondary"><span class="quote-tile-checkbox"></span><span class="quote-workload-tile-label">Secondary (&gt; 5 ms)</span></label>
-              </div>
-            </div>
+
           </section>
 
           <!-- 3) Configure workload requirements -->
           <section class="config-workload-section" id="configure-workload-section">
             <h2 class="config-workload-page-title">Configure workload requirements</h2>
             <div class="config-workload-links-row" aria-label="Workload reference links">
-              <a href="#" id="rate-card-open-link">Rate card</a>
-              <span aria-hidden="true">|</span>
               <a href="#" id="keystone-performance-levels-open-link">Keystone performance levels</a>
             </div>
             <div id="configure-workload-cards" class="config-workload-cards-container"></div>
@@ -306,7 +712,6 @@
                   </span>
                   <span class="addon-card-label">Metro Cluster</span>
                   <span class="addon-card-desc">Blurb about product</span>
-                  <span class="addon-card-cost" id="adp-card-rate">$X.XX / TiB / month</span>
                   <span class="addon-card-action">Add to quote</span>
                 </label>
                 <label class="addon-card">
@@ -316,7 +721,6 @@
                   </span>
                   <span class="addon-card-label">Data tiering</span>
                   <span class="addon-card-desc">Blurb about product</span>
-                  <span class="addon-card-cost" id="tiering-card-rate">$XX.XX / TiB / month</span>
                   <span class="addon-card-action">Add to quote</span>
                 </label>
                 <label class="addon-card">
@@ -326,7 +730,6 @@
                   </span>
                   <span class="addon-card-label">Data infrastructure insights</span>
                   <span class="addon-card-desc">Blurb about product</span>
-                  <span class="addon-card-cost" id="dii-card-rate">$0.36 – $4.00 / TiB / month</span>
                   <span class="addon-card-action">Add to quote</span>
                 </label>
               </div>
@@ -340,7 +743,6 @@
                     <svg viewBox="0 0 24 24"><path d="M7 7h6v6H7V7zm4 4h6v6h-6v-6z"/></svg>
                   </span>
                   <span class="addon-card-label">Cluster Join</span>
-                  <span class="addon-card-cost">$14,400 — one-time charge</span>
                   <span class="addon-card-action">Add to quote</span>
                 </label>
               </div>
@@ -355,6 +757,8 @@
                 <span class="quote-field-label">Site location</span>
                 <select class="quote-select-sm" name="deployment_location" aria-label="Deployment location">
                   <option value="">— Select —</option>
+                  <option value="EU-Sovereign-Berlin">EU Sovereign — Berlin</option>
+                  <option value="Dark-Site-Frankfurt">Dark Site — Frankfurt</option>
                   <option value="Site-Santa Clara">Site-Santa Clara</option>
                   <option value="Dallas_FW">Dallas_FW</option>
                   <option value="BRL">BRL</option>
@@ -366,6 +770,7 @@
                 <select class="quote-select-sm" id="subscription-type" aria-label="Subscription type">
                   <option value="USPS" selected>USPS</option>
                   <option value="Non USPS">Non USPS</option>
+                  <option value="Sovereign">Sovereign</option>
                 </select>
               </div>
               <div class="quote-field-group">
@@ -401,26 +806,6 @@
             <div class="quote-sidebar-section quote-sidebar-summary-compact" id="quote-sidebar-summary" hidden>
               <h3 class="quote-sidebar-section-title">Summary</h3>
               <div class="quote-selections-list" id="sidebar-selections"></div>
-            </div>
-
-            <div class="quote-sidebar-section">
-              <h3 class="quote-sidebar-section-title">Estimated cost</h3>
-              <div class="quote-input-row quote-currency-row">
-                <label class="quote-field-label">Currency</label>
-                <select class="quote-select-sm" id="sidebar-currency" aria-label="Currency"><option>USD</option><option>EUR</option></select>
-              </div>
-              <div class="quote-cost-breakdown">
-                <div class="quote-summary-row"><span class="quote-meta-label">Subtotal</span><span class="quote-summary-value" id="sidebar-subtotal">$0</span></div>
-                <div class="quote-summary-row" id="sidebar-row-adp" hidden><span class="quote-meta-label">Add-on: Adv. data protection</span><span class="quote-summary-value" id="sidebar-adp-value">$0</span></div>
-                <div class="quote-summary-row" id="sidebar-row-dt" hidden><span class="quote-meta-label">Add-on: Data tiering</span><span class="quote-summary-value" id="sidebar-dt-value">$0</span></div>
-                <div class="quote-summary-row" id="sidebar-row-dii" hidden><span class="quote-meta-label">Add-on: Data infra. insights</span><span class="quote-summary-value" id="sidebar-dii-value">$0</span></div>
-                <div class="quote-summary-row" id="sidebar-row-cj" hidden><span class="quote-meta-label">Add-on: Cluster Join (one-time)</span><span class="quote-summary-value" id="sidebar-cj-value">$14,400</span></div>
-                <div class="quote-summary-row"><span class="quote-meta-label">Monthly cost</span><span class="quote-summary-value" id="sidebar-monthly-cost">$0</span></div>
-                <div class="quote-summary-row"><span class="quote-meta-label">Per TiB / month</span><span class="quote-summary-value" id="sidebar-per-tib-month">$0</span></div>
-                <div class="quote-summary-row"><span class="quote-meta-label">Yearly cost</span><span class="quote-summary-value" id="sidebar-total-year">$0</span></div>
-                <div class="quote-summary-row quote-summary-total"><span class="quote-meta-label">Total per year</span><span class="quote-summary-value" id="sidebar-total-year-final">$0</span></div>
-                <div class="quote-summary-row quote-summary-total quote-summary-contract-total"><span class="quote-meta-label">Estimated total contract price</span><span class="quote-summary-value" id="sidebar-total">$0</span></div>
-              </div>
             </div>
 
             <div class="quote-sidebar-actions">
@@ -504,12 +889,21 @@
       <h2 class="modal-title" id="custom-burst-modal-title">Custom burst capacity</h2>
       <form id="custom-burst-form" class="modal-form">
         <div class="modal-field">
-          <label for="custom-burst-pct">Burst %</label>
-          <input type="number" id="custom-burst-pct" class="deviation-modal-input" min="1" max="200" value="20" aria-label="Custom burst percentage">
+          <label for="custom-burst-value">Burst (%)</label>
+          <input type="number" id="custom-burst-value" name="custom_burst_value" min="0" max="100" placeholder="e.g. 75" aria-label="Custom burst percentage">
+        </div>
+        <div class="modal-field">
+          <label for="custom-burst-justification">Notes (optional)</label>
+          <textarea id="custom-burst-justification" name="custom_burst_justification" rows="3" placeholder="Any notes about this burst requirement..." aria-label="Notes"></textarea>
+        </div>
+        <div class="modal-field modal-apply-to">
+          <label class="modal-apply-to-label">Apply to quotes</label>
+          <div class="modal-quote-checkboxes" id="custom-burst-quote-list"></div>
+          <button type="button" class="modal-link-select-all" id="custom-burst-select-all">Select all</button>
         </div>
         <div class="modal-actions">
           <button type="button" class="quote-btn-secondary modal-btn-cancel" id="custom-burst-cancel">Cancel</button>
-          <button type="submit" class="quote-btn-primary">Apply</button>
+          <button type="submit" class="quote-btn-primary modal-btn-submit">Apply</button>
         </div>
       </form>
     </div>
@@ -521,16 +915,6 @@
       <div id="plan-details-body"></div>
       <div class="modal-actions">
         <button type="button" class="quote-btn-secondary modal-btn-cancel" id="plan-details-close">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="rate-card-modal" role="dialog" aria-labelledby="rate-card-title" aria-modal="true" hidden>
-    <div class="modal-dialog">
-      <h2 class="modal-title" id="rate-card-title">Rate card</h2>
-      <div id="rate-card-body"></div>
-      <div class="modal-actions">
-        <button type="button" class="quote-btn-secondary modal-btn-cancel" id="rate-card-close">Close</button>
       </div>
     </div>
   </div>
@@ -587,6 +971,6 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="persona-switcher.js"></script>
-  <script src="sizing.js"></script>
+  <script src="sizing.js?v=20260915c"></script>
 </body>
 </html>

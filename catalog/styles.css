@@ -145,6 +145,27 @@ body {
   gap: 0.5rem;
 }
 
+.header-console-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-right: 0.5rem;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: 4px;
+  border: 1px solid var(--bp-border);
+  background: var(--bp-surface-muted);
+  color: #0067c5;
+}
+
+.header-console-link:hover {
+  background: var(--bp-surface);
+  border-color: #0067c5;
+}
+
 .header-persona {
   display: flex;
   flex-direction: column;
@@ -490,4 +511,29 @@ body {
 .flow-breadcrumb-current {
   font-weight: 500;
   color: var(--text-primary);
+}
+
+/* Mirrors the periwinkle Blueprint tag the Console uses for sovereignty. */
+.sovereign-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #dee0fa;
+  color: #1e4a93;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.sovereign-tag[hidden] {
+  display: none;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }

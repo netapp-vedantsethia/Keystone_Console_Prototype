@@ -1968,3 +1968,41 @@ a.step.completed {
   border-radius: 8px;
   box-shadow: var(--ma-shadow-card);
 }
+
+.meta-link-tooltip-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.meta-link-tooltip-wrap .meta-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 99999;
+  min-width: 260px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 14px 16px;
+  pointer-events: none;
+}
+
+.meta-link-tooltip-wrap .meta-tooltip p {
+  margin: 0 0 3px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #374151;
+}
+
+.meta-link-tooltip-wrap .meta-tooltip p:last-child {
+  margin-bottom: 0;
+}
+
+.meta-link-tooltip-wrap .meta-tooltip p strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+.meta-link-tooltip-wrap:hover .meta-tooltip {
+  display: block;
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Subscription Request | Email Notification</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="sales-email-notification.css">
+</head>
+<body class="email-notif-page">
+
+  <div class="email-notif-wrapper">
+    <!-- Scene label -->
+    <div class="email-notif-scene-label">
+      <img src="images/avatar-placeholder.svg" alt="Derek Keller" class="email-notif-scene-photo">
+      <span>Derek Keller's Inbox</span>
+    </div>
+
+    <!-- Email card -->
+    <div class="email-notif-card">
+      <!-- Email header -->
+      <div class="email-notif-header">
+        <div class="email-notif-header-top">
+          <div class="email-notif-from-row">
+            <span class="email-notif-avatar">SE</span>
+            <div class="email-notif-from-details">
+              <span class="email-notif-from-name">Subscription Engine</span>
+              <span class="email-notif-from-email">&lt;notifications@netapp.com&gt;</span>
+            </div>
+          </div>
+          <span class="email-notif-time" id="email-notif-time">Just now</span>
+        </div>
+        <div class="email-notif-to-row">
+          <span class="email-notif-to-label">To:</span>
+          <img src="images/avatar-placeholder.svg" alt="Derek Keller" class="email-notif-to-photo">
+          <span class="email-notif-to-value">Derek Keller &lt;derek.keller@netapp.com&gt;</span>
+        </div>
+        <h1 class="email-notif-subject">
+          <span class="email-notif-new-badge">NEW</span>
+          New subscription request from AUMOVIO Germany GmbH
+        </h1>
+      </div>
+
+      <!-- Email body -->
+      <div class="email-notif-body">
+        <p>Hi Derek,</p>
+
+        <p>A new Keystone STaaS subscription request has been submitted by <strong>AUMOVIO Germany GmbH</strong> and is awaiting your review.</p>
+
+        <div class="email-notif-details-box">
+          <div class="email-notif-detail-row">
+            <span class="email-notif-detail-label">Customer</span>
+            <span class="email-notif-detail-value">AUMOVIO Germany GmbH</span>
+          </div>
+          <div class="email-notif-detail-row">
+            <span class="email-notif-detail-label">Request type</span>
+            <span class="email-notif-detail-value">NetApp Keystone STaaS</span>
+          </div>
+          <div class="email-notif-detail-row">
+            <span class="email-notif-detail-label">Submitted</span>
+            <span class="email-notif-detail-value" id="email-notif-submitted-date">Just now</span>
+          </div>
+          <div class="email-notif-detail-row">
+            <span class="email-notif-detail-label">Status</span>
+            <span class="email-notif-detail-value">
+              <span class="email-notif-status-badge">Pending review</span>
+            </span>
+          </div>
+        </div>
+
+        <p>Please review the request and create a quote for the customer at your earliest convenience.</p>
+
+        <a href="login.html?persona=sales&redirect=sales-dashboard.html" class="email-notif-cta" id="email-notif-cta">
+          Review request in Subscription Engine &rarr;
+        </a>
+
+        <div class="email-notif-alt-link">
+          Or copy this link: <span class="email-notif-link-text" id="email-notif-link-text">https://engine.netapp.com/sales-dashboard</span>
+        </div>
+      </div>
+
+      <!-- Email footer -->
+      <div class="email-notif-footer">
+        <p>This is an automated notification from NetApp Subscription Engine.</p>
+        <p>You are receiving this because you are the assigned sales representative for AUMOVIO Germany GmbH</p>
+        <div class="email-notif-footer-links">
+          <a href="#">Notification settings</a>
+          <span>&middot;</span>
+          <a href="#">Unsubscribe</a>
+          <span>&middot;</span>
+          <a href="#">Help</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page footer -->
+    <div class="email-notif-page-footer">
+      <p>&copy; 2025 NetApp Subscription Engine &mdash; Prototype demo</p>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var now = new Date();
+      var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      var dateStr = now.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+      var el = document.getElementById('email-notif-time');
+      if (el) el.textContent = timeStr;
+      var subEl = document.getElementById('email-notif-submitted-date');
+      if (subEl) subEl.textContent = dateStr + ' at ' + timeStr;
+    })();
+  </script>
+</body>
+</html>
